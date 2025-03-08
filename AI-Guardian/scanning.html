@@ -1,46 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8"/>
-        <title>Scanning</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
-        <style>
-            #camera video{
-                width:100%;
-                max-width:640px;
-            }
-        </style>
-    </head>
-    <body>
-        <div id="camera" style="width:100%"></div>
-        <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script> 
-        <script>
-            const quaggaConf = {
-                inputStream: {
-                    target: document.querySelector("#camera"),
-                    type: "LiveStream",
-                    constraints: {
-                        width: { min: 640 },
-                        height: { min: 480 },
-                        facingMode: "environment",
-                        aspectRatio: { min: 1, max: 2 }
-                    }
-                },
-                decoder: {
-                    readers: ['code_128_reader']
-                },
-            }
-
-            Quagga.init(quaggaConf, function(err) {
-                if(err){
-                    return console.log(err);
+<head>
+    <meta charset="utf-8"/>
+    <title>Scanning</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+    <style>
+        #camera video {
+            width: 100%;
+            max-width: 640px;
+        }
+    </style>
+</head>
+<body>
+    <div id="camera" style="width:100%; position: relative;">
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
+    <script>
+        const quaggaConf = {
+            inputStream: {
+                target: document.querySelector("#camera"),
+                type: "LiveStream",
+                constraints: {
+                    width: { min: 1280 },
+                    height: { min: 720 },
+                    facingMode: "environment",
+                    aspectRatio: { min: 1, max: 2 }
                 }
-                Quagga.start();
-            });
+            },
+            decoder: {
+                readers: [
+                    'code_128_reader',
+                    'ean_reader',
+                    'ean_8_reader',
+                    'upc_reader',
+                    'upc_e_reader',
+                    'code_39_reader',
+                    'code_39_vin_reader',
+                    'codabar_reader',
+                    'i2of5_reader',
+                    '2of5_reader',
+                    'code_93_reader'
+                ]
+            },
+            locator: {
+                patchSize: "medium",
+                halfSample: true
+            },
+            locate: true,
+            numOfWorkers: 4
+        };
 
-            Quagga.onDetected(function(result) {
-                alert("Detected barcode: " + result.codeResult.code);
-            });
-        </script>
-    </body>
+        Quagga.init(quaggaConf, function(err) {
+            if (err) {
+                console.error("Initialization failed: ", err);
+                return;
+            }
+            console.log("Initialization successful");
+            Quagga.start();
+        });
+
+        let lastDetectedCode = null; 
+        let lastDetectionTime = 0; 
+
+        Quagga.onDetected(function(result) {
+            const currentCode = result.codeResult.code; 
+            const currentTime = Date.now(); 
+
+            if (currentCode === lastDetectedCode && (currentTime - lastDetectionTime) < 5000) {
+                return;
+            }
+
+            console.log("Detected barcode: ", currentCode);
+            alert("Detected barcode: " + currentCode);
+
+            lastDetectedCode = currentCode;
+            lastDetectionTime = currentTime;
+        });
+    </script>
+</body>
 </html>
