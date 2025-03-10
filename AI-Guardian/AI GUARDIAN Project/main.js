@@ -18,5 +18,5 @@ function makeNewList()
 }
 function makeNewItem()
 {
-    window.location.replace("adding.html");
+    window.location.replace("scanning.html");
 }
