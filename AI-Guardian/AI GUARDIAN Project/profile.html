@@ -1,1 +1,53 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grocery Guardian</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <ul>
+        <li><a>Main</a></li>
+        <li><a>History</a></li>
+        <li><a>Search</a></li>
+        <li><a>Overview</a></li>
+        <li><a>Profile</a></li>
+    </ul>
+
+    <div class="profile-container">
+        <h1>Profile</h1>
+
+        <!-- Profile Picture Upload -->
+        <label for="profilePicInput" class="profile-pic-container">
+            <img id="profilePic" src="default-profile.jpg">
+        </label>
+        <input type="file" id="profilePicInput" accept="image/*">
+
+        <!-- User Name -->
+        <div class="name-container">
+            <input type="text" id="userName" placeholder="Enter your name">
+            <span id="displayName" style="display: none;"></span>
+            <button id="editName" style="display: none;" onclick="editName()">Edit</button>
+        </div>
+
+        <br>
+        <!-- Allergens Selection -->
+
+        <div class="allergy-container">
+            <input type="text" id="allergyInput" placeholder="Enter an allergen">
+            <button id="addAllergy">Add Allergy</button>
+            <ul id="allergyList"></ul> <!-- Allergies will be added here -->
+        </div>
+        
+        
+        <!-- Save Button -->
+        <button onclick="saveProfile()">Save Profile</button>
+    </div>
+
+      
+        
+<script src="script.js"></script>
+</body>
+</html>
