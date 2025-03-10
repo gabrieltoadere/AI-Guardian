@@ -20,7 +20,6 @@ loginForm.addEventListener("submit", function(event) {
 
 
 
-
     // Simulate login process (Replace with actual authentication logic)
     //alert(`Welcome, ${username}! Redirecting to dashboard...`);
     window.location.href = "main.html"; // Redirect to dashboard
@@ -29,6 +28,8 @@ loginForm.addEventListener("submit", function(event) {
 
 
 
+
+    
 });
 
 // Button redirects

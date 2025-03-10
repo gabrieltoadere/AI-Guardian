@@ -75,10 +75,10 @@ input {
     border-radius: 5px;
     outline: none;
     border-color: black;
+    transition: all 0.3s ease;
 }
 
 input:focus, button:hover {
-    transition: all 0.3s ease;
     transform: scale(1.05);
 }
 
