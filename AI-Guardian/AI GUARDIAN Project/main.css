@@ -1,0 +1,106 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+.navbar{
+    background-color: #333;
+    overflow: hidden;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    justify-content: space-around;
+    display: flex;
+    
+}
+.navbar ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+}
+.navbar a {
+    display: flex;
+    color: #f2f2f2;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+    align-items: center; 
+}
+.navbar a:hover {
+    background: #f1f1f1;
+    color:black
+}
+h1{
+    display: flex;
+    justify-content: center;
+}
+.newList{
+    display: flex;
+    justify-content: space-around;
+}
+#createNewList{
+    background-color: #333;
+    color: #f2f2f2;
+    width: 70%;
+    text-align: center;
+}
+#createNewList.active{
+    display:flex;
+    text-align: left;
+}
+.newItem{
+    display: none;
+    justify-content: space-around;
+}
+#createNewItem{
+    background-color: lightgray;
+    color: black;
+    width: 70%;
+    text-align: left;
+}
+.newItem.active{
+    display: flex;
+    justify-content: space-around;
+    visibility: visible;
+}
+div.allergyDisplay{
+    background-color: #333;
+    overflow: auto;
+    white-space: nowrap;
+}
+div.allergyDisplay li{
+    display: inline-block;
+    color: white;
+    text-align: center;
+    padding: 14px;
+    text-decoration: none;
+}
+div.allergyDisplay li:hover{
+    background-color: #777;
+}
+.currentItems{
+    visibility: hidden;;
+}
+.currentItems.active{
+    background-color: lightgray;
+    color: black;
+    width: 70%;
+    margin: 0 auto;
+    text-align: left;
+    margin-top: 0;
+    padding-top: 0;
+    visibility: visible;
+} 
+.currentItems ul {
+    padding-left: 0; 
+    margin-top: 0;
+    padding-top: 0;
+}
+.currentItems li {
+    background-color: lightgray;
+    list-style-type: none; 
+    text-align: left
+}  

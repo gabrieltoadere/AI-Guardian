@@ -1,0 +1,247 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f8f8f8;
+    margin: 0;
+}
+
+/* Login Box */
+.login-container {
+    background: white;
+    padding: 50px;
+    border-radius: 15px;
+    box-shadow: 20px 20px 50px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 350px;
+    animation: fadeIn 1s ease-out;
+}
+
+/* Fade-in effect for container */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+
+
+/* Heading Styles */
+h1 {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+p {
+    font-size: 16px;
+    color: #777;
+}
+
+
+/* Emoji Style */
+.emoji {
+    font-size: 20px;
+}
+
+/* Input Fields */
+.input-group {
+    text-align: left;
+    margin-bottom: 15px;
+}
+
+label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+input {
+    display: block;
+    width: 90%;
+    padding: 10px;
+    margin: 10px auto;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    border-color: black;
+}
+
+input:focus, button:hover {
+    transition: all 0.3s ease;
+    transform: scale(1.05);
+}
+
+
+
+/* Forgot Password Link */
+.forgot-password {
+    display: block;
+    margin-bottom: 15px;
+    color: black;
+    text-decoration: none;
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+/* Login Button */
+.login-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: white;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.login-btn:hover {
+    background-color: grey;
+}
+
+/* Social Media & Other Sign-in Buttons */
+.social-btn {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    margin-top: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px; /* Space between logo and text */
+    color: white;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover, .social-btn:hover {
+    transform: scale(1.05);
+    background-color: #ccc;
+}
+
+/* Different Colors for Sign-in Buttons */
+.google {
+    background-color: #db4437;
+}
+
+.google:hover {
+    background-color: #c1351d;
+}
+
+.apple {
+    background-color: #000;
+}
+
+.apple:hover {
+    background-color: #333;
+}
+
+.phone {
+    background-color: #34a853;
+}
+
+.phone:hover {
+    background-color: #2a7d3b;
+}
+
+.email {
+    background-color: #4285F4;
+}
+
+.email:hover {
+    background-color: #e09c04;
+}
+
+/* Hover Effects for Buttons */
+.social-btn:hover {
+    opacity: 0.8;
+    background-color: lightgray;
+}
+
+/* Social Media Icons */
+.icon {
+    width: 20px;
+    height: 20px;
+}
+
+
+/* Links */
+a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+}
+
+a:hover {
+    color: #0056b3;
+}
+
+/* Dashboard Styling */
+.dashboard {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    width: 80%;
+    max-width: 500px;
+    margin: 50px auto;
+}
+
+.logout-btn {
+    background-color: green;
+}
+
+.logout-btn:hover {
+    background-color: green;
+}
+
+
+
+/* General mobile-friendly adjustments */
+@media screen and (max-width: 768px) {
+    .login-container {
+        width: 90%;
+        padding: 20px;
+    }
+
+    h1, h2 {
+        font-size: 1.5em;
+    }
+
+    .input-group {
+        margin: 10px 0;
+    }
+
+    .social-btn {
+        width: 100%;
+        margin: 10px 0;
+    }
+
+    .social-btn img {
+        max-width: 20px;
+        margin-right: 10px;
+    }
+s
+    /* Adjust form inputs and buttons */
+    input, button {
+        width: 100%;
+        padding: 12px;
+    }
+
+    .forgot-password {
+        font-size: 0.9em;
+    }
+}
