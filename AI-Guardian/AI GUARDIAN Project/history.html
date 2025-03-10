@@ -1,7 +1,56 @@
 <!DOCTYPE html>
-<html>
-    <head></head>
-    <body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expandable Options</title>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="script.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <!-- Page Title with Shopping Basket Icon -->
+    <h1><i class="fa-solid fa-basket-shopping"></i> My Shopping List</h1>
+    
+    <!-- Scan Button (positioned below the title and near the bottom nav) -->
+    <div class="scan-button-container">
+        <a href="scan.html" class="scan-button">Scan</a>
+    </div>
+
+    <!-- Container to ensure dropdowns are stacked vertically -->
+    <div class="dropdown-container">
+        <div class="dropdown" onclick="toggleOptions('recentOptions', 'recentCaret')">
+            <span class="caret" id="recentCaret">▸</span> Recent
+        </div>
+        <div class="options" id="recentOptions">
+            <ul>
+                <li>Recent 1</li>
+                <li>Recent 2</li>
+                <li>Recent 3</li>
+            </ul>
+        </div>
+
+         <!-- Divider line between Recent and Previous -->
+        <hr class="divider">
         
-    </body>
+        <div class="dropdown" onclick="toggleOptions('previousOptions', 'previousCaret')">
+            <span class="caret" id="previousCaret">▸</span> Previous
+        </div>
+        <div class="options" id="previousOptions">
+            <ul>
+                <li>Previous 1</li>
+                <li>Previous 2</li>
+                <li>Previous 3</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Bottom Navigation Bar -->
+    <div class="bottom-nav">
+        <a href="history.html" class="nav-item"><i class="fa-solid fa-clock"></i><span>History</span></a>
+        <a href="recommendations.html" class="nav-item"><i class="fa-solid fa-star"></i><span>Recommendations</span></a>
+        <a href="search.html" class="nav-item"><i class="fa-solid fa-search"></i><span>Search</span></a>
+        <a href="overview.html" class="nav-item"><i class="fa-solid fa-list"></i><span>Overview</span></a>
+    </div>
+</body>
 </html>
