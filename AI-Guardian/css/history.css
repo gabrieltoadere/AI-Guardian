@@ -1,0 +1,104 @@
+h1 {
+    display: flex;
+    align-items: center;
+    font-size: 24px;
+    gap: 10px;
+}
+
+h1 i {
+    font-size: 28px;
+    color: #ff6600; /* Change color as needed */
+}
+.dropdown {
+    display: inline-block;
+    cursor: pointer;
+    font-size: 18px;
+    user-select: none;
+}
+.dropdown-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Adds space between dropdowns */
+}
+/* Style for the divider */
+.divider {
+    border: 0;
+    border-top: 1px solid #ccc; /* The color and thickness of the line */
+    margin: 10px 0;  /* Adds some spacing above and below the line */
+}
+
+
+.caret {
+    transition: transform 0.3s ease;
+}
+.options {
+    display: none;
+    margin-top: 5px;
+}
+.show {
+    display: block;
+}
+.rotate {
+    transform: rotate(90deg);
+}
+
+
+/* Style for the Scan Button */
+.scan-button-container {
+    display: flex;
+    justify-content: flex-end;  /* Aligns the button to the right */
+    padding: 10px 20px;  /* Adds some space around the button */
+    position: fixed;  /* Fixes it in place */
+    top: 780px;  /* Adjusts the vertical position */
+    right: 0px;  /* Positions it to the right */
+    z-index: 100;  /* Ensures it's above other elements */
+}
+
+.scan-button {
+    background-color: #007bff;  /* Blue background */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    text-decoration: none;  /* Removes the default underline for <a> tag */
+    display: inline-block;
+    transition: background-color 0.3s ease;  /* Adds a hover effect */
+}
+
+.scan-button:hover {
+    background-color: #0056b3;  /* Darker blue when hovering */
+}
+
+
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #fff;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    border-top: 1px solid #ccc;
+}
+
+.nav-item {
+    text-align: center;
+    flex: 1;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.nav-item i {
+    display: block;
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+
+.nav-item:hover {
+    color: #007bff;
+}
+
