@@ -2,37 +2,7 @@ body {
     margin: 0;
     padding: 0;
 }
-.navbar{
-    background-color: #333;
-    overflow: hidden;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    justify-content: space-around;
-    display: flex;
-    
-}
-.navbar ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: space-around;
-    width: 100%;
-}
-.navbar a {
-    display: flex;
-    color: #f2f2f2;
-    text-align: center;
-    padding: 14px 16px;
-    text-decoration: none;
-    font-size: 17px;
-    align-items: center; 
-}
-.navbar a:hover {
-    background: #f1f1f1;
-    color:black
-}
+
 h1{
     display: flex;
     justify-content: center;
@@ -66,23 +36,38 @@ h1{
     justify-content: space-around;
     visibility: visible;
 }
-div.allergyDisplay{
-    background-color: #333;
+.allergyDisplay{
+    background-color: #ffffff;
     overflow: auto;
     white-space: nowrap;
+    width: 900px;
+    display: flex;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 30px;
+    align-items: center;
+    border: solid;
 }
 div.allergyDisplay li{
     display: inline-block;
-    color: white;
+    color: rgb(0, 0, 0);
     text-align: center;
-    padding: 14px;
+    padding: 6px;
     text-decoration: none;
+    border: solid;
+    border-radius: 20px;
+    border-color: black;
+    transition: all 0.3s ease-in-out;
 }
-div.allergyDisplay li:hover{
+
+
+/* div.allergyDisplay li:hover{
     background-color: #777;
-}
+    cursor: default;
+    border-color: rgb(255, 174, 0);
+} */
 .currentItems{
-    visibility: hidden;;
+    visibility: hidden;
 }
 .currentItems.active{
     background-color: lightgray;
