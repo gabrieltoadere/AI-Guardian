@@ -5,7 +5,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #f4f4f4;
+  background-color: #f8f8f8;
   font-family: Arial, sans-serif;
 }
 
@@ -39,15 +39,26 @@ li a:hover:not(.active) {
 /* Profile  */
 .profile-container {
   background: white;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  padding: 50px;
+  border-radius: 15px;
+  box-shadow: 20px 20px 50px rgba(0, 0, 0, 0.1);
   text-align: center;
-  width: 400px;
-  height:400px;
+  width: 350px;
+  animation: fadeIn 1s ease-out;
 }
+
+@keyframes fadeIn {
+  from {
+      opacity: 0;
+  }
+  to {
+      opacity: 1;
+  }
+}
+
+
 .name-container{
-  margin-top: 10px;;
+  margin-top: 10px;
 
 }
 /* Profile Picture Styling */
@@ -67,19 +78,25 @@ li a:hover:not(.active) {
   display: none;
 }
 
+
 /* Button */
 button {
-  margin-top: 15px;
-  padding: 10px;
   width: 100%;
-  background-color: #007BFF;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+    padding: 10px;
+    background-color: white;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    gap: 10px;
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: grey;
+  transform: scale(1.05);
+  opacity: 0.8;
+  
 }
 

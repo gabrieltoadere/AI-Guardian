@@ -9,12 +9,14 @@ h1 i {
     font-size: 28px;
     color: #ff6600; /* Change color as needed */
 }
+
 .dropdown {
     display: inline-block;
     cursor: pointer;
     font-size: 18px;
     user-select: none;
 }
+
 .dropdown-container {
     display: flex;
     flex-direction: column;
@@ -26,6 +28,7 @@ h1 i {
     border-top: 1px solid #ccc; /* The color and thickness of the line */
     margin: 10px 0;  /* Adds some spacing above and below the line */
 }
+
 
 
 .caret {

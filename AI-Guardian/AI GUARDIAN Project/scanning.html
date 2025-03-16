@@ -9,15 +9,15 @@
 </head>
 <body>
     <div class="main">
-        <h1>Food Ingredients Scanner</h1>
+        <h1>Barcode Scanner</h1>
     <button id="scanButton" onclick="startScanning()">Scan Barcode</button>
     <button id="manualInputButton" onclick="showManualInput()">Manual Input</button>
 
     <div id="camera" class="hidden"></div>
 
     <div id="manualInput" class="hidden">
-        <label for="barcode">Enter Barcode:</label>
-        <input type="text" id="barcode" placeholder="Enter barcode">
+        <!--<label for="barcode">Enter Barcode:</label> -->
+        <input type="text" id="barcode" placeholder="Enter A Barcode...">
         <button onclick="fetchProductInfo()">Get Ingredients</button>
     </div>
 
@@ -50,6 +50,7 @@
             document.getElementById('camera').classList.add('hidden'); 
             document.getElementById('manualInput').classList.remove('hidden');
         }
+        
 
         function initializeScanner() {
             const quaggaConf = {
@@ -57,9 +58,9 @@
                     target: document.querySelector("#camera"),
                     type: "LiveStream",
                     constraints: {
-                        width: { min: 1280 },
-                        height: { min: 720 },
-                        facingMode: "environment",
+                        width: { min: 500 },
+                        height: { min: 400 },
+                        facingMode: "User",
                         aspectRatio: { min: 1, max: 2 }
                     }
                 },

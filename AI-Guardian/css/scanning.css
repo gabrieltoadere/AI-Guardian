@@ -1,33 +1,71 @@
+/* General Styles */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    color: #333;
-    margin: 0px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f8f8f8;
+    margin: 0;
 }
+
+/* Heading Styles */
 h1 {
-    color: #4CAF50;
-}
-label {
+    font-size: 50px;
     font-weight: bold;
 }
-input[type="text"] {
-    padding: 8px;
-    width: 200px;
-    margin-right: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+
+/* Fade-in effect for container */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
+
+
+
+
+label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+
+input[type="text"] {
+    display: block;
+    width: 90%;
+    padding: 10px;
+    margin: 10px auto;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    border-color: black;
+    transition: all 0.3s ease;
+}
+
+input:focus, button:hover {
+    transform: scale(1.05);
+}
+
+
 button {
     padding: 8px 16px;
-    background-color: #4CAF50;
-    color: white;
+    background-color: white;
+    color: black;
     border: none;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
+    font-size: 16px;
 }
+
 button:hover {
-    background-color: #45a049;
+    background-color: grey;
 }
+
 #result {
     margin-top: 20px;
     padding: 20px;
@@ -38,7 +76,9 @@ button:hover {
 }
 #result h2 {
     margin-top: 0;
-    color: #4CAF50;
+    color: black;
+    font-size: 20px;
+    margin-bottom: 20px;
 }
 #productName, #ingredients {
     font-weight: normal;
@@ -57,6 +97,15 @@ button:hover {
 #camera video {
     width: 100%;
     max-width: 640px;
+    justify-content: center;
+    align-items: center;
+    background-color: black; /* Background to make it visually distinct */
+    border-radius: 10px; /* Rounded corners for a modern look */
+    overflow: hidden;
+    margin: 20px auto; /* Center it horizontally */
+
+    
+
 }
 .hidden {
     display: none;
