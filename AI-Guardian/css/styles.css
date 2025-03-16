@@ -77,7 +77,7 @@ h2 {
 }
 
 .scan-button {
-    background-color: #4285F4;
+    background-color: black;
     color: white;
     padding: 10px 20px;
     border-radius: 5px;
@@ -86,7 +86,7 @@ h2 {
 }
 
 .scan-button:hover {
-    background-color: #3367D6;
+    background-color: grey;
 }
 
 /* Bottom Navigation */
