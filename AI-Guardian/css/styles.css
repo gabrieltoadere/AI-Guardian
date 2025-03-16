@@ -1,45 +1,58 @@
 /* General Styles */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f8f8f8;
-    margin: 0;
-    padding: 0;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f8f8f8;
+    margin: 0;
+    padding: 0px;
 }
 
-/* Header Styles */
+
+.history-container {
+    background: white;
+    padding: 50px;
+    border-radius: 15px;
+    box-shadow: 20px 20px 50px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 90%;
+    max-width: 350px;
+    animation: fadeIn 1s ease-out;
+    height: 50vh;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Heading Styles */
 h1 {
     font-size: 24px;
     font-weight: bold;
+    margin-bottom: 20px;
     text-align: center;
-    margin-top: 20px;
 }
 
 h2 {
     font-size: 20px;
+    margin-bottom: 15px;
     text-align: center;
-    margin-bottom: 20px;
-}
-
-/* Container Styles */
-.dropdown-container {
-    background: white;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    width: 90%;
-    max-width: 500px;
-    margin: 20px auto;
 }
 
 /* Dropdown Styles */
+.dropdown-container {
+    margin-bottom: 20px;
+}
+
 .dropdown {
-    cursor: pointer;
-    padding: 10px;
     background-color: #f1f1f1;
+    padding: 10px;
     border-radius: 5px;
+    cursor: pointer;
     margin-bottom: 10px;
 }
 
@@ -49,28 +62,23 @@ h2 {
 
 .options {
     display: none;
-    padding: 10px;
-    background-color: #fff;
+    background-color: white;
+    border: 1px solid #ddd;
     border-radius: 5px;
+    padding: 10px;
 }
 
 .options ul {
     list-style-type: none;
     padding: 0;
+    margin: 0;
 }
 
 .options li {
     padding: 5px 0;
 }
 
-/* Divider */
-.divider {
-    border: none;
-    border-top: 1px solid #ccc;
-    margin: 15px 0;
-}
-
-/* Scan Button */
+/* Button Styles */
 .scan-button-container {
     text-align: center;
     margin: 20px 0;
@@ -83,22 +91,21 @@ h2 {
     border-radius: 5px;
     text-decoration: none;
     font-weight: bold;
+    text-align: center;
+    margin: 20px 0;
 }
 
-.scan-button:hover {
-    background-color: grey;
-}
-
-/* Bottom Navigation */
+/* Navigation Styles */
 .bottom-nav {
+    gap: 30px;
     display: flex;
     justify-content: space-around;
-    background-color: #fff;
-    padding: 10px 0;
-    position: fixed;
+    background-color: #f1f1f1;
+    padding: 10px;
+    position: center;
     bottom: 0;
-    width: 100%;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    left: 0;
+    right: 0;
 }
 
 .nav-item {
@@ -112,47 +119,57 @@ h2 {
 .nav-item i {
     font-size: 20px;
     margin-bottom: 5px;
-}
-
-.nav-item span {
-    font-size: 12px;
-}
-
-/* Navbar */
-.navbar {
-    background-color: #f1f1f1;
-    padding: 10px 0;
-}
-
-.navbar ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    justify-content: space-around;
-}
-
-.navbar a {
-    text-decoration: none;
-    color: #333;
-    font-weight: bold;
+    
 }
 
 /* Responsive Design */
 @media screen and (max-width: 768px) {
-    .dropdown-container {
+    .container {
         width: 95%;
+        padding: 20px;
     }
 
-    .bottom-nav {
-        padding: 5px 0;
+    h1 {
+        font-size: 20px;
     }
 
-    .nav-item i {
+    h2 {
         font-size: 18px;
     }
+}
 
-    .nav-item span {
-        font-size: 10px;
-    }
+
+
+
+
+
+.scan-button-container {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    margin-top: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px; /* Space between logo and text */
+    color: white;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.scan-button:hover {
+    background-color: grey;
+}
+button:hover, .social-btn:hover {
+    transform: scale(1.05);
+    background-color: #ccc;
+}
+
+
+/* Hover Effects for Buttons */
+.social-btn:hover {
+    opacity: 0.8;
+    background-color: lightgray;
 }
