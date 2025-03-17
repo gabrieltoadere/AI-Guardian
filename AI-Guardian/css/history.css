@@ -10,17 +10,18 @@ h1 i {
     color: #ff6600; /* Change color as needed */
 }
 
-.dropdown {
-    display: inline-block;
-    cursor: pointer;
-    font-size: 18px;
-    user-select: none;
-}
 
 .dropdown-container {
     display: flex;
     flex-direction: column;
     gap: 10px; /* Adds space between dropdowns */
+}
+
+.dropdown {
+    display: inline-block;
+    cursor: pointer;
+    font-size: 18px;
+    user-select: none;
 }
 /* Style for the divider */
 .divider {
