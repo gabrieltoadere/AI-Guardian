@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (lowerQuery.includes('recipe')) {
             return 'Here are some recipe suggestions based on your recent purchases...';
         }
-        if (lowerQuery.includes('expire')) {
+        if (lowerQuery.includes('expir')) {
             return 'I can help track expiration dates. Scan an item to get started!';
         }
         if (lastMessage && lastMessage.content.includes('recipe')) {
