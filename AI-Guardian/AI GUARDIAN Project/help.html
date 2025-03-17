@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help Center</title>
+    <link rel="stylesheet" href="/AI-Guardian/css/help.css">
+    <link rel="stylesheet" href="/AI-Guardian/css/common.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <!-- Help Container -->
+    <div class="help-container">
+        <h1><i class="fa-solid fa-robot"></i> Grocery Guardian AI</h1>
+        
+        <!-- Chat Container -->
+        <div class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+                <div class="bot-message">
+                    <p>Hello! I'm your Grocery Guardian AI. How can I help you today?</p>
+                </div>
+            </div>
+            
+            <!-- Typing Indicator -->
+            <div class="typing-indicator" id="typingIndicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-container">
+                <input type="text" id="userInput" placeholder="Type your question here...">
+                <button id="sendButton"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+
+        <!-- Scan Button -->
+        <div class="scan-button-container">
+            <a href="scanning.html" class="scan-button">Scan</a>
+        </div>
+    </div>
+
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <ul>
+            <a href="main.html">Main</a>
+            <a href="history.html">History</a>
+            <a href="profile.html">Profile</a>
+        </ul>
+    </div>
+
+    <script src="/AI-Guardian/scripts/help.js"></script>
+</body>
+</html>
