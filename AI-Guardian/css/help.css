@@ -11,33 +11,30 @@
     height: 83vh;
 }
 
-/* Unified Scan Button Style */
-.scan-button-container {
-    position: fixed;
-    bottom: 80px;
-    width: 100%;
-    text-align: center;
-    z-index: 1000;
-}
-
+/* Scan Button Styling */
 .scan-button {
-    background: black;
+    background-color: black;
     color: white;
-    padding: 12px 30px;
+    padding: 12px 24px;
     border-radius: 25px;
     text-decoration: none;
-    font-weight: 600;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-weight: bold;
     transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: inline-block;
+    margin: 10px 0;
+    border: none;
+    cursor: pointer;
 }
 
 .scan-button:hover {
+    background-color: grey;
     transform: translateY(-2px);
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
-    background: grey;
+}
+
+.scan-button:active {
+    transform: translateY(0);
 }
 
 
@@ -118,5 +115,6 @@
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-5px); }
 }
+
 
 

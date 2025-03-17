@@ -1,16 +1,29 @@
+// Add at top of file
+let conversationHistory = [];
+
+
 document.addEventListener('DOMContentLoaded', () => {
     const chatMessages = document.getElementById('chatMessages');
     const userInput = document.getElementById('userInput');
     const sendButton = document.getElementById('sendButton');
     const typingIndicator = document.getElementById('typingIndicator');
 
-    // Sample AI responses
-    const aiResponses = {
-        'help': "You can ask me about product information, expiration dates, or recipe suggestions!",
-        'expired': "Check the expiration date by scanning the product. I'll notify you when items are nearing expiration!",
-        'recipe': "Based on your items, try making a vegetable stir-fry! Need more suggestions?",
-        'default': "I'm constantly learning! For complex queries, our human team will follow up via email."
-    };
+    function generateResponse(query) {
+        const lowerQuery = query.toLowerCase();
+        const lastMessage = conversationHistory[conversationHistory.length - 2];
+        
+        // Add contextual responses
+        if (lowerQuery.includes('recipe')) {
+            return 'Here are some recipe suggestions based on your recent purchases...';
+        }
+        if (lowerQuery.includes('expire')) {
+            return 'I can help track expiration dates. Scan an item to get started!';
+        }
+        if (lastMessage && lastMessage.content.includes('recipe')) {
+            return 'Would you like detailed instructions for that recipe?';
+        }
+        return "I'm learning more about grocery management every day! How else can I assist?";
+    }
 
     function addMessage(text, isUser = false) {
         const messageDiv = document.createElement('div');
@@ -30,20 +43,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function processQuery(query) {
         showTypingIndicator();
+        conversationHistory.push({ role: 'user', content: query });
         
         // Simulate AI processing delay
-        setTimeout(() => {
-            hideTypingIndicator();
-            const lowerQuery = query.toLowerCase();
-            let response = aiResponses['default'];
-
-            if (lowerQuery.includes('help')) response = aiResponses['help'];
-            if (lowerQuery.includes('expir')) response = aiResponses['expired'];
-            if (lowerQuery.includes('recipe')) response = aiResponses['recipe'];
-
-            addMessage(response);
-        }, 1500);
-    }
+          // Simulate API call
+    setTimeout(() => {
+        const response = generateResponse(query);
+        conversationHistory.push({ role: 'bot', content: response });
+        addMessage(response);
+        hideTypingIndicator();
+    }, 800);
+}
 
     sendButton.addEventListener('click', () => {
         const query = userInput.value.trim();
