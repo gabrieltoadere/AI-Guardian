@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capture Image</title>
+</head>
+<body>
+    <div id = "camContainer">
+        <video id="video" width="640" height="480" autoplay></video>
+        <img id="capturedImage" alt="Captured Image" style="display:none;" width="640" height="480"/>
+    </div>
+    
+    <button id="capture">Capture</button>
+    <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+
+    <script>
+        const video = document.getElementById('video'); //displays the live camera 
+
+        navigator.mediaDevices.getUserMedia({ video: true }) // Asks the user for permission to use the camera
+            .then(stream => {
+                video.srcObject = stream;
+                window.localStream = stream;
+            })
+            .catch(err => {
+                console.error("Error accessing the camera: ", err); // catches any error
+            });
+
+        const captureButton = document.getElementById('capture'); // Capture the image when the button is clicked
+        captureButton.addEventListener('click', () => {
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const imageUrl = canvas.toDataURL('image/jpeg');  // Convert the canvas image to a URL
+            
+            // Displaying the captured image
+            const capturedImage = document.getElementById('capturedImage');
+            capturedImage.src = imageUrl;
+            capturedImage.style.display = 'block';
+            video.style.display = 'none'; // hides video from web page 
+
+            // Create a link to download the image
+            const link = document.createElement('a');
+            link.href = imageUrl;
+            link.download = 'captured_image.jpeg';
+            link.click();
+
+            // Getting the media tracks(video & audio) and stopping each track
+            // 
+            const stream = window.localStream;
+            const tracks = stream.getTracks();
+            tracks.forEach(track => track.stop());
+            video.srcObject = null; //Removing the video stream from the video element
+        });
+
+    </script>
+</body>
+</html>
