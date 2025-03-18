@@ -1,0 +1,144 @@
+    /*Nav bar*/
+    body {
+        margin:0;
+        padding: 0;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #f4f4f4;
+        font-family: Arial, sans-serif;
+    }
+    
+    ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #333;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+    
+    li {
+      float: left;
+    }
+    
+    li a {
+      display: block;
+      color: white;
+      text-align: center;
+      padding: 20px 50px;
+      text-decoration: none;
+    }
+    
+    li a:hover:not(.active) {
+      background-color: #111;
+    }
+    
+    /*overview container*/
+    .overview-container {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        text-align: left;
+        width: 400px;
+        height:400px;
+    }
+    
+    #logo{
+        font-size:50px;
+    }
+    .title-container {
+        display: flex;
+        align-items: center; /* Vertically aligns icon and text */
+        justify-content: left; /* Centers everything horizontally */
+        gap: 15px; /* Adds spacing between the icon and text */
+      }
+    /*dropdown*/
+    .dropbtn {
+        background-color: #04AA6D;
+        color: white;
+        padding: 16px;
+        margin-bottom: 10px;
+        font-size: 16px;
+        border: none;
+        cursor: pointer;
+        display: block;
+        
+      }
+      
+      .dropbtn:hover, .dropbtn:focus {
+        background-color: #3e8e41;
+      }
+      
+      #myInput {
+        box-sizing: border-box;
+        background-image: url('searchicon.png');
+        background-position: 14px 12px;
+        background-repeat: no-repeat;
+        font-size: 16px;
+        padding: 14px 20px 12px 45px;
+        border: none;
+        border-bottom: 1px solid #ddd;
+      }
+      
+      #myInput:focus {outline: 3px solid #ddd;}
+      
+      .dropdown {
+        position: relative;
+        display: inline-block;
+      }
+      
+      .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f6f6f6;
+        min-width: 230px;
+        overflow: auto;
+        border: 1px solid #ddd;
+        z-index: 1;
+      }
+      
+      .dropdown-content button {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+      }
+      
+      .dropdown button:hover {background-color: #ddd;}
+      
+      .show {display: block;}
+    
+    
+      /*vertical scrollable menu*/
+    .vertical-menu {
+        width: 200px;
+        height: 100px;
+        overflow-y: auto;
+    }
+    
+    .vertical-menu a {
+        background-color: #eee;
+        color: black;
+        display: block;
+        padding: 12px;
+        text-decoration: none;
+    }
+    .dropdown .dropdown-content {
+        top: 0;
+        left: 100%;
+        margin-left: 1px;
+    }
+    
+    .vertical-menu a:hover {
+        background-color: #ccc;
+    }
+    
+    .vertical-menu a.active {
+        background-color: #04AA6D;
+        color: white;
+    }
