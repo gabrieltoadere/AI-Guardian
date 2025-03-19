@@ -1,19 +1,21 @@
-<html>
-    <head>
-        <title>Main Page</title>
-        <link rel="stylesheet" href="/AI-Guardian/css/main.css">
-        <link rel="stylesheet" href="/AI-Guardian/css/common.css">
-        <script src="/AI-Guardian/scripts/main.js"></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grocery Guardian</title>
+    <link rel="stylesheet" href="/AI-Guardian/css/main.css">
+    <link rel="stylesheet" href="/AI-Guardian/css/common.css">
+    <script src="/AI-Guardian/scripts/main.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
 
-    </head>
+<body>
 
+    <div class="main-container">
+        <h1>Grocery Guardian</h1>
 
-    <body>
-
-        <br>
-        <div><h1>Grocery Guardian</h1></div>
-        <br>
+        <!-- Allergy List with Horizontal Scroll -->
         <div class="allergyDisplay">
             <ul class="allergyList">
                 <li>Allergen 1</li>
@@ -31,15 +33,14 @@
                 <li>Allergen 13</li>
             </ul>
         </div>
-        <br>
-        <br>
-        <div class="newList">
-            <button id="createNewList" onclick="makeNewList()">Create New List</button>
-        </div>
 
-        <div class="newItem">
+        <!-- Buttons for Creating List and Adding Items -->
+        <div class="button-container">
+            <button id="createNewList" onclick="makeNewList()">Create New List</button>
             <button id="createNewItem" onclick="makeNewItem()">Add New Item +</button>
         </div>
+
+        <!-- Current Items -->
         <div class="currentItems">
             <ul>
                 <li>Chocolate</li>
@@ -49,17 +50,21 @@
                 <li>Eggs</li>
             </ul>
         </div>
-        <div class="navbar">
-            <ul>
-                <a href="main.html">Main</a>
-                <a href="history.html">History</a>
-                <a href="profile.html">Profile</a>
-            </ul>
-        </div>
+    </div>
 
-<!-- Chatbot Icon -->
-<div class="chatbot-icon" id="chatbotIcon">
-    <i class="fa-solid fa-robot"></i>
-</div>
-    </body>
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <ul>
+            <a href="main.html">Main</a>
+            <a href="history.html">History</a>
+            <a href="profile.html">Profile</a>
+        </ul>
+    </div>
+
+    <!-- Chatbot Icon -->
+    <div class="chatbot-icon" id="chatbotIcon">
+        <i class="fa-solid fa-robot"></i>
+    </div>
+
+</body>
 </html>
