@@ -7,29 +7,56 @@
     <link rel="stylesheet" href="/AI-Guardian/css/common.css">
     <link rel="stylesheet" href="/AI-Guardian/css/scanning.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
 </head>
-
 <body>
     <div class="main">
         <h1>Barcode Scanner</h1>
     <button id="scanButton" onclick="startScanning()">Scan Barcode</button>
     <button id="manualInputButton" onclick="showManualInput()">Manual Input</button>
 
-    <div id="camera" class="hidden"></div>
 
+    <div id="camera"></div>
+    <div id="camera" class="hidden"></div>
     <div id="manualInput" class="hidden">
-        <!--<label for="barcode">Enter Barcode:</label> -->
-        <input type="text" id="barcode" placeholder="Enter A Barcode...">
+        <input type="text" id="barcode" placeholder="Enter barcode">
         <button onclick="fetchProductInfo()">Get Ingredients</button>
     </div>
+
 
     <div id="result">
         <h2>Product Information</h2>
         <p><strong>Product Name:</strong> <span id="productName">-</span></p>
         <p><strong>Ingredients:</strong> <span id="ingredients">-</span></p>
+	<p><strong>Potential Allergens:</strong> <span id="potentialAllergens">-</span></p>
+	<p><strong>Nutrient Levels:</strong> <span id="nutrientLevels">-</span></p>
+        <img id="productImage" src="" alt="Product Image" class="hidden">
     </div>
+
+    <!-- button to upload -->
+    <p>If barcode doesn't work, you can upload a picture of the ingredient list.</p>
+    <input type="file" id="imageInput" accept="image/*">
+    <div id="result2" class="main">
+       <h4>Extracted Text：</h4>
+       <pre id="extractedText"></pre>
+       <p id="warning"></p>
     </div>
+
+    <div class="main" id="confirmSection">
+    	<button id="safeFoodButton" onclick="markFood1()">Mark this as safe food</button>
+    	<button id="unsafeFoodButton" onclick="markFood2()">Mark this unsafe food</button>
+	<p id="notice"></p>	
+	<div id="questions" class="hidden">
+		<p>How many of this product did you purchase?</p>
+		<input type="number" placeholder="type number">
+		<p>Food Name:</p>
+		<input type="text" id="foodNameInput">
+		<button id="confirmButton" onclick="saveFoodHistory()">save</button>
+		<p id="test"></p>
+	</div>
+    </div>
+</div>
+    
+
     
 
     
@@ -37,36 +64,36 @@
     <script>
         let lastDetectedCode = null;
         let lastDetectionTime = 0;
-        let isCameraInitialized = false; 
+        let isCameraInitialized = false;
+	let foodName = null;
 
         function startScanning() {
-            document.getElementById('camera').classList.remove('hidden'); 
+            document.getElementById('camera').classList.remove('hidden');
             document.getElementById('manualInput').classList.add('hidden');
 
             if (!isCameraInitialized) {
-                initializeScanner(); 
-                isCameraInitialized = true; 
+                initializeScanner();
+                isCameraInitialized = true;
             }
         }
 
         function showManualInput() {
-            document.getElementById('camera').classList.add('hidden'); 
+            document.getElementById('camera').classList.add('hidden');
             document.getElementById('manualInput').classList.remove('hidden');
         }
-        
 
         function initializeScanner() {
             const quaggaConf = {
-                inputStream: {
-                    target: document.querySelector("#camera"),
-                    type: "LiveStream",
-                    constraints: {
-                        width: { min: 500 },
-                        height: { min: 400 },
-                        facingMode: "User",
-                        aspectRatio: { min: 1, max: 2 }
-                    }
-                },
+    inputStream: {
+        target: "#camera",  // Ensure Quagga attaches correctly
+        type: "LiveStream",
+        constraints: {
+            width: 640,  // Explicitly set the width
+            height: 480, // Set a height to keep it constrained
+            facingMode: "environment",
+            aspectRatio: 1.5
+        }
+    },
                 decoder: {
                     readers: [
                         'code_128_reader',
@@ -131,38 +158,38 @@
                 if (data.status === 1) {
                     const product = data.product;
 
-                    const productName = product.product_name || 
+                    const productName = product.product_name ||
+					product.generic_name_en || 
+					product.product_name_en ||
+					product.product_name_it ||
                                         product.generic_name || 
                                         product.abbreviated_product_name || 
                                         product.brands || 
                                         'Unknown Product';
 
-                    const ingredients = product.ingredients_text || 'No ingredients listed';
+					foodName = productName;	
 
+                    const ingredients = product.ingredients_text_en || product.ingredients_text || product.ingredients_hierarchy || product.ingredients_original_tags || 'No ingredients listed';
+
+					const potentialAllergens = product.allergens || 'No data';
+	
                     document.getElementById('productName').textContent = productName;
                     document.getElementById('ingredients').textContent = ingredients;
+					document.getElementById('potentialAllergens').textContent = potentialAllergens;
 
-                    const imageUrl = generateImageUrl(barcode);
-                    const productImage = document.getElementById('productImage');
-                    const noImageMessage = document.getElementById('noImageMessage');
+					const nutrientLevels = product.nutrient_levels || {};
+					const nutrientText = Object.entries(nutrientLevels).map(([key, value]) => `${key}: ${value}`).join(", "); 					 
+					document.getElementById('nutrientLevels').textContent = nutrientText || "No data";
+			
+					document.getElementById('productImage').classList.remove('hidden');
+                    const imageUrl = product.image_front_small_url || product.selected_images.front.small.it || "https://cdn-icons-png.flaticon.com/512/1178/1178479.png";
+					document.getElementById('productImage').src = imageUrl;            
 
-                    const imageExists = await checkImageExists(imageUrl);
-                    if (imageExists) {
-                        productImage.src = imageUrl;
-                        productImage.style.display = 'block';
-                        noImageMessage.style.display = 'none';
-                    } else {
-                        productImage.style.display = 'none';
-                        noImageMessage.style.display = 'block';
-                    }
-
-                    
-                    document.getElementById('camera').classList.add('hidden');
-                } else {
+					document.getElementById('camera').classList.add('hidden');
+				} else {
                     document.getElementById('productName').textContent = 'Product not found';
                     document.getElementById('ingredients').textContent = '-';
-                    document.getElementById('productImage').style.display = 'none';
-                    document.getElementById('noImageMessage').style.display = 'none';
+                    document.getElementById('productImage').classList.add('hidden');
                 }
             } catch (error) {
                 console.error('Error fetching product info:', error);
@@ -170,29 +197,144 @@
             }
         }
 
-        function generateImageUrl(barcode) {
-            const formattedBarcode = barcode.replace(/(\d{3})(\d{3})(\d{3})(\d+)/, '$1/$2/$3/$4');
-            return `https://static.openfoodfacts.org/images/products/${formattedBarcode}/front.400.jpg`;
+
+
+        function compressImage(file, callback) {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    const MAX_WIDTH = 800;
+                    const MAX_HEIGHT = 800;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob(
+                        (blob) => {
+                            if (blob.size > 1024 * 1024) {
+                                canvas.toBlob(
+                                    (blob) => callback(blob),
+                                    'image/webp',
+                                    0.7
+                                );
+                            } else {
+                                callback(blob);
+                            }
+                        },
+                        'image/webp',
+                        0.8
+                    );
+                };
+            };
         }
 
-        async function checkImageExists(url) {
-            try {
-                const response = await fetch(url, { method: 'HEAD' });
-                return response.ok;
-            } catch (error) {
-                return false;
+        async function processImage() {
+            const imageInput = document.getElementById('imageInput');
+            const extractedTextElement = document.getElementById('extractedText');
+            const warningElement = document.getElementById('warning');
+
+            if (!imageInput.files || imageInput.files.length === 0) {
+                alert('Please choose a photo');
+                return;
             }
-        }
-    </script>
-     <div class="navbar">
-        <ul>
-            <a href="main.html">Main</a>
-            <!--<a href="adding.html">add</a>-->
-            <a href="history.html">History</a>
-            <a href="profile.html">Profile</a>
-        </ul>
-    </div>
 
+            const file = imageInput.files[0];
+
+            compressImage(file, async (compressedBlob) => {
+                const formData = new FormData();
+                formData.append('file', compressedBlob, 'image.webp');
+                formData.append('language', 'eng');
+                formData.append('OCREngine', '2');
+                formData.append('isOverlayRequired', 'false');
+
+                //const apiKey = 'K81548401288957';
+				const apiKey = 'K82645357788957';
+                const apiUrl = `https://api.ocr.space/parse/image`;
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': apiKey,
+                        },
+                        body: formData,
+                    });
+                    const result = await response.json();
+
+                    if (result.IsErroredOnProcessing) {
+                        throw new Error(result.ErrorMessage);
+                    }
+
+                    
+                    document.getElementById('result2').classList.remove('hidden');
+
+                    
+                    const extractedText = result.ParsedResults[0].ParsedText;
+                    extractedTextElement.textContent = extractedText;
+			
+					foodName = extractedText.split("\n")[0];
+
+                    // I assume client is allergic to milk. We can change this later
+                    if (extractedText.toLowerCase().includes('milk')) {
+                        warningElement.textContent = "Warning! This product contains your allergens: xxxxxx";
+                        warningElement.style.display = 'block'; 
+                    } else {
+                        warningElement.style.display = 'none'; 
+                    }
+                } catch (error) {
+                    console.error('OCR went wrong:', error);
+                    alert('OCR went wrong, please try again.');
+                }
+            });
+        }
+
+        document.getElementById('imageInput').addEventListener('change', processImage);
+
+
+	function markFood1() {
+		document.getElementById('questions').classList.remove('hidden');
+		document.getElementById('foodNameInput').value = foodName;
+	}
+
+
+	function markFood2() {
+		document.getElementById('notice').innerHTML = "This unsafe food has been stored"
+	}
+
+	function saveFoodHistory(){
+		document.getElementById('test').innerHTML = foodName;
+	}
+
+   </script>
+   <nav class="navbar">
+    <ul>
+        <li><a href="main.html">Main</a></li>
+        <li><a href="history.html">History</a></li>
+        <li><a href="profile.html">Profile</a></li>
+    </ul>
+</nav>
 
     <!-- Chatbot Icon -->
 <div class="chatbot-icon" id="chatbotIcon">

@@ -94,19 +94,38 @@ button:hover {
     color: #888;
     font-style: italic;
 }
-#camera video {
-    width: 100%;
-    max-width: 640px;
+/* Center the camera container */
+#camera-container {
+    display: flex;
     justify-content: center;
     align-items: center;
-    background-color: black; /* Background to make it visually distinct */
-    border-radius: 10px; /* Rounded corners for a modern look */
-    overflow: hidden;
-    margin: 20px auto; /* Center it horizontally */
-
-    
-
+    width: 100%;
+    max-width: 700px;
+    height: 480px; /* Set a fixed height */
+    margin: auto; /* Centers properly */
+    padding: 0;
+    background-color: black;
+    border-radius: 10px;
+    overflow: hidden; /* Ensures no extra space appears */
 }
+
+/* Prevents the camera feed from taking over the screen */
+#camera video {
+    width: 100%;
+    height: auto;
+    max-width: 640px; /* Ensures the video is within bounds */
+    border-radius: 10px;
+    display: block;
+}
+
+/* Responsive fix for smaller screens */
+@media screen and (max-width: 768px) {
+    #camera-container {
+        max-width: 90%;
+    }
+}
+
+
 .hidden {
     display: none;
 }
