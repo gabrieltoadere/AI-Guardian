@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Allergen Preferences</title>
+    <link rel="stylesheet" href="/AI-Guardian/css/scanning.css">
+    <link rel="stylesheet" href="/AI-Guardian/css/common.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-heartbeat"></i> Allergen Preferences</h1>
+        <hr class="divider">
+
+        <p>Select the allergens you want to avoid:</p>
+
+        <form id="preferencesForm" class="dropdown-container">
+            <label><input type="checkbox" value="milk"> Milk</label>
+            <label><input type="checkbox" value="peanuts"> Peanuts</label>
+            <label><input type="checkbox" value="tree nuts"> Tree Nuts</label>
+            <label><input type="checkbox" value="soy"> Soy</label>
+            <label><input type="checkbox" value="eggs"> Eggs</label>
+            <label><input type="checkbox" value="wheat"> Wheat</label>
+            <label><input type="checkbox" value="gluten"> Gluten</label>
+            <label><input type="checkbox" value="shellfish"> Shellfish</label>
+            <label><input type="checkbox" value="fish"> Fish</label>
+            <label><input type="checkbox" value="sesame"> Sesame</label>
+        </form>
+
+        <div class="scan-button-container">
+            <button class="scan-button" onclick="savePreferences()">Save Preferences</button>
+        </div>
+    </div>
+
+    <div class="navbar">
+        <ul>
+            <li><a href="main.html"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="scanning.html"><i class="fas fa-barcode"></i> Scan</a></li>
+            <li><a href="history.html"><i class="fas fa-history"></i> History</a></li>
+            <li><a href="profile.html"><i class="fas fa-user"></i> Profile</a></li>
+        </ul>
+    </div>
+    
+
+    <script>
+        // after we host database each preference should be different as per user login details
+        function savePreferences() {
+            const checkboxes = document.querySelectorAll('#preferencesForm input[type="checkbox"]');
+            const selected = [];
+    
+            checkboxes.forEach(cb => {
+                if (cb.checked) selected.push(cb.value.toLowerCase());
+            });
+    
+            localStorage.setItem('userAllergens', JSON.stringify(selected));
+            alert("Your preferences have been saved!");
+        }
+    
+        // Pre-check saved preferences on load
+        window.onload = function () {
+            const saved = JSON.parse(localStorage.getItem('userAllergens')) || [];
+            document.querySelectorAll('#preferencesForm input').forEach(cb => {
+                cb.checked = saved.includes(cb.value.toLowerCase());
+            });
+        };
+    </script>
+
+
+
+</body>
+
+</html>

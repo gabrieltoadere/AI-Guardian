@@ -14,6 +14,11 @@
     <button id="scanButton" onclick="startScanning()">Scan Barcode</button>
     <button id="manualInputButton" onclick="showManualInput()">Manual Input</button>
 
+    <button onclick="window.location.href='UserPreference.html'">
+        Set Allergen Preferences
+    </button>
+    
+
 
     <div id="camera"></div>
     <div id="camera" class="hidden"></div>
@@ -35,6 +40,7 @@
         <img id="productImage" src="" alt="Product Image" class="hidden">
     </div>
 
+    
 
     <!-- button to upload -->
     <p>If barcode doesn't work, you can upload a picture of the ingredient list.</p>
@@ -204,7 +210,50 @@
 
 
 					const nutrientLevels = product.nutrient_levels || {};
-					const nutrientText = Object.entries(nutrientLevels).map(([key, value]) => `${key}: ${value}`).join(", "); 					 
+					const nutrientText = Object.entries(nutrientLevels).map(([key, value]) => `${key}: ${value}`).join(", "); 		
+                    
+                    const userAllergens = JSON.parse(localStorage.getItem('userAllergens')) || [];
+
+                let categoryTag = null;
+                if (product.categories_tags && product.categories_tags.length > 0) {
+                    categoryTag = product.categories_tags.find(tag => tag.startsWith('en:'));
+                }
+
+                if (categoryTag) {
+                    console.log("✔️ Using category:", categoryTag);
+                    console.log("✔️ User allergen preferences:", userAllergens);
+
+
+                    fetch(`https://world.openfoodfacts.org/category/${categoryTag.replace('en:', '')}.json`)
+                        .then(res => res.json())
+                        .then(categoryData => {
+                            const alternatives = categoryData.products.filter(p => {
+                                if (!p || !p.product_name || !p.image_front_small_url) return false;
+                                
+                                const pAllergens = (p.allergens || '')
+                                    .split(',')
+                                    .map(a => a.trim().replace(/^[a-z]{2}:/, '').toLowerCase());
+
+                                return !pAllergens.some(a => userAllergens.includes(a));
+                            }).slice(0, 5); // limit to 5 safe options
+
+                            if (alternatives.length === 0) {
+                                console.log("No allergen-safe alternatives found.");
+                            }
+
+                            displayAlternativeProducts(alternatives);
+                            console.log("✔️ Found total products in category:", categoryData.products.length);
+                            console.log("✔️ Filtered safe alternatives:", alternatives.length);
+
+                        })
+                        .catch(error => {
+                            console.error("Error fetching alternatives:", error);
+                        });
+                } else {
+                    console.warn("No valid category found for alternatives.");
+                }
+
+
 					document.getElementById('nutrientLevels').textContent = nutrientText || "No data";
 			
 					document.getElementById('productImage').classList.remove('hidden');
@@ -221,6 +270,8 @@
                 console.error('Error fetching product info:', error);
                 alert('Failed to fetch product information. Please try again.');
             }
+
+            
         }
 
 
@@ -354,13 +405,16 @@
 	}
 
    </script>
-   <nav class="navbar">
+   
+   
+   <div class="navbar">
     <ul>
-        <li><a href="main.html">Main</a></li>
-        <li><a href="history.html">History</a></li>
-        <li><a href="profile.html">Profile</a></li>
+        <li><a href="main.html"><i class="fas fa-home"></i> Home</a></li>
+        <li><a href="scanning.html"><i class="fas fa-barcode"></i> Scan</a></li>
+        <li><a href="history.html"><i class="fas fa-history"></i> History</a></li>
+        <li><a href="profile.html"><i class="fas fa-user"></i> Profile</a></li>
     </ul>
-</nav>
+</div>
 
     <!-- Chatbot Icon -->
 <div class="chatbot-icon" id="chatbotIcon">
@@ -372,15 +426,52 @@
 <script> 
     // ✅ Display the result
     function displayAllergenWarning(allergens) {
-        const warningBox = document.getElementById("allergen-warning");
-    
-        if (allergens.length > 0) {
-            warningBox.innerHTML = `⚠️ <span style="color:red;">Warning: Contains ${allergens.join(", ")}</span>`;
-        } else {
-            warningBox.innerHTML = `✅ <span style="color:green;">No allergens detected.</span>`;
-        }
+    const warningBox = document.getElementById("allergen-warning");
+    const userAllergens = JSON.parse(localStorage.getItem('userAllergens')) || [];
+
+    const filteredAllergens = allergens.filter(allergen =>
+        userAllergens.includes(allergen.toLowerCase())
+    );
+
+    if (filteredAllergens.length > 0) {
+        warningBox.innerHTML = `⚠️ <span style="color:red;">Warning: Contains ${filteredAllergens.join(", ")}</span>`;
+    } else {
+        warningBox.innerHTML = `✅ <span style="color:green;">No allergens detected based on your preferences.</span>`;
     }
+}
     </script>
+
+
+
+
+<script>
+function displayAlternativeProducts(products) {
+    const container = document.getElementById("alternativeList");
+    container.innerHTML = '';
+
+    if (products.length === 0) {
+        container.innerHTML = '<p>No allergen-safe alternatives found in this category.</p>';
+        return;
+    }
+
+    products.forEach(p => {
+        const item = document.createElement('div');
+        item.style.border = "1px solid #ccc";
+        item.style.padding = "10px";
+        item.style.borderRadius = "8px";
+        item.style.width = "150px";
+        item.style.textAlign = "center";
+
+        item.innerHTML = `
+            <img src="${p.image_front_small_url || 'https://cdn-icons-png.flaticon.com/512/1178/1178479.png'}" 
+                 alt="product" style="width: 100px; height: 100px; object-fit: contain;">
+            <p>${p.product_name || 'Unnamed Product'}</p>
+        `;
+        container.appendChild(item);
+    });
+}
+</script>
+
 
 
 
