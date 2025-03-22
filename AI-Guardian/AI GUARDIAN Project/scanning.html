@@ -27,10 +27,14 @@
         <h2>Product Information</h2>
         <p><strong>Product Name:</strong> <span id="productName">-</span></p>
         <p><strong>Ingredients:</strong> <span id="ingredients">-</span></p>
-	<p><strong>Potential Allergens:</strong> <span id="potentialAllergens">-</span></p>
+        <p><strong>Potential Allergens:</strong> 
+            <span id="allergen-warning" style="font-weight: bold;"></span>
+         </p>
+          
 	<p><strong>Nutrient Levels:</strong> <span id="nutrientLevels">-</span></p>
         <img id="productImage" src="" alt="Product Image" class="hidden">
     </div>
+
 
     <!-- button to upload -->
     <p>If barcode doesn't work, you can upload a picture of the ingredient list.</p>
@@ -169,13 +173,35 @@
 
 					foodName = productName;	
 
-                    const ingredients = product.ingredients_text_en || product.ingredients_text || product.ingredients_hierarchy || product.ingredients_original_tags || 'No ingredients listed';
+                    const ingredientsText = product.ingredients_text_en || product.ingredients_text || '';
+                    const ingredientsArray = ingredientsText.split(',').map(i => i.trim().toLowerCase());
 
-					const potentialAllergens = product.allergens || 'No data';
-	
+					let potentialAllergens = product.allergens || 'No data';
+                        if (typeof potentialAllergens === 'string') {
+                            potentialAllergens = potentialAllergens
+                                .split(',')
+                                .map(a => a.trim().replace(/^en:/, ''))  // remove "en:" prefix
+                                .join(', ');
+                        }
+                        // document.getElementById('potentialAllergens').textContent = potentialAllergens;
+
                     document.getElementById('productName').textContent = productName;
-                    document.getElementById('ingredients').textContent = ingredients;
-					document.getElementById('potentialAllergens').textContent = potentialAllergens;
+                    document.getElementById('ingredients').textContent = ingredientsText;
+                    
+
+                    let openFoodAllergens = [];
+
+                    if (typeof product.allergens === 'string') {
+                        openFoodAllergens = product.allergens
+                            .split(',')
+                            .map(a => a.trim().replace(/^[a-z]{2}:/, '').toLowerCase())
+                            .filter(a => a);
+                    }
+
+                    displayAllergenWarning(openFoodAllergens);
+
+
+
 
 					const nutrientLevels = product.nutrient_levels || {};
 					const nutrientText = Object.entries(nutrientLevels).map(([key, value]) => `${key}: ${value}`).join(", "); 					 
@@ -340,5 +366,24 @@
 <div class="chatbot-icon" id="chatbotIcon">
     <i class="fa-solid fa-robot"></i>
 </div>
+
+
+
+<script> 
+    // ✅ Display the result
+    function displayAllergenWarning(allergens) {
+        const warningBox = document.getElementById("allergen-warning");
+    
+        if (allergens.length > 0) {
+            warningBox.innerHTML = `⚠️ <span style="color:red;">Warning: Contains ${allergens.join(", ")}</span>`;
+        } else {
+            warningBox.innerHTML = `✅ <span style="color:green;">No allergens detected.</span>`;
+        }
+    }
+    </script>
+
+
+
+
 </body>
 </html>
