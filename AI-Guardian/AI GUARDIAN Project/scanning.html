@@ -478,3 +478,74 @@ function displayAlternativeProducts(products) {
 
 </body>
 </html>
+
+<!-- 
+
+
+// ** Fetch Alternative Products **
+async function fetchAlternativeProducts(allergens) {
+    const barcode = document.getElementById('barcode').value.trim();
+    if (!barcode) return;
+
+    const productUrl = `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`;
+
+    try {
+        const productResponse = await fetch(productUrl);
+        const productData = await productResponse.json();
+
+        if (productData.status !== 1) {
+            console.error("Original product not found.");
+            return;
+        }
+
+        // Extract categories from the scanned product
+        const possibleCategories = productData.product.categories_tags || [];
+        console.log("Possible categories:", possibleCategories);
+
+        // Default to categories like chocolates, but also consider others
+        const relevantCategories = ["chocolates", "cocoa-products", "candies", "sweets", "snacks"];
+        const matchedCategory = possibleCategories.find(cat => relevantCategories.includes(cat)) || "chocolates";
+
+        console.log("Using category:", matchedCategory);
+
+        // Build the exclusion query to avoid allergens
+        let exclusionQuery = allergens.map(allergen => `-ingredients_text:${encodeURIComponent(allergen)}`).join("&");
+        
+            // Fetch alternative products from the same category but excluding allergens
+            const searchUrl = `https://world.openfoodfacts.org/cgi/search.pl?action=process&tagtype_0=categories&tag_contains_0=contains&tag_0=${matchedCategory}&sort_by=popularity&json=1&fields=product_name,ingredients_text,image_url&${exclusionQuery}`;
+        
+            const searchResponse = await fetch(searchUrl);
+            const searchData = await searchResponse.json();
+        
+            const alternativeList = document.getElementById('alternativeProducts');
+            alternativeList.innerHTML = ''; // Clear previous suggestions
+        
+            const validAlternatives = searchData.products.filter(product => {
+                if (!product.ingredients_text) return false;
+        
+                // Exclude products that contain any of the user's allergens
+                return !allergens.some(allergen => product.ingredients_text.toLowerCase().includes(allergen.toLowerCase()));
+            });
+        
+            if (validAlternatives.length > 0) {
+                validAlternatives.slice(0, 3).forEach(product => {
+                    const li = document.createElement('li');
+                    
+                    // Use the English name if available, else use the original name
+                    const productName = product.product_name_en || product.product_name || 'Unknown Product';
+                    
+                    li.innerHTML = `<strong>${productName}</strong>`;
+        
+                    if (product.image_url) {
+                        li.innerHTML += `<br><img src="${product.image_url}" width="100" alt="Alternative product image">`;
+                    }
+        
+                    alternativeList.appendChild(li);
+                });
+            } else {
+                alternativeList.innerHTML = '<li>No safe alternatives found for your allergens.</li>';
+            }
+        } catch (error) {
+            console.error("Error fetching alternative products:", error);
+        }
+    } -->
