@@ -246,3 +246,16 @@ a:hover {
         font-size: 0.9em;
     }
 }
+
+.reject-div{
+    border: solid;
+    border-color: red;
+    border-radius: 4px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+}
+

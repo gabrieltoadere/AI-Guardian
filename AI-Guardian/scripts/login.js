@@ -1,36 +1,61 @@
-
-
 // Select the form element
 const loginForm = document.getElementById("loginForm");
 
-// Add event listener for form submission
-loginForm.addEventListener("submit", function(event) {
-    event.preventDefault(); // Prevent default form submission
 
-    // Retrieve values from input fields
+
+// Add event listener for form submission
+// loginForm.addEventListener("submit", function(event) {
+//     event.preventDefault(); // Prevent default form submission
+
+//     // Retrieve values from input fields
+//     const username = document.getElementById("username").value;
+//     const password = document.getElementById("password").value;
+
+//     // Simple validation
+//     if (username === "" || password === "") {
+//         alert("Please fill in all fields.");
+//         return;
+//     }
+
+//     // Simulate login process (Replace with actual authentication logic)
+//     //alert(`Welcome, ${username}! Redirecting to dashboard...`);
+//     window.location.href = "main.html"; // Redirect to dashboard
+//     //MAIN PAGE FILE WILL GO HERE!!!!
+// });
+document.querySelector(".login-btn").addEventListener("click",async () => {
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
+    const rejectDiv = document.getElementById('reject-div');
 
-    // Simple validation
-    if (username === "" || password === "") {
-        alert("Please fill in all fields.");
-        return;
-    }
+    try {
+        const response = await fetch('http://localhost:5501/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user: username, pass: password }),
+        });
+
+        const data = await response.json(); // Parse JSON response
+
+        if (data.success) {
+            localStorage.setItem('currentUser', JSON.stringify({
+                id: data.user.id,          // Unique user ID (required for future requests)
+                username: data.user.username, // Username for display
+                // Add other safe fields (e.g., email, name)
+                // ❌ NEVER store passwords/tokens here!
+            }));
+            window.location.href = "main.html"; // Login success
+        } else {
+            rejectDiv.style.display = 'block'; // Show error
+        }
+    } catch (error) {
+        console.error('Fetch error:', error);
+        rejectDiv.style.display = 'block'; // Show error if server fails
+    };
+})
 
 
 
 
-    // Simulate login process (Replace with actual authentication logic)
-    //alert(`Welcome, ${username}! Redirecting to dashboard...`);
-    window.location.href = "main.html"; // Redirect to dashboard
-    //MAIN PAGE FILE WILL GO HERE!!!!
-
-
-
-
-
-    
-});
 
 // Button redirects
 document.querySelector(".google").addEventListener("click", function() {

@@ -1,78 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Grocery Guardian - Login</title>
-    <link rel="stylesheet" href="/AI-Guardian/css/login.css"> 
-    <link rel="stylesheet" href="/AI-Guardian/css/common.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/AI-Guardian/css/login.css" />
+    <link rel="stylesheet" href="/AI-Guardian/css/common.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  </head>
 
-</head>
-
-
-
-<body>
-
+  <body>
     <!-- Login Container -->
     <div class="login-container">
-        <h1>Grocery Guardian</h1> <!-- Website title -->
-        <h2>Sign In <span class="emoji">☺</span></h2> <!-- Sign-in heading with emoji -->
+      <h1>Grocery Guardian</h1>
+      <!-- Website title -->
+      <h2>Sign In <span class="emoji">☺</span></h2>
+      <!-- Sign-in heading with emoji -->
 
-        <!-- Login Form -->
-        <form id="loginForm">
-            <!--username section-->
-            <div class="input-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" required>
-            </div>
+      <!-- Reject Div-->
+      <div class="reject-div" id="reject-div" style="display: none">
+        <strong>Incorrect username or password</strong>
+      </div>
 
-            <div class="input-group">
-                 <!--password section-->
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
-            </div>
+      <!-- Login Form -->
+      <div id="loginForm">
+        <!--username section-->
+        <div class="input-group">
+          <label for="username">Username:</label>
+          <input type="text" id="username" name="username" required />
+        </div>
 
-            <a href="#" class="forgot-password">Forgot your password?</a> <!-- Forgot password link -->
+        <div class="input-group">
+          <!--password section-->
+          <label for="password">Password:</label>
+          <input type="password" id="password" name="password" required />
+        </div>
 
-            <button type="submit" class="login-btn">Sign In</button> <!-- Login button -->
-            <h2>OR</h2>
-        </form>
-        <!-- Social Media Login Buttons -->
-        <button class="social-btn google">
-            <img src="/AI-Guardian/img's/google-logo.png" alt="Google Logo" class="icon"> Sign In With Google
-        </button>
-        
-        <button class="social-btn apple">
-            <img src="/AI-Guardian/img's/apple-logo.png" alt="Apple Logo" class="icon"> Sign In With Apple
-        </button>
-        
-        <button class="social-btn phone">
-            <img src="/AI-Guardian/img's/phone-logo.png" alt="Phone Logo" class="icon"> Sign In With Phone
-        </button>
-        
-        <button class="social-btn email">
-            <img src="/AI-Guardian/img's/email-logo.jpg" alt="Email Logo" class="icon"> Sign In With Email
-        </button>
+        <a href="#" class="forgot-password">Forgot your password?</a>
+        <!-- Forgot password link -->
 
+        <button type="submit" class="login-btn">Sign In</button>
+        <!-- Login button -->
+        <h2>OR</h2>
+      <div/>
+      <!-- Social Media Login Buttons -->
+      <button class="social-btn google">
+        <img
+          src="/AI-Guardian/img's/google-logo.png"
+          alt="Google Logo"
+          class="icon"
+        />
+        Sign In With Google
+      </button>
+
+      <button class="social-btn apple">
+        <img
+          src="/AI-Guardian/img's/apple-logo.png"
+          alt="Apple Logo"
+          class="icon"
+        />
+        Sign In With Apple
+      </button>
+
+      <button class="social-btn phone">
+        <img
+          src="/AI-Guardian/img's/phone-logo.png"
+          alt="Phone Logo"
+          class="icon"
+        />
+        Sign In With Phone
+      </button>
+
+      <button class="social-btn email">
+        <img
+          src="/AI-Guardian/img's/email-logo.jpg"
+          alt="Email Logo"
+          class="icon"
+        />
+        Sign In With Email
+      </button>
     </div>
 
     <div class="navbar">
-        <ul>
-            <li><a href="main.html"><i class="fas fa-home"></i> Home</a></li>
-            <li><a href="scanning.html"><i class="fas fa-barcode"></i> Scan</a></li>
-            <li><a href="history.html"><i class="fas fa-history"></i> History</a></li>
-            <li><a href="profile.html"><i class="fas fa-user"></i> Profile</a></li>
-        </ul>
+      <ul>
+        <li>
+          <a href="main.html"><i class="fas fa-home"></i> Home</a>
+        </li>
+        <li>
+          <a href="scanning.html"><i class="fas fa-barcode"></i> Scan</a>
+        </li>
+        <li>
+          <a href="history.html"><i class="fas fa-history"></i> History</a>
+        </li>
+        <li>
+          <a href="profile.html"><i class="fas fa-user"></i> Profile</a>
+        </li>
+      </ul>
     </div>
 
-    <script src="/AI-Guardian/scripts/login.js"></script> <!-- Linking JavaScript file -->
+    <script type="module" src="/AI-Guardian/scripts/login.js"></script>
+    <!-- Linking JavaScript file -->
     <script src="https://apis.google.com/js/platform.js" async defer></script>
-
-
     <!-- Chatbot Icon -->
-<div class="chatbot-icon" id="chatbotIcon">
-    <i class="fa-solid fa-robot"></i>
-</div>
-</body>
+    <div class="chatbot-icon" id="chatbotIcon">
+      <i class="fa-solid fa-robot"></i>
+    </div>
+  </body>
 </html>
