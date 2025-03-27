@@ -12,36 +12,6 @@
 </head>
 
 <body>
-    <div class="profile-container">
-        <h1>Profile</h1>
-
-        <!-- Profile Picture Upload -->
-        <label for="profilePicInput" class="profile-pic-container">
-            <img id="profilePic" src="/AI-Guardian/img's/default-profile.jpg">
-        </label>
-        <input type="file" id="profilePicInput" accept="image/*">
-
-        <!-- User Name -->
-        <div class="name-container">
-            <input type="text" id="userName" placeholder="Enter your name">
-            <span id="displayName" style="display: none;"></span>
-            <button id="editName" style="display: none;" onclick="editName()">Edit</button>
-        </div>
-
-        <br>
-        <!-- Allergens Selection -->
-
-        <div class="allergy-container">
-            <input type="text" id="allergyInput" placeholder="Enter an allergen">
-            <button id="addAllergy">Add Allergy</button>
-            <ul id="allergyList"></ul> <!-- Allergies will be added here -->
-        </div>
-        
-        <!-- Save Button -->
-        <button onclick="saveProfile()">Save Profile</button>
-        
-    </div>
-    
     
     <div class="navbar">
         <ul>
@@ -52,12 +22,45 @@
         </ul>
     </div>
 
+    <div class="common-container profile-container">
+
+        <!-- Profile Picture Upload -->
+        <label for="profilePicInput" class="profile-pic-container">
+            <img id="profilePic" src="/AI-Guardian/img's/default-profile.jpg" alt="Profile Picture">
+        </label>
+        <input type="file" id="profilePicInput" accept="image/*">
+
+        
+        <input type="file" id="profilePicInput" accept="image/*">
+
+        <!-- User Name -->
+        <div class="name-container">
+            <input type="text" id="userName" placeholder="Enter your name">
+            <span id="displayName" style="display: none;"></span>
+            <br>
+            <button id="saveName">Save</button>
+            <button id="editName" style="display: none;">Edit</button>
+        </div>
+        
+        <br>
+        <!-- Allergens Selection -->
+        <div class="allergy-container">
+            <h4 class="allergy-heading">Your Allergies</h4>
+            <div class="allergy-dropdown">
+                <button id="toggleAllergyList">Show Allergies ⬇</button>
+                <ul id="selectedAllergyList" class="hidden"></ul>
+            </div>
+            <button onclick="window.location.href='allergy-selection.html'" id="addAllergy">Add Allergy</button>
+            <button onclick="location.href='overview.html';" id="monthlyOverview">Monthly Overview</button>
+        </div>
+
 <script src="/AI-Guardian/scripts/profile.js"></script>
 
 <!-- Chatbot Icon -->
 <div class="chatbot-icon" id="chatbotIcon">
     <i class="fa-solid fa-robot"></i>
 </div>
+
 
 
 </body>

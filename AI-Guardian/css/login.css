@@ -1,261 +1,166 @@
-/* General Styles */
+/* Common Styles */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Montserrat', sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #f8f8f8;
     margin: 0;
-}
-
-/* Login Box */
-.login-container {
-    background: white;
-    padding: 50px;
-    border-radius: 15px;
-    box-shadow: 20px 20px 50px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    width: 90%;
-    max-width: 350px;
-    animation: fadeIn 1s ease-out;
-}
-
-/* Fade-in effect for container */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
+    flex-direction: column;
+    color: #333;
+    background: linear-gradient(180deg, #FF9A8B, #FF6A88, #FF99AC, #FFC3A0, #FFDD94, #A1C4FD, #C2E9FB);
+    background-size: 400% 400%;
+    animation: skyGradientAnimation 25s infinite ease-in-out;
     }
-    to {
-        opacity: 1;
+    
+    @keyframes skyGradientAnimation {
+    0% { background-position: 0% 50%; }
+    25% { background-position: 50% 100%; }
+    50% { background-position: 100% 50%; }
+    75% { background-position: 50% 0%; }
+    100% { background-position: 0% 50%; }
     }
-}
-
-
-
-/* Heading Styles */
-h1 {
-    font-size: 24px;
-    font-weight: bold;
-}
-
-h2 {
-    font-size: 20px;
-    margin-bottom: 20px;
-}
-
-p {
-    font-size: 16px;
-    color: #777;
-}
-
-
-/* Emoji Style */
-.emoji {
-    font-size: 20px;
-}
-
-/* Input Fields */
-.input-group {
-    text-align: left;
-    margin-bottom: 15px;
-}
-
-label {
-    font-weight: bold;
-    display: block;
-    margin-bottom: 5px;
-}
-
-input {
-    display: block;
-    width: 90%;
-    padding: 10px;
-    margin: 10px auto;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    outline: none;
-    border-color: black;
-    transition: all 0.3s ease;
-}
-
-input:focus, button:hover {
-    transform: scale(1.05);
-}
-
-
-
-/* Forgot Password Link */
-.forgot-password {
-    display: block;
-    margin-bottom: 15px;
-    color: black;
-    text-decoration: none;
-    font-weight: bold;
-    text-decoration: underline;
-}
-
-/* Login Button */
-.login-btn {
-    width: 100%;
-    padding: 10px;
-    background-color: white;
-    color: black;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.login-btn:hover {
-    background-color: grey;
-}
-
-/* Social Media & Other Sign-in Buttons */
-.social-btn {
-    width: 100%;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    margin-top: 10px;
-    font-size: 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px; /* Space between logo and text */
-    color: white;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-button:hover, .social-btn:hover {
-    transform: scale(1.05);
-    background-color: #ccc;
-}
-
-/* Different Colors for Sign-in Buttons */
-.google {
-    background-color: #db4437;
-}
-
-.google:hover {
-    background-color: #c1351d;
-}
-
-.apple {
-    background-color: #000;
-}
-
-.apple:hover {
-    background-color: #333;
-}
-
-.phone {
-    background-color: #34a853;
-}
-
-.phone:hover {
-    background-color: #2a7d3b;
-}
-
-.email {
-    background-color: #4285F4;
-}
-
-.email:hover {
-    background-color: #e09c04;
-}
-
-/* Hover Effects for Buttons */
-.social-btn:hover {
-    opacity: 0.8;
-    background-color: lightgray;
-}
-
-/* Social Media Icons */
-.icon {
-    width: 20px;
-    height: 20px;
-}
-
-
-/* Links */
-a {
-    text-decoration: none;
-    color: #007bff;
-    font-weight: bold;
-}
-
-a:hover {
-    color: #0056b3;
-}
-
-/* Dashboard Styling */
-.dashboard {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-    width: 80%;
-    max-width: 500px;
-    margin: 50px auto;
-}
-
-.logout-btn {
-    background-color: green;
-}
-
-.logout-btn:hover {
-    background-color: green;
-}
-
-
-
-/* General mobile-friendly adjustments */
-@media screen and (max-width: 768px) {
-    .login-container {
-        width: 90%;
-        padding: 20px;
-    }
-
+    
     h1, h2 {
-        font-size: 1.5em;
+    text-align: center;
+    color: #333;
+    margin-bottom: 10px;
+    font-weight: 700; /* Bold for headings */
+    font-family: 'Montserrat', sans-serif; /* Apply Montserrat to headings */
     }
-
+    /* Logo Styling */
+    .logo i {
+    color: #4CAF50; /* Green color for the shopping basket icon */
+    font-size: 40px; /* Adjust size if needed */
+    }
+    
+    
+    .emoji {
+    font-size: 1.2em;
+    }
+    
+    /* Login Container */
+    .login-container {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 350px;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    font-family: 'Montserrat', sans-serif;
+    }
+    
     .input-group {
-        margin: 10px 0;
+    margin-bottom: 1rem;
+    text-align: left;
     }
-
-    .social-btn {
-        width: 100%;
-        margin: 10px 0;
+    
+    .input-group label {
+    display: block;
+    font-weight: 500; /* Medium weight for labels */
+    margin-bottom: 5px;
+    color: #333;
     }
-
-    .social-btn img {
-        max-width: 20px;
-        margin-right: 10px;
+    
+    .input-group input {
+    width: 94%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: 0.3s;
+    font-family: 'Montserrat', sans-serif;
     }
-
-    /* Adjust form inputs and buttons */
-    input, button {
-        width: 100%;
-        padding: 12px;
+    
+    .input-group input:focus {
+    border-color: #FF7043;
+    outline: none;
     }
-
+    
     .forgot-password {
-        font-size: 0.9em;
+    display: block;
+    margin-bottom: 1rem;
+    color: #333;
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: color 0.3s;
     }
-}
-
-.reject-div{
-    border: solid;
-    border-color: red;
-    border-radius: 4px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    
+    .forgot-password:hover {
+    text-decoration: underline;
+    color: #757575;
+    }
+    
+    /* Green Sign In Button */
+    .login-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(45deg, #50C878, #2E8B57); /* Lighter green gradient */
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500; /* Medium weight for buttons */
+    transition: 0.3s;
+    font-family: 'Montserrat', sans-serif;
+    }
+    
+    .login-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(255, 105, 97, 0.5);
+    }
+    
+    /* Social Media Login Buttons */
+    .social-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-direction: row;
-}
-
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 10px;
+    font-weight: 500; /* Medium weight for buttons */
+    transition: 0.3s;
+    font-family: 'Montserrat', sans-serif;
+    }
+    
+    .social-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .social-btn .icon {
+    width: 24px;
+    margin-right: 10px;
+    }
+    
+    .google { background: linear-gradient(45deg, #db4437, #b02a1e); color: white; }
+    .apple { background: linear-gradient(45deg, #000, #555); color: white; }
+    .phone { background: linear-gradient(45deg, #34a853, #2b8b46); color: white; }
+    .email { background: linear-gradient(45deg, #4285f4, #3367d6); color: white; }
+    
+    /* Chatbot Icon */
+    .chatbot-icon {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: linear-gradient(45deg, #50C878, #2E8B57);
+    color: white;
+    padding: 15px;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    font-size: 1.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .chatbot-icon:hover {
+    transform: scale(1.1);
+    box-shadow: 0 5px 20px rgba(255, 105, 97, 0.5);
+    }
