@@ -1,5 +1,15 @@
-// Add at top of file
 let conversationHistory = [];
+
+const products = [
+    { name: "Almond Milk", tags: ["dairy-free", "vegan"] },
+    { name: "Oat Cookies", tags: ["gluten-free", "vegan"] },
+    { name: "Greek Yogurt", tags: ["dairy"] },
+    { name: "Rice Crackers", tags: ["gluten-free"] },
+    { name: "Tofu", tags: ["vegan", "dairy-free"] },
+];
+
+let userPreferences = [];
+
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -9,21 +19,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const typingIndicator = document.getElementById('typingIndicator');
 
     function generateResponse(query) {
-        const lowerQuery = query.toLowerCase();
-        const lastMessage = conversationHistory[conversationHistory.length - 2];
+        const doc = nlp(query.toLowerCase());
+        const nouns = doc.nouns().out('array');
+        const verbs = doc.verbs().out('array');
+    
+        if (doc.has('gluten')) {
+            return "This product appears to contain gluten. Would you like alternatives?";
+        }
+        if (doc.has('dairy')) {
+            return "Got it! Showing you dairy-free options.";
+        }
+        if (doc.has('recommend')) {
+            return recommendProducts(userPreferences);
+        }
         
-        // Add contextual responses
-        if (lowerQuery.includes('recipe')) {
-            return 'Here are some recipe suggestions based on your recent purchases...';
+        if (nouns.includes('recipe')) {
+            return "Here are some recipe suggestions based on your recent purchases...";
         }
-        if (lowerQuery.includes('expir')) {
-            return 'I can help track expiration dates. Scan an item to get started!';
+        if (verbs.includes('expire')) {
+            return "I can help track expiration dates. Scan an item to get started!";
         }
-        if (lastMessage && lastMessage.content.includes('recipe')) {
-            return 'Would you like detailed instructions for that recipe?';
+    
+        return "I'm still learning to better understand you. Could you rephrase that?";
+        if (query.includes("recommend")) {
+            return recommendProducts(userPreferences);
         }
-        return "I'm learning more about grocery management every day! How else can I assist?";
+
+        
     }
+    
 
     function addMessage(text, isUser = false) {
         const messageDiv = document.createElement('div');
@@ -45,8 +69,11 @@ document.addEventListener('DOMContentLoaded', () => {
         showTypingIndicator();
         conversationHistory.push({ role: 'user', content: query });
         
-        // Simulate AI processing delay
-          // Simulate API call
+        const lowered = query.toLowerCase();
+        if (lowered.includes("gluten")) userPreferences.push("gluten-free");
+        if (lowered.includes("dairy")) userPreferences.push("dairy-free");
+        if (lowered.includes("vegan")) userPreferences.push("vegan");
+        
     setTimeout(() => {
         const response = generateResponse(query);
         conversationHistory.push({ role: 'bot', content: response });
@@ -54,6 +81,20 @@ document.addEventListener('DOMContentLoaded', () => {
         hideTypingIndicator();
     }, 800);
 }
+
+
+function recommendProducts(preferences) {
+    const recommended = products.filter(product =>
+        preferences.every(pref => product.tags.includes(pref))
+    );
+
+    if (recommended.length > 0) {
+        return "Based on your preferences, I recommend: " + recommended.map(p => p.name).join(", ");
+    } else {
+        return "I couldn't find a perfect match, but here are some popular options: Almond Milk, Oat Cookies.";
+    }
+}
+
 
     sendButton.addEventListener('click', () => {
         const query = userInput.value.trim();
@@ -69,4 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
             sendButton.click();
         }
     });
+
+    console.log('TensorFlow.js version:', tf.version.tfjs);
+
 });
