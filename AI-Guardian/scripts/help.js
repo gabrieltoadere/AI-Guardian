@@ -1,12 +1,48 @@
 let conversationHistory = [];
 
 const products = [
-    { name: "Almond Milk", tags: ["dairy-free", "vegan"] },
-    { name: "Oat Cookies", tags: ["gluten-free", "vegan"] },
-    { name: "Greek Yogurt", tags: ["dairy"] },
-    { name: "Rice Crackers", tags: ["gluten-free"] },
-    { name: "Tofu", tags: ["vegan", "dairy-free"] },
+    { name: "Alpro Soya Milk", tags: ["contains-nuts", "egg-free", "low-sugar", "nut-free"] },
+    { name: "Glenisk Organic Greek Yogurt", tags: ["gluten-free", "nut-free", "vegetarian"] },
+    { name: "BFree Brown Seeded Loaf", tags: ["vegan", "gluten-free", "nut-free"] },
+    { name: "O'Donnells Mature Cheese & Red Onion Crisps", tags: ["gluten-free", "egg-free"] },
+    { name: "Ballygowan Still Water", tags: ["vegetarian", "low-sugar", "gluten-free"] },
+    { name: "SuperValu Free From Chocolate Chip Cookies", tags: ["vegan", "organic", "egg-free", "nut-free"] },
+    { name: "Flahavan’s Organic Porridge Oats", tags: ["organic", "nut-free", "egg-free", "gluten-free"] },
+    { name: "Lindt 90% Cocoa Chocolate", tags: ["gluten-free", "contains-nuts", "low-sugar"] },
+    { name: "Tesco Plant Chef Vegan Burgers", tags: ["egg-free", "low-sugar", "vegan"] },
+    { name: "Avonmore Full Fat Milk", tags: ["egg-free", "contains-nuts", "dairy-free"] },
+    { name: "Tesco Free From Egg Pasta", tags: ["organic", "egg-free", "dairy-free", "vegetarian"] },
+    { name: "Kerrygold Butter", tags: ["dairy-free", "gluten-free", "nut-free", "low-sugar"] },
+    { name: "Carroll’s Roast Chicken Slices", tags: ["vegan", "egg-free"] },
+    { name: "Heinz Baked Beans", tags: ["egg-free", "low-sugar", "dairy-free"] },
+    { name: "Lindt Hazelnut Chocolate", tags: ["gluten-free", "nut-free", "low-sugar"] },
+    { name: "Oatly Barista Edition", tags: ["dairy-free", "low-sugar", "gluten-free"] },
+    { name: "SuperValu Organic Carrots", tags: ["vegetarian", "gluten-free", "low-sugar", "organic"] },
+    { name: "Glenisk Kids Yogurt Tubes", tags: ["dairy-free", "vegan", "organic"] },
+    { name: "Fulfil Protein Bar", tags: ["gluten-free", "contains-nuts", "egg-free"] },
+    { name: "McCambridge Gluten Free Brown Bread", tags: ["nut-free", "egg-free", "gluten-free", "vegetarian"] },
+    { name: "Aldi Vegan Sausages", tags: ["egg-free", "vegan", "low-sugar", "nut-free"] },
+    { name: "Denny Traditional Rashers", tags: ["vegetarian", "egg-free", "low-sugar"] },
+    { name: "Batchelors Mushy Peas", tags: ["organic", "nut-free", "egg-free", "gluten-free"] },
+    { name: "Pat The Baker Gluten Free White Bread", tags: ["gluten-free", "egg-free", "vegan"] },
+    { name: "Nature Valley Protein Bars", tags: ["low-sugar", "contains-nuts", "vegetarian"] },
+    { name: "Tesco Organic Free Range Eggs", tags: ["egg-free", "vegetarian", "organic", "gluten-free"] },
+    { name: "Clonakilty Black Pudding", tags: ["egg-free", "nut-free", "dairy-free", "low-sugar"] },
+    { name: "Green Isle Mixed Vegetables", tags: ["gluten-free", "vegan", "organic"] },
+    { name: "Yazoo Strawberry Milk", tags: ["low-sugar", "gluten-free", "egg-free"] },
+    { name: "Cadbury Dairy Milk", tags: ["vegetarian", "contains-nuts"] },
+    { name: "Milbona Greek Style Yogurt", tags: ["dairy-free", "low-sugar", "vegetarian", "egg-free"] },
+    { name: "Innocent Smoothie", tags: ["vegan", "gluten-free", "organic", "low-sugar"] },
+    { name: "Odlums Wholemeal Flour", tags: ["gluten-free", "organic", "low-sugar"] },
+    { name: "Baxters Tomato Soup", tags: ["egg-free", "low-sugar", "vegan", "nut-free"] },
+    { name: "Irish Cheddar Cheese", tags: ["vegetarian", "gluten-free", "nut-free", "egg-free"] },
+    { name: "Keogh's Atlantic Sea Salt Crisps", tags: ["gluten-free", "vegan", "egg-free"] },
+    { name: "Irish Apple Juice", tags: ["organic", "low-sugar", "vegan"] },
+    { name: "SuperValu Tuna Chunks in Brine", tags: ["nut-free", "egg-free", "low-sugar"] },
+    { name: "Goodfella's Gluten Free Pizza", tags: ["gluten-free", "dairy-free", "vegetarian"] },
+    { name: "Nairn's Oat Biscuits", tags: ["gluten-free", "low-sugar", "vegan"] }
 ];
+
 
 let userPreferences = [];
 
