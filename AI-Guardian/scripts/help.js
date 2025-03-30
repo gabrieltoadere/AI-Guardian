@@ -45,6 +45,8 @@ const products = [
 
 
 let userPreferences = [];
+userPreferences = JSON.parse(localStorage.getItem("userPreferences")) || [];
+
 
 
 
@@ -56,33 +58,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function generateResponse(query) {
         const doc = nlp(query.toLowerCase());
-        const nouns = doc.nouns().out('array');
-        const verbs = doc.verbs().out('array');
+        const lowerQuery = query.toLowerCase();
     
-        if (doc.has('gluten')) {
-            return "This product appears to contain gluten. Would you like alternatives?";
-        }
-        if (doc.has('dairy')) {
-            return "Got it! Showing you dairy-free options.";
-        }
-        if (doc.has('recommend')) {
-            return recommendProducts(userPreferences);
-        }
+        if (lowerQuery.includes("ingredient") || lowerQuery.includes("contains")) {
+            // Extract portion after "contains"
+            const match = query.toLowerCase().match(/contains(.*)/);
+            const ingredientText = match ? match[1].trim() : query;
         
-        if (nouns.includes('recipe')) {
-            return "Here are some recipe suggestions based on your recent purchases...";
-        }
-        if (verbs.includes('expire')) {
-            return "I can help track expiration dates. Scan an item to get started!";
+            return analyzeIngredients(ingredientText).then(result => {
+        
+                if (result && result.labels && result.scores) {
+                    const labels = result.labels;
+                    const scores = result.scores;
+                    const top = labels.filter((_, i) => scores[i] > 0.5);
+    
+                    const msg = top.length > 0
+                        ? `⚠️ Potential allergens detected: ${top.join(", ")}`
+                        : "✅ No common allergens detected.";
+    
+                    return msg;
+                } else {
+                    console.error("Unexpected Hugging Face response:", result);
+                    return "Sorry, I couldn't analyze the ingredients.";
+                }
+            });
         }
     
-        return "I'm still learning to better understand you. Could you rephrase that?";
-        if (query.includes("recommend")) {
-            return recommendProducts(userPreferences);
-        }
-
-        
+        // Synchronous responses
+        if (doc.has("recommend")) return Promise.resolve(recommendProducts(userPreferences));
+        if (doc.has("recipe")) return Promise.resolve("Here are some recipe suggestions based on your recent purchases...");
+        if (doc.has("expire")) return Promise.resolve("I can help track expiration dates. Scan an item to get started!");
+    
+        return Promise.resolve("I'm still learning to understand you better. Try asking me about ingredients or for product suggestions!");
     }
+    
+    
+    
     
 
     function addMessage(text, isUser = false) {
@@ -91,6 +102,17 @@ document.addEventListener('DOMContentLoaded', () => {
         messageDiv.innerHTML = `<p>${text}</p>`;
         chatMessages.appendChild(messageDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = "en-GB"; // English
+            speechSynthesis.speak(utterance);
+        }
+
+        if (!isUser) {
+            speak(text);
+        }
+        
     }
 
     function showTypingIndicator() {
@@ -106,16 +128,29 @@ document.addEventListener('DOMContentLoaded', () => {
         conversationHistory.push({ role: 'user', content: query });
         
         const lowered = query.toLowerCase();
-        if (lowered.includes("gluten")) userPreferences.push("gluten-free");
-        if (lowered.includes("dairy")) userPreferences.push("dairy-free");
-        if (lowered.includes("vegan")) userPreferences.push("vegan");
-        
-    setTimeout(() => {
-        const response = generateResponse(query);
-        conversationHistory.push({ role: 'bot', content: response });
-        addMessage(response);
-        hideTypingIndicator();
-    }, 800);
+
+if (lowered.includes("gluten") && !userPreferences.includes("gluten-free")) {
+    userPreferences.push("gluten-free");
+}
+if (lowered.includes("dairy") && !userPreferences.includes("dairy-free")) {
+    userPreferences.push("dairy-free");
+}
+if (lowered.includes("vegan") && !userPreferences.includes("vegan")) {
+    userPreferences.push("vegan");
+}
+if (lowered.includes("vegetarian") && !userPreferences.includes("vegetarian")) {
+    userPreferences.push("vegetarian");
+}
+
+localStorage.setItem("userPreferences", JSON.stringify(userPreferences));
+
+setTimeout(async () => {
+    const response = await generateResponse(query);
+    conversationHistory.push({ role: 'bot', content: response });
+    addMessage(response);
+    hideTypingIndicator();
+}, 800);
+
 }
 
 
@@ -146,6 +181,63 @@ function recommendProducts(preferences) {
             sendButton.click();
         }
     });
+
+    const micButton = document.getElementById("micButton");
+
+if ('webkitSpeechRecognition' in window) {
+    const recognition = new webkitSpeechRecognition();
+    recognition.continuous = false;
+    recognition.lang = "en-GB"; //  English
+    recognition.interimResults = false;
+
+    micButton.addEventListener("click", () => {
+        recognition.start();
+    });
+
+    recognition.onstart = () => {
+        micButton.classList.add("listening");
+        console.log("Voice recognition started...");
+    };
+
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        userInput.value = transcript;
+        sendButton.click(); // Auto-send the message
+    };
+
+    recognition.onerror = (event) => {
+        console.error("Speech recognition error", event);
+    };
+
+    recognition.onend = () => {
+        micButton.classList.remove("listening");
+        console.log("Voice recognition ended.");
+    };
+} else {
+    micButton.disabled = true;
+    alert("Sorry, your browser doesn't support speech recognition.");
+}
+
+async function analyzeIngredients(text) {
+    const response = await fetch("https://api-inference.huggingface.co/models/facebook/bart-large-mnli", {
+        method: "POST",
+        headers: {
+            "Authorization": "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",
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            inputs: text,
+            parameters: {
+                candidate_labels: ["gluten", "dairy", "nuts", "soy", "egg", "vegan", "vegetarian"]
+            }
+        })
+    });
+  
+    return await response.json();
+}
+
+
+
 
     console.log('TensorFlow.js version:', tf.version.tfjs);
 
