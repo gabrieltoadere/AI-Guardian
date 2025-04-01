@@ -103,15 +103,15 @@ document.addEventListener('DOMContentLoaded', () => {
         chatMessages.appendChild(messageDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
 
-        // function speak(text) {
-        //     const utterance = new SpeechSynthesisUtterance(text);
-        //     utterance.lang = "en-GB"; // English
-        //     speechSynthesis.speak(utterance);
-        // }
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = "en-GB"; // English
+            speechSynthesis.speak(utterance);
+        }
 
-        // if (!isUser) {
-        //     speak(text);
-        // }
+        if (!isUser) {
+            speak(text);
+        }
         
     }
 
