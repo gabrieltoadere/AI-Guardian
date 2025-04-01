@@ -1,4 +1,6 @@
-document.getElementById("profilePicInput").addEventListener("change", function(event) {
+// profile.js - Refactored to use database instead of localStorage
+
+document.getElementById("profilePicInput")?.addEventListener("change", function(event) {
     const file = event.target.files[0];
     if (file) {
         const reader = new FileReader();
@@ -9,42 +11,60 @@ document.getElementById("profilePicInput").addEventListener("change", function(e
     }
 });
 
-function saveProfile() {
-    const name = document.getElementById("userName").value;
+const userId = 1; // Use dynamic ID once login is integrated
+
+async function fetchAllergiesFromDB(userId) {
+    try {
+        const res = await fetch(`http://localhost:5000/api/preferences/${userId}`);
+        return await res.json();
+    } catch (err) {
+        console.error("Error fetching allergies:", err);
+        return [];
+    }
 }
 
-
-document.addEventListener('DOMContentLoaded', () => {
-    const chatbotIcon = document.getElementById('chatbotIcon');
-    
-    if (chatbotIcon) {
-        chatbotIcon.addEventListener('click', () => {
-            window.location.href = '/AI-GUARDIAN/AI GUARDIAN Project/help.html';
-        });
+async function fetchUserNameFromDB(userId) {
+    try {
+        const res = await fetch(`http://localhost:5000/api/user/${userId}`);
+        const data = await res.json();
+        return data.name;
+    } catch (err) {
+        console.error("Error fetching user name:", err);
+        return "";
     }
-});
+}
 
+async function saveUserNameToDB(userId, name) {
+    try {
+        await fetch("http://localhost:5000/api/user", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId, name })
+        });
+    } catch (err) {
+        console.error("Error saving user name:", err);
+    }
+}
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
     const userNameInput = document.getElementById("userName");
     const displayName = document.getElementById("displayName");
     const saveNameBtn = document.getElementById("saveName");
     const editNameBtn = document.getElementById("editName");
 
-    // Check if a name is saved in localStorage
-    if (localStorage.getItem("userName")) {
-        displayName.textContent = localStorage.getItem("userName");
-        displayName.style.display = "inline"; // Show saved name
-        userNameInput.style.display = "none"; // Hide input field
-        saveNameBtn.style.display = "none"; // Hide save button
-        editNameBtn.style.display = "inline"; // Show edit button
+    const savedName = await fetchUserNameFromDB(userId);
+    if (savedName) {
+        displayName.textContent = savedName;
+        displayName.style.display = "inline";
+        userNameInput.style.display = "none";
+        saveNameBtn.style.display = "none";
+        editNameBtn.style.display = "inline";
     }
 
-    // Function to save and display name
-    saveNameBtn.addEventListener("click", function () {
+    saveNameBtn?.addEventListener("click", async function () {
         const name = userNameInput.value.trim();
         if (name !== "") {
-            localStorage.setItem("userName", name); // Store in localStorage
+            await saveUserNameToDB(userId, name);
             displayName.textContent = name;
             displayName.style.display = "inline";
             userNameInput.style.display = "none";
@@ -53,25 +73,23 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // Function to edit name
-    editNameBtn.addEventListener("click", function () {
+    editNameBtn?.addEventListener("click", function () {
         userNameInput.style.display = "inline";
         saveNameBtn.style.display = "inline";
         editNameBtn.style.display = "none";
         displayName.style.display = "none";
-        userNameInput.value = displayName.textContent; // Set input to current name
+        userNameInput.value = displayName.textContent;
     });
 });
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
     const allergyList = document.getElementById("selectedAllergyList");
     const toggleButton = document.getElementById("toggleAllergyList");
-    const savedAllergies = JSON.parse(localStorage.getItem("selectedAllergies")) || [];
+    let savedAllergies = await fetchAllergiesFromDB(userId);
 
-    // Populate the allergy list
     function populateAllergyList() {
-        allergyList.innerHTML = ""; // Clear the list
-        
+        allergyList.innerHTML = "";
+
         if (savedAllergies.length) {
             savedAllergies.forEach((allergy) => {
                 const listItem = document.createElement("li");
@@ -85,33 +103,25 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Initialize the list
     populateAllergyList();
-    
-    // Set initial state (hidden)
     allergyList.classList.remove('show');
     toggleButton.innerHTML = "Show Allergies ▼";
 
-    // Toggle visibility on button click
-    toggleButton.addEventListener("click", function () {
+    toggleButton?.addEventListener("click", function () {
         allergyList.classList.toggle("show");
-        
-        // Update button text and arrow direction
+
         if (allergyList.classList.contains("show")) {
             toggleButton.innerHTML = "Hide Allergies ▲";
-            // Optional: scroll into view if list is long
             allergyList.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } else {
             toggleButton.innerHTML = "Show Allergies ▼";
         }
     });
 
-    // Update the list when coming back from allergy selection page
-    window.addEventListener('focus', function() {
-        const updatedAllergies = JSON.parse(localStorage.getItem("selectedAllergies")) || [];
+    window.addEventListener('focus', async function() {
+        const updatedAllergies = await fetchAllergiesFromDB(userId);
         if (JSON.stringify(updatedAllergies) !== JSON.stringify(savedAllergies)) {
-            savedAllergies.length = 0; // Clear the array
-            Array.prototype.push.apply(savedAllergies, updatedAllergies); // Update with new values
+            savedAllergies = updatedAllergies;
             populateAllergyList();
         }
     });

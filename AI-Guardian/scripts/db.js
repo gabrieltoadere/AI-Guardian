@@ -61,10 +61,90 @@ app.post('/allergens', (req, res) => {
     });
 });
 
+// Save user name
+app.post('/api/user', (req, res) => {
+    const { userId, name } = req.body;
+    db.query('UPDATE users SET name = ? WHERE id = ?', [name, userId], (err) => {
+      if (err) return res.status(500).send(err);
+      res.send({ message: "User name updated" });
+    });
+  });
+  
+  // Get user name
+  app.get('/api/user/:userId', (req, res) => {
+    db.query('SELECT name FROM users WHERE id = ?', [req.params.userId], (err, results) => {
+      if (err) return res.status(500).send(err);
+      const name = results[0]?.name || "";
+      res.send({ name });
+    });
+  });
+
+  // Save user allergen preferences
+app.post('/api/preferences', (req, res) => {
+    const { userId, allergens } = req.body;
+    const allergensJSON = JSON.stringify(allergens);
+
+    db.query('UPDATE users SET allergens = ? WHERE id = ?', [allergensJSON, userId], (err) => {
+        if (err) {
+            console.error('Error saving preferences:', err);
+            return res.status(500).json({ error: 'Failed to save preferences' });
+        }
+        res.json({ message: 'Preferences saved' });
+    });
+});
+
+// Get user allergen preferences
+app.get('/api/preferences/:userId', (req, res) => {
+    const { userId } = req.params;
+
+    db.query('SELECT allergens FROM users WHERE id = ?', [userId], (err, results) => {
+        if (err) {
+            console.error('Error retrieving preferences:', err);
+            return res.status(500).json({ error: 'Failed to load preferences' });
+        }
+
+        const prefs = results[0]?.allergens ? JSON.parse(results[0].allergens) : [];
+        res.json(prefs);
+    });
+});
+
+// Save scan history
+app.post('/api/scan-history', (req, res) => {
+    const { userId, product } = req.body;
+
+    const query = `
+        INSERT INTO scan_history (user_id, product_name, ingredients, scanned_at)
+        VALUES (?, ?, ?, NOW())
+    `;
+    db.query(query, [userId, product.name, JSON.stringify(product.ingredients)], (err) => {
+        if (err) {
+            console.error('Error saving scan history:', err);
+            return res.status(500).json({ error: 'Failed to save scan history' });
+        }
+        res.json({ message: 'Scan saved' });
+    });
+});
+
+// Get scan history
+app.get('/api/scan-history/:userId', (req, res) => {
+    const { userId } = req.params;
+
+    const query = `
+        SELECT product_name, ingredients, scanned_at
+        FROM scan_history
+        WHERE user_id = ?
+        ORDER BY scanned_at DESC
+    `;
+    db.query(query, [userId], (err, results) => {
+        if (err) {
+            console.error('Error fetching scan history:', err);
+            return res.status(500).json({ error: 'Failed to fetch history' });
+        }
+        res.json(results);
+    });
+});
 
 app.use(express.static(path.join(__dirname,'scripts')));
-
-
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

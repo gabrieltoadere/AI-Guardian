@@ -61,154 +61,166 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
-    <script>
-        let lastDetectedCode = null;
-        let lastDetectionTime = 0;
-        let isCameraInitialized = false;
-        let foodName = null;
+<script>
+    const userId = 1;
+    let userAllergens = [];
 
-        function startScanning() {
-            document.getElementById('camera').classList.remove('hidden');
-            document.getElementById('manualInput').classList.add('hidden');
-
-            if (!isCameraInitialized) {
-                initializeScanner();
-                isCameraInitialized = true;
-            }
+    async function loadUserAllergens() {
+        try {
+            const res = await fetch(`http://localhost:5000/api/preferences/${userId}`);
+            userAllergens = await res.json();
+        } catch (err) {
+            console.error("Failed to load user allergens:", err);
+            userAllergens = [];
         }
+    }
 
-        function showManualInput() {
+    let lastDetectedCode = null;
+    let lastDetectionTime = 0;
+    let isCameraInitialized = false;
+    let foodName = null;
+
+    async function startScanning() {
+        document.getElementById('camera').classList.remove('hidden');
+        document.getElementById('manualInput').classList.add('hidden');
+
+        if (!isCameraInitialized) {
+            initializeScanner();
+            isCameraInitialized = true;
+        }
+    }
+
+    function showManualInput() {
+        document.getElementById('camera').classList.add('hidden');
+        document.getElementById('manualInput').classList.remove('hidden');
+    }
+
+    function initializeScanner() {
+        Quagga.init({
+            inputStream: {
+                target: "#camera",
+                type: "LiveStream",
+                constraints: {
+                    width: 640,
+                    height: 480,
+                    facingMode: "environment",
+                    aspectRatio: 1.5
+                }
+            },
+            decoder: {
+                readers: [
+                    'code_128_reader', 'ean_reader', 'ean_8_reader',
+                    'upc_reader', 'upc_e_reader', 'code_39_reader',
+                    'code_39_vin_reader', 'codabar_reader',
+                    'i2of5_reader', '2of5_reader', 'code_93_reader'
+                ]
+            },
+            locator: { patchSize: "medium", halfSample: true },
+            locate: true,
+            numOfWorkers: 4
+        }, function(err) {
+            if (err) return console.error("Initialization failed:", err);
+            Quagga.start();
+        });
+
+        Quagga.onDetected(result => {
+            const code = result.codeResult.code;
+            const now = Date.now();
+
+            if (code === lastDetectedCode && (now - lastDetectionTime) < 5000) return;
+
+            document.getElementById('barcode').value = code;
+            fetchProductInfo();
+
+            lastDetectedCode = code;
+            lastDetectionTime = now;
+        });
+    }
+
+    async function fetchProductInfo() {
+        await loadUserAllergens();
+        const barcode = document.getElementById('barcode').value;
+        if (!barcode) return alert('Please enter a barcode.');
+
+        const url = `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`;
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            if (data.status !== 1) throw new Error('Product not found');
+
+            const p = data.product;
+            const productName = p.product_name || p.generic_name_en || p.product_name_en || p.product_name_it || p.generic_name || p.abbreviated_product_name || p.brands || 'Unknown Product';
+            foodName = productName;
+
+            const ingredientsText = p.ingredients_text_en || p.ingredients_text || '';
+            const openFoodAllergens = (p.allergens || '').split(',').map(a => a.trim().replace(/^[a-z]{2}:/, '').toLowerCase()).filter(Boolean);
+            const nutrientText = Object.entries(p.nutrient_levels || {}).map(([k, v]) => `${k}: ${v}`).join(", ");
+
+            document.getElementById('productName').textContent = productName;
+            document.getElementById('ingredients').textContent = ingredientsText;
+            document.getElementById('nutrientLevels').textContent = nutrientText || "No data";
+            document.getElementById('productImage').src = p.image_front_small_url || "https://cdn-icons-png.flaticon.com/512/1178/1178479.png";
+            document.getElementById('productImage').classList.remove('hidden');
             document.getElementById('camera').classList.add('hidden');
-            document.getElementById('manualInput').classList.remove('hidden');
-        }
 
-        function initializeScanner() {
-            Quagga.init({
-                inputStream: {
-                    target: "#camera",
-                    type: "LiveStream",
-                    constraints: {
-                        width: 640,
-                        height: 480,
-                        facingMode: "environment",
-                        aspectRatio: 1.5
-                    }
-                },
-                decoder: {
-                    readers: [
-                        'code_128_reader', 'ean_reader', 'ean_8_reader',
-                        'upc_reader', 'upc_e_reader', 'code_39_reader',
-                        'code_39_vin_reader', 'codabar_reader',
-                        'i2of5_reader', '2of5_reader', 'code_93_reader'
-                    ]
-                },
-                locator: { patchSize: "medium", halfSample: true },
-                locate: true,
-                numOfWorkers: 4
-            }, function(err) {
-                if (err) return console.error("Initialization failed:", err);
-                Quagga.start();
+            displayAllergenWarning(openFoodAllergens);
+            fetchAlternativeProducts(userAllergens);
+        } catch (err) {
+            alert('Failed to fetch product information.');
+            console.error(err);
+        }
+    }
+
+    function displayAllergenWarning(allergens) {
+        const warningBox = document.getElementById("allergen-warning");
+
+        const filtered = allergens.filter(a => userAllergens.includes(a.toLowerCase()));
+        warningBox.innerHTML = filtered.length > 0
+            ? `⚠️ <span style="color:red;">Warning: Contains ${filtered.join(", ")}</span>`
+            : `✅ <span style="color:green;">No allergens detected based on your preferences.</span>`;
+    }
+
+    async function fetchAlternativeProducts(userAllergens) {
+        const barcode = document.getElementById('barcode').value.trim();
+        if (!barcode) return;
+
+        const productUrl = `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`;
+        try {
+            const res = await fetch(productUrl);
+            const data = await res.json();
+            if (data.status !== 1) return;
+
+            const tags = data.product.categories_tags || [];
+            const matched = tags.find(tag => ["chocolates", "candies", "snacks", "beverages", "sweets"].includes(tag.replace("en:", ""))) || "chocolates";
+
+            const query = userAllergens.map(a => `-ingredients_text:${encodeURIComponent(a)}`).join("&");
+            const url = `https://world.openfoodfacts.org/cgi/search.pl?action=process&tagtype_0=categories&tag_contains_0=contains&tag_0=${matched.replace("en:", "")}&sort_by=popularity&json=1&fields=product_name,ingredients_text,image_url&${query}`;
+
+            const searchRes = await fetch(url);
+            const searchData = await searchRes.json();
+
+            const container = document.getElementById('alternativeProducts');
+            container.innerHTML = '';
+            const safe = searchData.products.filter(p => p.ingredients_text && !userAllergens.some(a => p.ingredients_text.toLowerCase().includes(a.toLowerCase())));
+
+            if (safe.length === 0) return container.innerHTML = '<p>No safe alternatives found.</p>';
+
+            safe.slice(0, 3).forEach(p => {
+                const div = document.createElement('div');
+                div.style.marginBottom = '15px';
+                div.style.border = '1px solid #ddd';
+                div.style.padding = '10px';
+                div.style.borderRadius = '8px';
+                div.innerHTML = `<strong>${p.product_name || 'Unnamed Product'}</strong><br>`;
+                if (p.image_url) div.innerHTML += `<img src="${p.image_url}" width="100" alt="Product Image">`;
+                container.appendChild(div);
             });
-
-            Quagga.onDetected(result => {
-                const code = result.codeResult.code;
-                const now = Date.now();
-
-                if (code === lastDetectedCode && (now - lastDetectionTime) < 5000) return;
-
-                document.getElementById('barcode').value = code;
-                fetchProductInfo();
-
-                lastDetectedCode = code;
-                lastDetectionTime = now;
-            });
+        } catch (err) {
+            console.error("Error fetching alternatives:", err);
         }
+    }
+</script>
 
-        async function fetchProductInfo() {
-            const barcode = document.getElementById('barcode').value;
-            if (!barcode) return alert('Please enter a barcode.');
-
-            const url = `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`;
-            try {
-                const res = await fetch(url);
-                const data = await res.json();
-                if (data.status !== 1) throw new Error('Product not found');
-
-                const p = data.product;
-                const productName = p.product_name || p.generic_name_en || p.product_name_en || p.product_name_it || p.generic_name || p.abbreviated_product_name || p.brands || 'Unknown Product';
-                foodName = productName;
-
-                const ingredientsText = p.ingredients_text_en || p.ingredients_text || '';
-                const openFoodAllergens = (p.allergens || '').split(',').map(a => a.trim().replace(/^[a-z]{2}:/, '').toLowerCase()).filter(Boolean);
-                const nutrientText = Object.entries(p.nutrient_levels || {}).map(([k, v]) => `${k}: ${v}`).join(", ");
-
-                const userAllergens = JSON.parse(localStorage.getItem('userAllergens')) || [];
-
-                document.getElementById('productName').textContent = productName;
-                document.getElementById('ingredients').textContent = ingredientsText;
-                document.getElementById('nutrientLevels').textContent = nutrientText || "No data";
-                document.getElementById('productImage').src = p.image_front_small_url || "https://cdn-icons-png.flaticon.com/512/1178/1178479.png";
-                document.getElementById('productImage').classList.remove('hidden');
-                document.getElementById('camera').classList.add('hidden');
-
-                displayAllergenWarning(openFoodAllergens);
-                fetchAlternativeProducts(userAllergens);
-            } catch (err) {
-                alert('Failed to fetch product information.');
-                console.error(err);
-            }
-        }
-
-        function displayAllergenWarning(allergens) {
-            const warningBox = document.getElementById("allergen-warning");
-            const userAllergens = JSON.parse(localStorage.getItem('userAllergens')) || [];
-
-            const filtered = allergens.filter(a => userAllergens.includes(a.toLowerCase()));
-            warningBox.innerHTML = filtered.length > 0
-                ? `⚠️ <span style="color:red;">Warning: Contains ${filtered.join(", ")}</span>`
-                : `✅ <span style="color:green;">No allergens detected based on your preferences.</span>`;
-        }
-
-        async function fetchAlternativeProducts(userAllergens) {
-            const barcode = document.getElementById('barcode').value.trim();
-            if (!barcode) return;
-
-            const productUrl = `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`;
-            try {
-                const res = await fetch(productUrl);
-                const data = await res.json();
-                if (data.status !== 1) return;
-
-                const tags = data.product.categories_tags || [];
-                const matched = tags.find(tag => ["chocolates", "candies", "snacks", "beverages", "sweets"].includes(tag.replace("en:", ""))) || "chocolates";
-
-                const query = userAllergens.map(a => `-ingredients_text:${encodeURIComponent(a)}`).join("&");
-                const url = `https://world.openfoodfacts.org/cgi/search.pl?action=process&tagtype_0=categories&tag_contains_0=contains&tag_0=${matched.replace("en:", "")}&sort_by=popularity&json=1&fields=product_name,ingredients_text,image_url&${query}`;
-
-                const searchRes = await fetch(url);
-                const searchData = await searchRes.json();
-
-                const container = document.getElementById('alternativeProducts');
-                container.innerHTML = '';
-                const safe = searchData.products.filter(p => p.ingredients_text && !userAllergens.some(a => p.ingredients_text.toLowerCase().includes(a.toLowerCase())));
-
-                if (safe.length === 0) return container.innerHTML = '<p>No safe alternatives found.</p>';
-
-                safe.slice(0, 3).forEach(p => {
-                    const div = document.createElement('div');
-                    div.style.marginBottom = '15px';
-                    div.style.border = '1px solid #ddd';
-                    div.style.padding = '10px';
-                    div.style.borderRadius = '8px';
-                    div.innerHTML = `<strong>${p.product_name || 'Unnamed Product'}</strong><br>`;
-                    if (p.image_url) div.innerHTML += `<img src="${p.image_url}" width="100" alt="Product Image">`;
-                    container.appendChild(div);
-                });
-            } catch (err) {
-                console.error("Error fetching alternatives:", err);
-            }
-        }
-    </script>
     <div class="navbar">
         <ul>
             <li><a href="main.html"><i class="fas fa-home"></i> Home</a></li>
