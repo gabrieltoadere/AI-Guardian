@@ -1,10 +1,11 @@
 // help.js - Enhanced Chat Logic with OpenAI API
 
-const chatBox = document.getElementById("chat-box");
-const userInput = document.getElementById("user-input");
-const sendBtn = document.getElementById("send-btn");
+const chatBox = document.getElementById("chatMessages");
+const userInput = document.getElementById("userInput");
+const sendBtn = document.getElementById("sendButton");
+const typingIndicator = document.getElementById("typingIndicator");
 
-const OPENAI_API_KEY = "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"; // <-- Replace with your key
+const OPENAI_API_KEY = "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";
 const API_URL = "https://api.openai.com/v1/chat/completions";
 
 sendBtn.addEventListener("click", () => {
@@ -17,29 +18,23 @@ sendBtn.addEventListener("click", () => {
 });
 
 function addMessage(sender, text) {
-  const message = document.createElement("div");
-  message.classList.add("message", sender);
-  message.textContent = text;
-  chatBox.appendChild(message);
+  const msg = document.createElement("div");
+  msg.className = `${sender}-message`;
+  msg.innerHTML = `<p>${text}</p>`;
+  chatBox.appendChild(msg);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-function addTypingIndicator() {
-  const typing = document.createElement("div");
-  typing.classList.add("message", "bot");
-  typing.id = "typing-indicator";
-  typing.textContent = "Typing...";
-  chatBox.appendChild(typing);
-  chatBox.scrollTop = chatBox.scrollHeight;
+function showTyping() {
+  typingIndicator.style.display = "flex";
 }
 
-function removeTypingIndicator() {
-  const typing = document.getElementById("typing-indicator");
-  if (typing) typing.remove();
+function hideTyping() {
+  typingIndicator.style.display = "none";
 }
 
 async function getBotResponse(userText) {
-  addTypingIndicator();
+  showTyping();
 
   const payload = {
     model: "gpt-3.5-turbo",
@@ -60,7 +55,7 @@ async function getBotResponse(userText) {
     });
 
     const data = await res.json();
-    removeTypingIndicator();
+    hideTyping();
 
     if (data.choices && data.choices.length > 0) {
       const reply = data.choices[0].message.content.trim();
@@ -69,7 +64,7 @@ async function getBotResponse(userText) {
       addMessage("bot", "Sorry, I couldn't understand that. Try again.");
     }
   } catch (error) {
-    removeTypingIndicator();
+    hideTyping();
     addMessage("bot", "Error reaching AI service.");
     console.error("OpenAI Error:", error);
   }
