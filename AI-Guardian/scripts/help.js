@@ -1,5 +1,7 @@
 // help.js - Enhanced Chat Logic with OpenAI API
 
+let chatHistory = [];
+
 const chatBox = document.getElementById("chatMessages");
 const userInput = document.getElementById("userInput");
 const sendBtn = document.getElementById("sendButton");
@@ -7,6 +9,44 @@ const typingIndicator = document.getElementById("typingIndicator");
 
 const OPENAI_API_KEY = "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";
 const API_URL = "https://api.openai.com/v1/chat/completions";
+
+
+
+async function autoSuggestFromScan(userId) {
+    try {
+      const res = await fetch(`http://localhost:5501/api/scan-history/${userId}/latest`);
+      const data = await res.json();
+  
+      if (!data || !data.product_name) return;
+  
+      const suggestions = [
+        `Does "${data.product_name}" contain any of my allergens?`,
+        `Is "${data.product_name}" safe for someone allergic to ${data.ingredients.slice(0, 2).join(", ")}?`,
+        `What are some alternatives to "${data.product_name}"?`
+      ];
+  
+      const container = document.createElement("div");
+      container.classList.add("bot-message");
+      container.innerHTML = `<strong>Suggestions:</strong><br>` + suggestions.map(s => `<button class="suggestion-btn">${s}</button>`).join("<br>");
+      chatBox.appendChild(container);
+  
+      chatBox.scrollTop = chatBox.scrollHeight;
+  
+      document.querySelectorAll(".suggestion-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          userInput.value = btn.textContent;
+          sendBtn.click();
+        });
+      });
+    } catch (err) {
+      console.error("Auto-suggestion error:", err);
+    }
+  }
+
+  
+
+
+
 
 sendBtn.addEventListener("click", () => {
   const input = userInput.value.trim();
@@ -18,12 +58,16 @@ sendBtn.addEventListener("click", () => {
 });
 
 function addMessage(sender, text) {
-  const msg = document.createElement("div");
-  msg.className = `${sender}-message`;
-  msg.innerHTML = `<p>${text}</p>`;
-  chatBox.appendChild(msg);
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
+    const msg = document.createElement("div");
+    msg.className = `${sender}-message`;
+    msg.innerHTML = `<p>${text}</p>`;
+    chatBox.appendChild(msg);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  
+    // Store in history
+    chatHistory.push({ role: sender === "user" ? "user" : "assistant", content: text });
+  }
+  
 
 function showTyping() {
   typingIndicator.style.display = "flex";
@@ -63,13 +107,15 @@ async function getBotResponse(userText) {
   User's question: ${userText}
   `;
   
-    const payload = {
-      model: "gpt-3.5-turbo",
-      messages: [
-        { role: "system", content: "You help users with food safety and allergen analysis." },
-        { role: "user", content: prompt }
-      ]
-    };
+  const payload = {
+    model: "gpt-3.5-turbo",
+    messages: [
+      { role: "system", content: "You help users with food safety and allergen analysis." },
+      ...chatHistory,
+      { role: "user", content: prompt }
+    ]
+  };
+  
   
     try {
       const res = await fetch(API_URL, {
@@ -136,7 +182,43 @@ async function getBotResponse(userText) {
   document.getElementById("recommendButton").addEventListener("click", () => {
     recommendSafeProducts(1); // Replace with dynamic user ID later
   });
+
+  autoSuggestFromScan(1); // Replace with real user ID later
+
+
+  const micButton = document.getElementById("micButton");
+const recognition = window.SpeechRecognition || window.webkitSpeechRecognition
+  ? new (window.SpeechRecognition || window.webkitSpeechRecognition)()
+  : null;
+
+if (recognition) {
+  recognition.lang = "en-US";
+  recognition.continuous = false;
+
+  micButton.addEventListener("click", () => {
+    micButton.classList.add("listening");
+    recognition.start();
+  });
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    userInput.value = transcript;
+    micButton.classList.remove("listening");
+    sendBtn.click();
+  };
+
+  recognition.onerror = () => {
+    alert("Sorry, we couldn’t hear you. Try again.");
+    micButton.classList.remove("listening");
+  };
+} else {
+  micButton.disabled = true;
+  micButton.title = "Voice not supported in this browser";
+}
+
   
+
+
   
 
 
