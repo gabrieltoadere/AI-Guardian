@@ -1,183 +1,274 @@
+/* ================ BASE STYLES ================ */
+:root {
+  --primary-color: #2e7d32;
+  --primary-light: #81c784;
+  --primary-dark: #1b5e20;
+  --secondary-color: #388e3c;
+  --background-light: #e8f5e9;
+  --background-lighter: #f1f8e9;
+  --text-dark: #1b5e20;
+  --text-light: #ffffff;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
+  --transition-fast: all 0.2s ease;
+  --transition-normal: all 0.3s ease;
+  --border-radius-sm: 0.5rem;
+  --border-radius-md: 0.75rem;
+  --border-radius-lg: 1rem;
+}
+
 body {
-  margin:0;
-  padding: 0;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #f8f8f8;
-  font-family: Arial, sans-serif;
-}
-.edit-icon {
-  position: absolute;
-  top: 70px;  /* Adjust based on placement */
-  right: 90px;
-  background: white;
-  color: black;
-  padding: 5px;
-  border-radius: 50%;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-
-/* Allergy Dropdown */
-.allergy-dropdown {
-  margin-top: 0px;
-  text-align: center;
-}
-
-#toggleAllergyList {
-  background-color: white;
-  color: black;
-  border: 1px solid #ccc;
-  padding: 10px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  width: 100%;
-  transition: background-color 0.3s ease;
-}
-
-#toggleAllergyList:hover {
-  background-color: grey;
-  color: white;
-}
-
-/* Hide allergy list by default */
-.hidden {
-  display: none;
-}
-
-/* Style the allergy list */
-#selectedAllergyList {
-  list-style: none;
-  padding: 10px;
-  margin: 0;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background-color: #f9f9f9;
-   /* Hidden by default */
-  
-}
-
-#selectedAllergyList li {
-  font-size: 14px;
-  color: #555;
-  margin-bottom: 5px;
-}
-
-.hidden {
-  display: none;
-}
-
-.navbar-list ul {
-  list-style-type: none;
+  background-color: var(--background-light);
   margin: 0;
   padding: 0;
-  overflow: hidden;
-  background-color: #333;
-  position: fixed;
-  bottom: 0;
-  width: 100%;
+  min-height: 100vh;
+  font-family: 'Montserrat', sans-serif;
+  color: var(--text-dark);
+  padding-bottom: 80px; /* Space for navbar */
 }
 
-.navbar-list li {
-  float: left;
-}
-
-.navbar-list li a {
-  display: block;
-  color: white;
-  text-align: center;
-  padding: 20px 50px;
-  text-decoration: none;
-}
-
-li a:hover:not(.active) {
-  background-color: #111;
-}
-
-/* Profile  */
+/* ================ PROFILE CONTAINER ================ */
 .profile-container {
-  background: white;
-  padding: 50px;
-  border-radius: 15px;
-  box-shadow: 20px 20px 50px rgba(0, 0, 0, 0.1);
-  text-align: center;
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
   width: 90%;
-  max-width: 350px;
-  animation: fadeIn 1s ease-out;
-  height: 50vh;
+  max-width: 36rem;
+  margin: 2rem auto;
+  border-top: 6px solid var(--primary-light);
+  animation: fadeIn 0.6s ease-out;
 }
 
 @keyframes fadeIn {
-  from {
-      opacity: 0;
-  }
-  to {
-      opacity: 1;
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-
-.name-container{
-  margin-top: 10px;
-
-}
-/* Profile Picture Styling */
-.profile-pic-container {  
+/* ================ PROFILE PICTURE ================ */
+.profile-pic-container {
   display: inline-block;
-  cursor: pointer; 
-  
+  margin: 1rem 0;
+  position: relative;
+  cursor: pointer;
 }
-h4{
-    font-size: 16px;
-    font-weight: normal;
-    margin-top: 0px; 
-    margin-bottom: 5px;  
-    text-align: left;  
-}
+
 #profilePic {
   width: 120px;
   height: 120px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #aaa;
+  border: 3px solid var(--primary-light);
+  transition: var(--transition-normal);
 }
 
 #profilePic:hover {
-  opacity: 0.7;  
+  transform: scale(1.05);
+  box-shadow: var(--shadow-sm);
 }
+
 #profilePicInput {
   display: none;
-  
 }
 
+.edit-icon {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: white;
+  color: var(--primary-dark);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--primary-light);
+}
 
-/* Button */
-button {
+/* ================ NAME SECTION ================ */
+.name-container {
+  margin: 1.5rem 0;
+}
+
+#userName, #displayName {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0.5rem 0;
+  text-align: center;
+}
+
+#userName {
   width: 100%;
-    padding: 10px;
-    background-color: white;
-    color: black;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    gap: 10px;
-    font-size: 16px;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+  padding: 0.75rem;
+  border: 2px solid var(--primary-light);
+  border-radius: var(--border-radius-sm);
+  font-size: 1rem;
 }
 
-button:hover {
-  background-color: grey;
-  transform: scale(1.05);
-  opacity: 0.8;
-  
+.name-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
-#displayName {
-  font-size: 22px; /* Adjust the size as needed */
+#saveName, #editName {
+  flex: 1;
+  padding: 0.75rem;
+  border-radius: var(--border-radius-sm);
+  font-weight: 600;
+  transition: var(--transition-normal);
+}
+
+#saveName {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  border: none;
+}
+
+#saveName:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+#editName {
+  background: white;
+  color: var(--primary-dark);
+  border: 2px solid var(--primary-color);
+}
+
+#editName:hover {
+  background: var(--background-lighter);
+}
+
+/* ================ ALLERGY SECTION ================ */
+.allergy-container {
+  margin: 2rem 0;
+}
+
+.allergy-heading {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--primary-dark);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.allergy-dropdown {
+  margin: 1rem 0;
+}
+
+#toggleAllergyList {
+  width: 100%;
+  padding: 0.75rem;
+  background: white;
+  color: var(--text-dark);
+  border: 2px solid var(--primary-light);
+  border-radius: var(--border-radius-sm);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: var(--transition-normal);
+}
+
+#toggleAllergyList:hover {
+  background: var(--background-lighter);
+}
+
+#selectedAllergyList {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  border-radius: var(--border-radius-sm);
+}
+
+#selectedAllergyList.show {
+  max-height: 500px; /* Adjust based on content */
+  padding: 1rem;
+  border: 1px solid var(--primary-light);
+  background: white;
+  margin-top: 0.5rem;
+}
+
+#selectedAllergyList li {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--background-lighter);
+  font-size: 0.9rem;
+}
+
+#selectedAllergyList li:last-child {
+  border-bottom: none;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+#addAllergy, #monthlyOverview {
+  flex: 1;
+  padding: 0.75rem;
+  border-radius: var(--border-radius-sm);
+  font-weight: 600;
+  transition: var(--transition-normal);
+}
+
+#addAllergy {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  border: none;
+}
+
+#addAllergy:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+#monthlyOverview {
+  background: white;
+  color: var(--primary-dark);
+  border: 2px solid var(--primary-color);
+}
+
+#monthlyOverview:hover {
+  background: var(--background-lighter);
+}
+
+
+/* ================ MOBILE OPTIMIZATIONS ================ */
+@media screen and (max-width: 480px) {
+  .profile-container {
+    padding: 1.5rem;
+    margin: 1rem auto;
+  }
   
-  margin-top: 10px;
+  .name-buttons, .action-buttons {
+    flex-direction: column;
+  }
+  
+  .navbar ul li a {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .navbar ul li a i {
+    font-size: 1.2rem;
+  }
+  
+  .chatbot-icon {
+    bottom: 7rem;
+    right: 1.5rem;
+    width: 3rem;
+    height: 3rem;
+  }
 }

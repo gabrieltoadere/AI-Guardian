@@ -1,108 +1,167 @@
-h1 {
+/* ================ BASE STYLES ================ */
+:root {
+    --primary-color: #2e7d32;
+    --primary-light: #81c784;
+    --primary-dark: #1b5e20;
+    --secondary-color: #388e3c;
+    --background-light: #e8f5e9;
+    --background-lighter: #f1f8e9;
+    --text-dark: #1b5e20;
+    --text-light: #ffffff;
+    --danger: #e53935;
+    --success: #43a047;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --border-radius-sm: 0.5rem;
+    --border-radius-md: 0.75rem;
+}
+
+body {
+    background-color: var(--background-light);
+    margin: 0;
+    padding: 0 0 80px; /* Space for navbar */
+    min-height: 100vh;
+    font-family: 'Montserrat', sans-serif;
+    color: var(--text-dark);
+}
+
+.main-container {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    width: 90%;
+    max-width: 800px;
+    margin: 1rem auto;
+}
+
+.main-container h1 {
+    color: var(--primary-dark);
+    text-align: center;
+    margin-bottom: 1.5rem;
     display: flex;
     align-items: center;
-    font-size: 24px;
-    gap: 10px;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
-h1 i {
-    font-size: 28px;
-    color: #ff6600; /* Change color as needed */
-}
-
-
-.dropdown-container {
+/* ================ HISTORY LIST ================ */
+.history-list {
     display: flex;
     flex-direction: column;
-    gap: 10px; /* Adds space between dropdowns */
+    gap: 0.75rem;
 }
 
-.dropdown {
-    display: inline-block;
-    cursor: pointer;
-    font-size: 18px;
-    user-select: none;
-}
-/* Style for the divider */
-.divider {
-    border: 0;
-    border-top: 1px solid #ccc; /* The color and thickness of the line */
-    margin: 10px 0;  /* Adds some spacing above and below the line */
-}
-
-
-
-.caret {
-    transition: transform 0.3s ease;
-}
-.options {
-    display: none;
-    margin-top: 5px;
-}
-.show {
-    display: block;
-}
-.rotate {
-    transform: rotate(90deg);
-}
-
-
-/* Style for the Scan Button */
-.scan-button-container {
+.history-item {
     display: flex;
-    justify-content: flex-end;  /* Aligns the button to the right */
-    padding: 10px 20px;  /* Adds some space around the button */
-    position: fixed;  /* Fixes it in place */
-    top: 780px;  /* Adjusts the vertical position */
-    right: 0px;  /* Positions it to the right */
-    z-index: 100;  /* Ensures it's above other elements */
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: white;
+    border-radius: var(--border-radius-sm);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
 }
 
-.scan-button {
-    background-color: #007bff;  /* Blue background */
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    text-decoration: none;  /* Removes the default underline for <a> tag */
-    display: inline-block;
-    transition: background-color 0.3s ease;  /* Adds a hover effect */
+.history-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.scan-button:hover {
-    background-color: #0056b3;  /* Darker blue when hovering */
+.item-info {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
 }
 
+.item-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
 
+.item-date {
+    font-size: 0.85rem;
+    color: #666;
+}
 
-.bottom-nav {
+.item-status {
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius-sm);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.item-status.safe {
+    background-color: rgba(67, 160, 71, 0.1);
+    color: var(--success);
+}
+
+.item-status.unsafe {
+    background-color: rgba(229, 57, 53, 0.1);
+    color: var(--danger);
+}
+
+/* ================ NAVBAR ================ */
+.navbar {
     position: fixed;
     bottom: 0;
-    left: 0;
     width: 100%;
-    background-color: #fff;
+    background-color: white;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 100;
+}
+
+.navbar ul {
     display: flex;
-    justify-content: space-around;
-    padding: 10px 0;
-    border-top: 1px solid #ccc;
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
-.nav-item {
-    text-align: center;
+.navbar li {
     flex: 1;
-    color: #333;
-    text-decoration: none;
-    font-size: 14px;
+    text-align: center;
 }
 
-.nav-item i {
+.navbar a {
     display: block;
-    font-size: 20px;
-    margin-bottom: 5px;
+    padding: 0.75rem 0;
+    text-decoration: none;
+    color: var(--text-dark);
+    font-size: 0.85rem;
 }
 
-.nav-item:hover {
-    color: #007bff;
+.navbar a.active {
+    color: var(--primary-color);
 }
 
+.navbar a:hover {
+    color: var(--primary-color);
+}
+
+.navbar i {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 1.25rem;
+}
+
+/* ================ MOBILE OPTIMIZATIONS ================ */
+@media screen and (max-width: 480px) {
+    .main-container {
+        padding: 1rem;
+        width: 95%;
+    }
+    
+    .history-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .item-status {
+        align-self: flex-end;
+    }
+}

@@ -3,173 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>History</title>
-    <link rel="stylesheet" href="/AI-Guardian/css/styles.css">
+    <title>Purchase History</title>
     <link rel="stylesheet" href="/AI-Guardian/css/common.css">
+    <link rel="stylesheet" href="/AI-Guardian/css/history.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
 </head>
-
 <body>
-    <!-- History Container -->
-    <div class="history-container">
-        <h1><i class="fa-solid fa-basket-shopping"></i> History</h1>
+    <div class="main-container">
+        <h1><i class="fas fa-history"></i> Purchase History</h1>
         
-        <!-- Scan Button -->
-        <div class="scan-button-container">
-            <a href="scanning.html" class="scan-button">Scan Items</a>
-        </div>
-        <!-- Scan Button -->
-        <div class="scan-button-container">
-            <a href="receipt-capture.html" class="scan-button">Scan Receipt</a>
-        </div>
-
-    <!-- Dropdowns -->
-    <div class="dropdown-container">
-        <div class="dropdown" onclick="toggleOptions('recentOptions', 'recentCaret')">
-            <span class="caret" id="recentCaret">▸</span> Recent
-        </div>
-        <div class="options" id="recentOptions">
-            <ul>
-                <li>Recent 1</li>
-                <li>Recent 2</li>
-                <li>Recent 3</li>
-            </ul>
-        </div>
-
-         <!-- Divider -->
-         <hr class="divider">
-
-         <div class="dropdown" onclick="toggleOptions('previousOptions', 'previousCaret')">
-             <span class="caret" id="previousCaret">▸</span> Previous
-         </div>
-         <div class="options" id="previousOptions">
-             <ul>
-                 <li>Previous 1</li>
-                 <li>Previous 2</li>
-                 <li>Previous 3</li>
-             </ul>
-         </div>
-     </div>
-    
-
-        <!-- middle Navigation Bar -->
-        <div class="bottom-nav">
-            <a href="recommendations.html" class="nav-item"><i class="fa-solid fa-star"></i><span>Recommendations</span></a>
-            <a href="search.html" class="nav-item"><i class="fa-solid fa-search"></i><span>Search</span></a>
-            <a href="overview.html" class="nav-item"><i class="fa-solid fa-list"></i><span>Overview</span></a>
+        <!-- History Items List -->
+        <div class="history-list">
+            <!-- Example Item 1 (Safe) -->
+            <div class="history-item" onclick="viewProductDetails('12345')">
+                <div class="item-info">
+                    <span class="item-name">Organic Almond Milk</span>
+                    <span class="item-date">May 15, 2023</span>
+                </div>
+                <div class="item-status safe">
+                    <i class="fas fa-check-circle"></i> Safe
+                </div>
+            </div>
+            
+            <!-- Example Item 2 (Unsafe) -->
+            <div class="history-item" onclick="viewProductDetails('67890')">
+                <div class="item-info">
+                    <span class="item-name">Peanut Butter Cookies</span>
+                    <span class="item-date">May 10, 2023</span>
+                </div>
+                <div class="item-status unsafe">
+                    <i class="fas fa-exclamation-triangle"></i> Unsafe
+                </div>
+            </div>
+            
+            <!-- Example Item 3 (Safe) -->
+            <div class="history-item" onclick="viewProductDetails('54321')">
+                <div class="item-info">
+                    <span class="item-name">Gluten-Free Pasta</span>
+                    <span class="item-date">May 5, 2023</span>
+                </div>
+                <div class="item-status safe">
+                    <i class="fas fa-check-circle"></i> Safe
+                </div>
+            </div>
         </div>
     </div>
 
-  
-
+    <!-- Bottom Navigation -->
     <div class="navbar">
         <ul>
             <li><a href="main.html"><i class="fas fa-home"></i> Home</a></li>
             <li><a href="scanning.html"><i class="fas fa-barcode"></i> Scan</a></li>
-            <li><a href="history.html"><i class="fas fa-history"></i> History</a></li>
+            <li><a href="history.html" class="active"><i class="fas fa-history"></i> History</a></li>
             <li><a href="profile.html"><i class="fas fa-user"></i> Profile</a></li>
         </ul>
     </div>
 
-    <!-- JavaScript -->
-    <script src="/AI-Guardian/scripts/history.js"></script>
-
-    <!-- Chatbot Icon -->
-<div class="chatbot-icon" id="chatbotIcon">
-    <i class="fa-solid fa-robot"></i>
-</div>
+    <script>
+        function viewProductDetails(productId) {
+            // In a real app, this would redirect to a details page with the product ID
+            // For this example, we'll show an alert
+            window.location.href = `product-details.html?id=${productId}`;
+        }
+    </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- recommendation -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recommendations</title>
-    <link rel="stylesheet" href="/AI-Guardian/css/styles.css">
-    <link rel="stylesheet" href="/AI-Guardian/css/common.css">
-    <script defer src="/AI-Guardian/scripts/script.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-</head>
-<body>
-</body>
-</html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- search -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search</title>
-    <link rel="stylesheet" href="/AI-Guardian/css/styles.css">
-    <link rel="stylesheet" href="/AI-Guardian/css/common.css">
-    <script defer src="/AI-Guardian/scripts/script.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-</head>
-<body>
-    <h1><i class="fa-solid fa-basket-shopping"></i> Grocery Guardian</h1>
-    
-</body>
-</html>
-
-
-
-
-
-
-
-<!-- overview not completed check Faridat's one -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Overview</title>
-    <link rel="stylesheet" href="/AI-Guardian/css/styles.css">
-    <link rel="stylesheet" href="/AI-Guardian/css/common.css">
-    <script defer src="/AI-Guardian/scripts/script.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-</head>
-<body>
-    <h1><i class="fa-solid fa-basket-shopping"></i> Grocery Guardian</h1>
-    <p>No Overview yet</p>
-    <!-- Scan Button (positioned below the title and near the bottom nav) -->
-    <div class="scan-button-container">
-        <a href="scan.html" class="scan-button">Scan</a>
-    </div>
-
-
-
-
-</body>
-</html>
-
-

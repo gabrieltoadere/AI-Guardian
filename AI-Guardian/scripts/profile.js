@@ -68,36 +68,51 @@ document.addEventListener("DOMContentLoaded", function () {
     const toggleButton = document.getElementById("toggleAllergyList");
     const savedAllergies = JSON.parse(localStorage.getItem("selectedAllergies")) || [];
 
-    console.log("Retrieved allergies from localStorage:", savedAllergies); // Debugging
-
     // Populate the allergy list
     function populateAllergyList() {
-        console.log("Populating allergy list...");
         allergyList.innerHTML = ""; // Clear the list
+        
         if (savedAllergies.length) {
             savedAllergies.forEach((allergy) => {
                 const listItem = document.createElement("li");
                 listItem.textContent = allergy;
                 allergyList.appendChild(listItem);
-                console.log("Added allergy to list:", allergy); // Debugging
             });
         } else {
             const noAllergiesItem = document.createElement("li");
             noAllergiesItem.textContent = "No allergies selected";
             allergyList.appendChild(noAllergiesItem);
-            console.log("No allergies selected."); // Debugging
         }
     }
 
-    // Populate the list on page load
+    // Initialize the list
     populateAllergyList();
+    
+    // Set initial state (hidden)
+    allergyList.classList.remove('show');
+    toggleButton.innerHTML = "Show Allergies ▼";
 
     // Toggle visibility on button click
     toggleButton.addEventListener("click", function () {
-        allergyList.classList.toggle("hidden");
-        console.log("Toggled allergy list visibility. Hidden:", allergyList.classList.contains("hidden")); // Debugging
-        toggleButton.innerHTML = allergyList.classList.contains("hidden")
-            ? "Show Allergies ⬇"
-            : "Hide Allergies ⬆";
+        allergyList.classList.toggle("show");
+        
+        // Update button text and arrow direction
+        if (allergyList.classList.contains("show")) {
+            toggleButton.innerHTML = "Hide Allergies ▲";
+            // Optional: scroll into view if list is long
+            allergyList.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+            toggleButton.innerHTML = "Show Allergies ▼";
+        }
+    });
+
+    // Update the list when coming back from allergy selection page
+    window.addEventListener('focus', function() {
+        const updatedAllergies = JSON.parse(localStorage.getItem("selectedAllergies")) || [];
+        if (JSON.stringify(updatedAllergies) !== JSON.stringify(savedAllergies)) {
+            savedAllergies.length = 0; // Clear the array
+            Array.prototype.push.apply(savedAllergies, updatedAllergies); // Update with new values
+            populateAllergyList();
+        }
     });
 });
