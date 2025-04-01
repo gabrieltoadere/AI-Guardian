@@ -80,7 +80,9 @@ function hideTyping() {
 async function getBotResponse(userText) {
     showTyping();
   
-    const userId = 1;
+    const params = new URLSearchParams(window.location.search);
+const userId = parseInt(params.get("userId")) || 1;
+
     let userAllergens = [];
     let lastScan = { product_name: "None", ingredients: [] };
   
@@ -183,7 +185,7 @@ async function getBotResponse(userText) {
     recommendSafeProducts(1); // Replace with dynamic user ID later
   });
 
-  autoSuggestFromScan(1); // Replace with real user ID later
+  autoSuggestFromScan(1);// Replace with real user ID later
 
 
   const micButton = document.getElementById("micButton");
