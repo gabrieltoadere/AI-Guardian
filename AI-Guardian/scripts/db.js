@@ -144,6 +144,40 @@ app.get('/api/scan-history/:userId', (req, res) => {
     });
 });
 
+
+
+
+// here i am working on everything to do with OpenAI
+app.get('/api/scan-history/:userId/latest', (req, res) => {
+    const { userId } = req.params;
+    const query = `
+      SELECT product_name, ingredients
+      FROM scan_history
+      WHERE user_id = ?
+      ORDER BY scanned_at DESC
+      LIMIT 1
+    `;
+  
+    db.query(query, [userId], (err, results) => {
+      if (err) {
+        console.error("Error fetching latest scan:", err);
+        return res.status(500).json({ error: "Database error" });
+      }
+      if (results.length === 0) {
+        return res.json({ product_name: "", ingredients: "" });
+      }
+
+      const latest = results[0];
+      res.json({
+        product_name: latest.product_name,
+        ingredients: JSON.parse(latest.ingredients)
+      });
+    });
+  });
+  
+
+
+
 app.use(express.static(path.join(__dirname,'scripts')));
 
 app.listen(port, () => {
