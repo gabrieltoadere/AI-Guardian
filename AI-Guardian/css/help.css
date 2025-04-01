@@ -116,4 +116,25 @@
 }
 
 
+#micButton {
+    background: #eee;
+    color: #333;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-left: 8px;
+    transition: background 0.3s;
+}
+
+#micButton:hover {
+    background: #ccc;
+}
+
+#micButton.listening {
+    background-color: red;
+    color: white;
+}
+
+
 
