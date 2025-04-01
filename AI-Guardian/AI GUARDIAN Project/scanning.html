@@ -12,6 +12,7 @@
     <div class="main">
         <h1>Barcode Scanner</h1>
         <button id="scanButton" onclick="startScanning()">Scan Barcode</button>
+        <button onclick="window.location.href='receipt-capture.html'">Scan Receipt</button>
         <button id="manualInputButton" onclick="showManualInput()">Manual Input</button>
         <button onclick="window.location.href='UserPreference.html'">Set Allergen Preferences</button>
 
@@ -208,5 +209,13 @@
             }
         }
     </script>
+    <div class="navbar">
+        <ul>
+            <li><a href="main.html"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="scanning.html"><i class="fas fa-barcode"></i> Scan</a></li>
+            <li><a href="history.html"><i class="fas fa-history"></i> History</a></li>
+            <li><a href="profile.html"><i class="fas fa-user"></i> Profile</a></li>
+        </ul>
+    </div>
 </body>
 </html>
