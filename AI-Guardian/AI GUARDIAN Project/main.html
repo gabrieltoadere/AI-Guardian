@@ -6,25 +6,22 @@
     <title>Grocery Guardian</title>
     <link rel="stylesheet" href="/AI-Guardian/css/main.css" />
     <link rel="stylesheet" href="/AI-Guardian/css/common.css" />
-    <script src="/AI-Guardian/scripts/main.js"></script>
+    
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
   </head>
 
-  <body>
+  <body onload="displayAllergens()">
     <div class="main-container">
       <h1>Grocery Guardian</h1>
 
       <!-- Allergy List with Horizontal Scroll -->
       <div class="allergyDisplay">
         <ul class="allergyList" id="allergens-list">
-          <li>dairy</li>
-          <li>shellfish</li>
         </ul>
       </div>
-
       <!-- Buttons for Creating List and Adding Items -->
       <div class="button-container">
         <button id="createNewList" onclick="makeNewList()">
@@ -56,5 +53,7 @@
     <div class="chatbot-icon" id="chatbotIcon">
       <i class="fa-solid fa-robot"></i>
     </div>
+    <script src="/AI-Guardian/scripts/main.js"></script>
+    <script src="/AI-Guardian/scripts/allergy-selection.js"></script>
   </body>
 </html>

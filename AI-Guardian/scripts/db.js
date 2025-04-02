@@ -31,19 +31,13 @@ db.connect((err) => {
 app.post('/login', (req,res) => {
     const { user, pass } = req.body; // Destructure `user` and `pass` from frontend
 
-    const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
+    const query = 'SELECT * FROM users';
     db.query(query, [user, pass], (err, results) => {
         if (err) {
             console.error('Database error:', err);
             return res.status(500).json({ error: 'Database error' });
         }
-
-        // ✅ Send success/failure response
-        if (results.length > 0) {
-            res.json({ success: true, user: results[0] }); // User exists
-        } else {
-            res.json({ success: false }); // Invalid credentials
-        }
+        res.json(results); // User exists
     });
 });
 
@@ -60,6 +54,20 @@ app.post('/allergens', (req, res) => {
         res.json(results); // Returns array like [{ allergen_name: "Peanuts" }, ...]
     });
 });
+
+
+app.patch('/update-allergens', async (req, res) => {
+    try {
+        const { userId, allergens } = req.body;
+        db.query(
+        'UPDATE users SET allergens = $1 WHERE id = $2',
+        [JSON.stringify(allergens), userId] 
+      );
+      res.status(200).json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update allergens" });
+    }
+  });
 
 // Save user name
 app.post('/api/user', (req, res) => {
@@ -113,7 +121,7 @@ app.post('/api/scan-history', (req, res) => {
     const { userId, product } = req.body;
 
     const query = `
-        INSERT INTO scan_history (user_id, product_name, ingredients, scanned_at)
+        INSERT INTO scan_history (user_id, product_name, ingredients, date)
         VALUES (?, ?, ?, NOW())
     `;
     db.query(query, [userId, product.name, JSON.stringify(product.ingredients)], (err) => {
