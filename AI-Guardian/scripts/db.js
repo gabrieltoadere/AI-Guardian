@@ -88,11 +88,11 @@ app.post('/api/user', (req, res) => {
   });
 
   // Save user allergen preferences
-app.post('/api/preferences', (req, res) => {
-    const { userId, allergens } = req.body;
+app.post('/change-preferences', (req, res) => {
+    const { id, allergens } = req.body;
     const allergensJSON = JSON.stringify(allergens);
 
-    db.query('UPDATE users SET allergens = ? WHERE id = ?', [allergensJSON, userId], (err) => {
+    db.query('UPDATE users SET allergens = ? WHERE id = ?', [allergensJSON, id], (err) => {
         if (err) {
             console.error('Error saving preferences:', err);
             return res.status(500).json({ error: 'Failed to save preferences' });
@@ -104,8 +104,8 @@ app.post('/api/preferences', (req, res) => {
 // Get user allergen preferences
 app.get('/api/preferences/:userId', (req, res) => {
     const { userId } = req.params;
-
-    db.query('SELECT allergens FROM users WHERE id = ?', [userId], (err, results) => {
+    const query = 'SELECT allergens FROM users WHERE id = ?';
+    db.query(query, [userId], (err, results) => {
         if (err) {
             console.error('Error retrieving preferences:', err);
             return res.status(500).json({ error: 'Failed to load preferences' });

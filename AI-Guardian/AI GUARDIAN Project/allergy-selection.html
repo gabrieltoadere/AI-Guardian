@@ -43,43 +43,7 @@
     </div>
     
 
-    <script>
-        const userId = 1; // Replace with dynamic user ID after login integration
-    
-        async function savePreferences() {
-            const checkboxes = document.querySelectorAll('#preferencesForm input[type="checkbox"]');
-            const selected = [];
-    
-            checkboxes.forEach(cb => {
-                if (cb.checked) selected.push(cb.value.toLowerCase());
-            });
-    
-            try {
-                await fetch("http://localhost:5000/api/preferences", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ userId, allergens: selected })
-                });
-                alert("Your preferences have been saved!");
-            } catch (err) {
-                console.error("Failed to save preferences:", err);
-                alert("Failed to save preferences.");
-            }
-        }
-    
-        window.onload = async function () {
-            try {
-                const res = await fetch(`http://localhost:5000/api/preferences/${userId}`);
-                const saved = await res.json();
-    
-                document.querySelectorAll('#preferencesForm input').forEach(cb => {
-                    cb.checked = saved.includes(cb.value.toLowerCase());
-                });
-            } catch (err) {
-                console.error("Failed to load preferences:", err);
-            }
-        };
-    </script>
+    <script src="/AI-Guardian/scripts/allergy-selection.js"></script>
     
 
 
