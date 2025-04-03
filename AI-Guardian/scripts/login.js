@@ -16,13 +16,17 @@ document.querySelector(".login-btn").addEventListener("click", async () => {
 
         const data = await response.json();
 
-        if (data.success) {
-            const userId = data.user.id;
-            const userNameEncoded = encodeURIComponent(data.user.username);
-            window.location.href = `main.html?userId=${userId}&username=${userNameEncoded}`;
-        } else {
-            rejectDiv.style.display = 'block';
-        }
+        data.forEach(user => {
+            if(user.username===username & user.password===password) {
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                const userId = user.id;
+                const userNameEncoded = encodeURIComponent(user.username);
+                window.location.href = `main.html?userId=${userId}&username=${userNameEncoded}`;
+            }else {
+                rejectDiv.style.display = 'block';
+            }
+        });
+
     } catch (error) {
         console.error('Fetch error:', error);
         rejectDiv.style.display = 'block';
