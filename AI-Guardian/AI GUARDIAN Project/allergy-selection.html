@@ -3,86 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <title>Allergen Preferences</title>
-    <link rel="stylesheet" href="/AI-Guardian/css/scanning.css">
-    <link rel="stylesheet" href="/AI-Guardian/css/common.css">
+    <link rel="stylesheet" href="/AI-Guardian/css/allergy-selection.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
 </head>
 <body>
     <div class="container">
+        <button class="back-button" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i> Back
+        </button>
+
         <h1><i class="fas fa-heartbeat"></i> Allergen Preferences</h1>
-        <hr class="divider">
 
-        <p>Select the allergens you want to avoid:</p>
+        <p style="text-align: center; font-size: 0.9rem; margin-bottom: 1rem;">
+            Select allergens to avoid
+        </p>
 
-        <form id="preferencesForm" class="dropdown-container">
-            <label><input type="checkbox" value="milk"> Milk</label>
-            <label><input type="checkbox" value="peanuts"> Peanuts</label>
-            <label><input type="checkbox" value="tree nuts"> Tree Nuts</label>
-            <label><input type="checkbox" value="soy"> Soy</label>
-            <label><input type="checkbox" value="eggs"> Eggs</label>
-            <label><input type="checkbox" value="wheat"> Wheat</label>
-            <label><input type="checkbox" value="gluten"> Gluten</label>
-            <label><input type="checkbox" value="shellfish"> Shellfish</label>
-            <label><input type="checkbox" value="fish"> Fish</label>
-            <label><input type="checkbox" value="sesame"> Sesame</label>
-        </form>
+        <div class="dropdown-container">
+            <!-- Milk -->
+            <div class="toggle-item">
+                <label for="milk-toggle">Milk</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="milk-toggle" value="milk">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <!-- Peanuts -->
+            <div class="toggle-item">
+                <label for="peanuts-toggle">Peanuts</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="peanuts-toggle" value="peanuts">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <!-- Tree Nuts -->
+            <div class="toggle-item">
+                <label for="tree-nuts-toggle">Tree Nuts</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="tree-nuts-toggle" value="tree nuts">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <!-- Soy -->
+            <div class="toggle-item">
+                <label for="soy-toggle">Soy</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="soy-toggle" value="soy">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <!-- Eggs -->
+            <div class="toggle-item">
+                <label for="eggs-toggle">Eggs</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="eggs-toggle" value="eggs">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <!-- Wheat -->
+            <div class="toggle-item">
+                <label for="wheat-toggle">Wheat</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="wheat-toggle" value="wheat">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <!-- Gluten -->
+            <div class="toggle-item">
+                <label for="gluten-toggle">Gluten</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="gluten-toggle" value="gluten">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <!-- Shellfish -->
+            <div class="toggle-item">
+                <label for="shellfish-toggle">Shellfish</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="shellfish-toggle" value="shellfish">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <!-- Fish -->
+            <div class="toggle-item">
+                <label for="fish-toggle">Fish</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="fish-toggle" value="fish">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            
+            <!-- Sesame -->
+            <div class="toggle-item">
+                <label for="sesame-toggle">Sesame</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="sesame-toggle" value="sesame">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
 
         <div class="scan-button-container">
             <button class="scan-button" onclick="savePreferences()">Save Preferences</button>
         </div>
     </div>
 
-    <div class="navbar">
-        <ul>
-            <li><a href="main.html"><i class="fas fa-home"></i> Home</a></li>
-            <li><a href="scanning.html"><i class="fas fa-barcode"></i> Scan</a></li>
-            <li><a href="history.html"><i class="fas fa-history"></i> History</a></li>
-            <li><a href="profile.html"><i class="fas fa-user"></i> Profile</a></li>
-        </ul>
-    </div>
-    
-
     <script>
-        const userId = 1; // Replace with dynamic user ID after login integration
-    
-        async function savePreferences() {
-            const checkboxes = document.querySelectorAll('#preferencesForm input[type="checkbox"]');
-            const selected = [];
-    
-            checkboxes.forEach(cb => {
-                if (cb.checked) selected.push(cb.value.toLowerCase());
-            });
-    
-            try {
-                await fetch("http://localhost:5000/api/preferences", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ userId, allergens: selected })
-                });
-                alert("Your preferences have been saved!");
-            } catch (err) {
-                console.error("Failed to save preferences:", err);
-                alert("Failed to save preferences.");
-            }
+        function goBack() {
+            window.history.back();
         }
-    
-        window.onload = async function () {
-            try {
-                const res = await fetch(`http://localhost:5000/api/preferences/${userId}`);
-                const saved = await res.json();
-    
-                document.querySelectorAll('#preferencesForm input').forEach(cb => {
-                    cb.checked = saved.includes(cb.value.toLowerCase());
-                });
-            } catch (err) {
-                console.error("Failed to load preferences:", err);
-            }
-        };
+        
+        function savePreferences() {
+            // Your save logic here
+        }
     </script>
-    
-
-
 </body>
-
 </html>

@@ -224,7 +224,49 @@ body {
     border-left: 4px solid var(--primary-color);
   }
 
-  
+  /* ================ NAVBAR ================ */
+.navbar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: white;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  z-index: 100;
+}
+
+.navbar ul {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar li {
+  flex: 1;
+  text-align: center;
+}
+
+.navbar a {
+  display: block;
+  padding: 0.75rem 0;
+  text-decoration: none;
+  color: var(--text-dark);
+  font-size: 0.85rem;
+}
+
+.navbar a.active {
+  color: var(--primary-color);
+}
+
+.navbar a:hover {
+  color: var(--primary-color);
+}
+
+.navbar i {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 1.25rem;
+}
   /* ================ UTILITY CLASSES ================ */
   .hidden {
     display: none !important;
@@ -269,14 +311,6 @@ body {
       font-size: 1.4rem;
     }
     
-    .navbar ul li a {
-      padding: 0.5rem;
-      font-size: 0.8rem;
-    }
-    
-    .navbar ul li a i {
-      font-size: 1.2rem;
-    }
   }
   
   /* Tablet Styles */
