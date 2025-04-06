@@ -10,43 +10,56 @@
 </head>
 <body>
     <div class="main-container">
-        <h1><i class="fas fa-history"></i> Purchase History</h1>
+        <h1><i class="fas fa-history"></i>History</h1>
+        <h2 class="subtitle">Previously Scanned Items</h2>
         
 
         <!-- History Items List -->
         <div class="history-list">
-            <!-- Example Item 1 (Safe) -->
-            <div class="history-item" onclick="viewProductDetails('12345')">
-                <div class="item-info">
-                    <span class="item-name">Organic Almond Milk</span>
-                    <span class="item-date">May 15, 2023</span>
-                </div>
-                <div class="item-status safe">
-                    <i class="fas fa-check-circle"></i> Safe
-                </div>
-            </div>
+            <!-- Example Item -->
+<div class="history-item" onclick="viewProductDetails('12345')">
+    <div class="item-info">
+        <span class="item-name">Peanut Butter</span>
+        <span class="item-date">June 7, 2025</span>
+    </div>
+    <div class="item-status safe" id="status-12345">
+        <i class="fas fa-check-circle"></i> <span class="status-text">Unsafe</span>
+    </div>
+    <button class="toggle-status" onclick="event.stopPropagation(); toggleStatus('12345')">
+        <i class="fas fa-pen"></i>
+    </button>
+</div>
+
             
-            <!-- Example Item 2 (Unsafe) -->
-            <div class="history-item" onclick="viewProductDetails('67890')">
-                <div class="item-info">
-                    <span class="item-name">Peanut Butter Cookies</span>
-                    <span class="item-date">May 10, 2023</span>
-                </div>
-                <div class="item-status unsafe">
-                    <i class="fas fa-exclamation-triangle"></i> Unsafe
-                </div>
-            </div>
+            <!-- Example Item -->
+<div class="history-item" onclick="viewProductDetails('12345')">
+    <div class="item-info">
+        <span class="item-name">Organic Almond Milk</span>
+        <span class="item-date">May 15, 2023</span>
+    </div>
+    <div class="item-status safe" id="status-12345">
+        <i class="fas fa-check-circle"></i> <span class="status-text">Safe</span>
+    </div>
+    <button class="toggle-status" onclick="event.stopPropagation(); toggleStatus('12345')">
+        <i class="fas fa-pen"></i>
+    </button>
+</div>
+
             
-            <!-- Example Item 3 (Safe) -->
-            <div class="history-item" onclick="viewProductDetails('54321')">
-                <div class="item-info">
-                    <span class="item-name">Gluten-Free Pasta</span>
-                    <span class="item-date">May 5, 2023</span>
-                </div>
-                <div class="item-status safe">
-                    <i class="fas fa-check-circle"></i> Safe
-                </div>
-            </div>
+            <!-- Example Item -->
+<div class="history-item" onclick="viewProductDetails('12345')">
+    <div class="item-info">
+        <span class="item-name">Orange Juice</span>
+        <span class="item-date">May 18, 2024</span>
+    </div>
+    <div class="item-status safe" id="status-12345">
+        <i class="fas fa-check-circle"></i> <span class="status-text">Unsafe</span>
+    </div>
+    <button class="toggle-status" onclick="event.stopPropagation(); toggleStatus('12345')">
+        <i class="fas fa-pen"></i>
+    </button>
+</div>
+
         </div>
     </div>
 

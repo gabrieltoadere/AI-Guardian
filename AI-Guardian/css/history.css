@@ -123,3 +123,25 @@ body {
         align-self: flex-end;
     }
 }
+
+
+
+.toggle-status {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-left: 10px;
+    font-size: 1rem;
+    color: #555;
+}
+
+.history-item {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.toggle-status:hover {
+    color: #000;
+}

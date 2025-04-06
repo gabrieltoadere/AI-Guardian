@@ -28,6 +28,51 @@ db.connect((err) => {
     
 });
 
+
+
+
+//I ADDED A ROUTE TO HANDLE CHANGES MADE TO SAFE OR UNSAFE FOODS
+// Assuming you're using Express and have a db connection set up
+app.post('/api/update-status', (req, res) => {
+    const { productId, status } = req.body;
+
+    if (!productId || !status) {
+        return res.status(400).json({ message: 'Missing productId or status' });
+    }
+
+    const query = 'UPDATE purchase_history SET status = ? WHERE product_id = ?';
+    db.query(query, [status, productId], (err, result) => {
+        if (err) {
+            console.error('Error updating status:', err);
+            return res.status(500).json({ message: 'Database error' });
+        }
+        return res.json({ message: 'Status updated successfully' });
+    });
+});
+
+
+//CREATE A TABLE USING THIS CODE
+// CREATE TABLE purchase_history (
+//     id INT AUTO_INCREMENT PRIMARY KEY,
+//     user_id INT,
+//     product_id VARCHAR(255),
+//     product_name VARCHAR(255),
+//     date_scanned DATE,
+//     status VARCHAR(10)  -- should hold 'safe' or 'unsafe'
+// );
+
+
+
+
+
+
+
+
+
+
+
+
+
 app.post('/login', (req,res) => {
     const { user, pass } = req.body; // Destructure `user` and `pass` from frontend
 
