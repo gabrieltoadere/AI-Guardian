@@ -24,6 +24,11 @@ function viewProductDetails(productId) {
 
 function toggleStatus(productId) {
     const statusDiv = document.getElementById(`status-${productId}`);
+    if (!statusDiv) {
+        console.error(`Status div not found for productId ${productId}`);
+        return;
+    }
+
     const statusText = statusDiv.querySelector('.status-text');
     const icon = statusDiv.querySelector('i');
     let newStatus;
@@ -42,25 +47,22 @@ function toggleStatus(productId) {
         newStatus = 'safe';
     }
 
-    // Send updated status to backend
+    // Send update to backend
     fetch('/api/update-status', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            productId: productId,
+            productId,
             status: newStatus
         })
     })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Status updated:', data.message);
-    })
-    .catch(error => {
-        console.error('Error updating status:', error);
-    });
+    .then(res => res.json())
+    .then(data => console.log('Status saved:', data))
+    .catch(err => console.error('Failed to update status:', err));
 }
+
 
 
 
