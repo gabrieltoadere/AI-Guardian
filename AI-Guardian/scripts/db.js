@@ -180,12 +180,16 @@ app.get('/api/preferences/:userId', (req, res) => {
     });
 });
 
+
+
+
+
 // Save scan history
 app.post('/api/scan-history', (req, res) => {
     const { userId, product } = req.body;
 
     const query = `
-        INSERT INTO scan_history (user_id, product_name, ingredients, date)
+        INSERT INTO scanHistory (user_id, product_name, ingredients, date)
         VALUES (?, ?, ?, NOW())
     `;
     db.query(query, [userId, product.name, JSON.stringify(product.ingredients)], (err) => {
@@ -202,10 +206,10 @@ app.get('/api/scan-history/:userId', (req, res) => {
     const { userId } = req.params;
 
     const query = `
-        SELECT product_name, ingredients, scanned_at
-        FROM scan_history
+        SELECT product_name, ingredients, date
+        FROM scanHistory
         WHERE user_id = ?
-        ORDER BY scanned_at DESC
+        ORDER BY date DESC
     `;
     db.query(query, [userId], (err, results) => {
         if (err) {
@@ -224,9 +228,9 @@ app.get('/api/scan-history/:userId/latest', (req, res) => {
     const { userId } = req.params;
     const query = `
       SELECT product_name, ingredients
-      FROM scan_history
+      FROM scanHistory
       WHERE user_id = ?
-      ORDER BY scanned_at DESC
+      ORDER BY date DESC
       LIMIT 1
     `;
   
