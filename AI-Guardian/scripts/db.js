@@ -67,7 +67,7 @@ app.post('/api/update-status', (req, res) => {
 // );
 
 
-
+//I THINK USERS ALREADY EXISTS IN THE DATABASE
 // CREAT AN ACCOUNT TABLE
 // CREATE TABLE users (
 //     id INT AUTO_INCREMENT PRIMARY KEY,

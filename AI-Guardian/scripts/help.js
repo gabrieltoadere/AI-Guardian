@@ -71,8 +71,25 @@ function hideTyping() {
   typingIndicator.style.display = "none";
 }
 
+let cooldown = false;
+
 async function getBotResponse(userText) {
+  if (cooldown) {
+    addMessage("bot", "Please wait a moment before asking another question.");
+    return;
+  }
+
+  cooldown = true;
+  sendBtn.disabled = true;
+  userInput.disabled = true;
   showTyping();
+
+  // Reset cooldown in 3 seconds
+  setTimeout(() => {
+    cooldown = false;
+    sendBtn.disabled = false;
+    userInput.disabled = false;
+  }, 3000);
 
   let userAllergens = [];
   let lastScan = { product_name: "None", ingredients: [] };
@@ -120,8 +137,16 @@ User's question: ${userText}
       body: JSON.stringify(payload)
     });
 
-    const data = await res.json();
     hideTyping();
+    sendBtn.disabled = false;
+    userInput.disabled = false;
+
+    if (res.status === 429) {
+      addMessage("bot", "⚠️ Too many requests. Please wait a bit before trying again.");
+      return;
+    }
+
+    const data = await res.json();
 
     if (data.choices?.length > 0) {
       addMessage("bot", data.choices[0].message.content.trim());
@@ -130,6 +155,8 @@ User's question: ${userText}
     }
   } catch (error) {
     hideTyping();
+    sendBtn.disabled = false;
+    userInput.disabled = false;
     addMessage("bot", "Error reaching AI service.");
     console.error("OpenAI Error:", error);
   }
