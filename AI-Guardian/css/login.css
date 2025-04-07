@@ -119,6 +119,31 @@ h1, h2 {
     transition: 0.3s;
 }
 
+.createAccount {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 10px;
+    transition: 0.3s;
+    background: linear-gradient(45deg, #50C878, #2E8B57);
+    color: white;
+}
+
+.createAccount:hover {
+    transform: scale(1.03);
+}
+
+.createAccount .icon {
+    width: 20px;
+    margin-right: 8px;
+}
+
 .social-btn:hover {
     transform: scale(1.03);
 }

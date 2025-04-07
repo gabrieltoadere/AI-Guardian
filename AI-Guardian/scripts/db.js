@@ -6,6 +6,11 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const port = 5501;
 
+// const bcrypt = require('bcrypt');
+// const jwt = require('jsonwebtoken'); // for tokens
+// const SECRET_KEY = 'secret123'; // move this to .env in production!
+
+
 
 
 app.use(cors());
@@ -32,7 +37,7 @@ db.connect((err) => {
 
 
 //I ADDED A ROUTE TO HANDLE CHANGES MADE TO SAFE OR UNSAFE FOODS
-// Assuming you're using Express and have a db connection set up
+// Assuming we're using Express and have a db connection set up
 app.post('/api/update-status', (req, res) => {
     const { productId, status } = req.body;
 
@@ -51,7 +56,7 @@ app.post('/api/update-status', (req, res) => {
 });
 
 
-//CREATE A TABLE USING THIS CODE
+//CREATE A TABLE USING THIS CODE SO IGNORE
 // CREATE TABLE purchase_history (
 //     id INT AUTO_INCREMENT PRIMARY KEY,
 //     user_id INT,
@@ -60,6 +65,20 @@ app.post('/api/update-status', (req, res) => {
 //     date_scanned DATE,
 //     status VARCHAR(10)  -- should hold 'safe' or 'unsafe'
 // );
+
+
+
+// CREAT AN ACCOUNT TABLE
+// CREATE TABLE users (
+//     id INT AUTO_INCREMENT PRIMARY KEY,
+//     name VARCHAR(100),
+//     email VARCHAR(100) UNIQUE,
+//     username VARCHAR(100) UNIQUE,
+//     password VARCHAR(255)
+// );
+
+
+
 
 
 
@@ -232,6 +251,94 @@ app.get('/api/scan-history/:userId/latest', (req, res) => {
 
 
 app.use(express.static(path.join(__dirname,'scripts')));
+
+
+
+
+
+
+
+
+
+
+// FUNCTION FOR CREATING ACCOUNT AND SETTING PASSWORD
+
+const bcrypt = require('bcrypt');
+
+app.post('/api/register', async (req, res) => {
+  const { name, email, username, password } = req.body;
+
+  if (!name || !email || !username || !password) {
+    return res.status(400).json({ success: false, message: "All fields are required." });
+  }
+
+  try {
+    // Check if username or email already exists
+    db.query('SELECT * FROM users WHERE username = ? OR email = ?', [username, email], async (err, results) => {
+      if (err) {
+        console.error('Database error:', err);
+        return res.status(500).json({ success: false, message: "Database error." });
+      }
+
+      if (results.length > 0) {
+        return res.status(400).json({ success: false, message: "Username or email already exists." });
+      }
+
+      // Hash password
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Insert new user
+      db.query('INSERT INTO users (name, email, username, password) VALUES (?, ?, ?, ?)',
+        [name, email, username, hashedPassword],
+        (err) => {
+          if (err) {
+            console.error('Insert error:', err);
+            return res.status(500).json({ success: false, message: "Failed to create account." });
+          }
+
+          return res.json({ success: true, message: "Account created successfully!" });
+        });
+    });
+  } catch (error) {
+    console.error("Registration error:", error);
+    return res.status(500).json({ success: false, message: "Unexpected error." });
+  }
+});
+
+
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+  
+    if (!username || !password)
+      return res.status(400).json({ success: false, message: 'Missing credentials' });
+  
+    db.query('SELECT * FROM users WHERE username = ?', [username], async (err, results) => {
+      if (err) return res.status(500).json({ success: false, message: 'Database error' });
+  
+      if (results.length === 0)
+        return res.status(401).json({ success: false, message: 'Invalid username or password' });
+  
+      const user = results[0];
+  
+      const match = await bcrypt.compare(password, user.password);
+      if (!match) {
+        return res.status(401).json({ success: false, message: 'Invalid username or password' });
+      }
+  
+      // Create a token
+      const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
+  
+      return res.json({ success: true, token });
+    });
+  });
+  
+
+
+
+
+
+
+
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

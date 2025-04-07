@@ -98,4 +98,7 @@ function handleReceiptScan() {
     document.getElementById('purchaseForm').classList.add('hidden');
     alert('Purchase saved to your history!');
   }
+
+
+
   

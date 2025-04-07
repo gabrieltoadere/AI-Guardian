@@ -48,7 +48,8 @@ function toggleStatus(productId) {
     }
 
     // Send update to backend
-    fetch('/api/update-status', {
+    fetch('http://localhost:5501/api/update-status', {
+
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -67,5 +68,13 @@ function toggleStatus(productId) {
 
 
 
-
+document.addEventListener('DOMContentLoaded', () => {
+    const chatbotIcon = document.getElementById('chatbotIcon');
+    
+    if (chatbotIcon) {
+        chatbotIcon.addEventListener('click', () => {
+            window.location.href = '/AI-GUARDIAN/AI GUARDIAN Project/help.html';
+        });
+    }
+});
 

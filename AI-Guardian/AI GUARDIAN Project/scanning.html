@@ -202,7 +202,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
     <script>
-        // Your existing JavaScript code remains the same
+        // existing JavaScript code remains the same
         const userId = 1;
         let userAllergens = [];
         let currentProduct = null;
@@ -429,7 +429,25 @@
                 console.error("Error fetching alternatives:", err);
             }
         }
-    </script>
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatbotIcon = document.getElementById('chatbotIcon');
+            
+            if (chatbotIcon) {
+                chatbotIcon.addEventListener('click', () => {
+                    window.location.href = '/AI-GUARDIAN/AI GUARDIAN Project/help.html';
+                });
+            }
+        });
+        </script>
+
+
+<!-- Chatbot Icon -->
+<div class="chatbot-icon" id="chatbotIcon">
+    <i class="fa-solid fa-robot"></i>
+  </div>
+
+
 
     <div class="navbar">
         <ul>

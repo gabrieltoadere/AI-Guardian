@@ -50,6 +50,10 @@ document.querySelector(".email").addEventListener("click", function () {
     window.location.href = "email.login.html";
 });
 
+document.querySelector(".createAccount").addEventListener("click", function () {
+    window.location.href = "createAccount.html";
+});
+
 function onSignIn(googleUser) {
     var profile = googleUser.getBasicProfile();
     console.log("Google ID: " + profile.getId());
