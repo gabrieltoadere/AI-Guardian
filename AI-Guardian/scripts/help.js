@@ -240,6 +240,7 @@
 
 
 
+let chatHistory = [];
 
 // Import axios (make sure axios is installed if running via Node.js)
 const axios = window.axios;
@@ -354,13 +355,13 @@ If recommending, avoid allergens.
 
 
 async function getAzureReply(userInput) {
+  
   const url = `${endpoint}openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`;
 
   const headers = {
     "Content-Type": "application/json",
     "api-key": apiKey
   };
-
 
 
   const today = new Date().toLocaleDateString("en-US", {
@@ -397,11 +398,13 @@ Always prioritize safety and personalize answers based on the user's preferences
 const body = {
   messages: [
     { role: "system", content: systemPrompt },
+    ...chatHistory.slice(-5), // include up to last 5 exchanges
     { role: "user", content: userInput }
   ],
   temperature: 0.7,
   max_tokens: 500
 };
+
 
   
 
@@ -412,6 +415,13 @@ const body = {
     console.error("Azure OpenAI Error:", error);
     return "Sorry, I couldn't respond at the moment.";
   }
+
+
+  if (userText.toLowerCase().includes("ingredients")) {
+    const analysis = await analyzeIngredients(userId);
+    return analysis;
+  }
+  
 }
 
 
@@ -427,13 +437,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const userText = input.value.trim();
     if (!userText) return;
-
+    
+    
     chatBox.innerHTML += `<div class="user">🧑 You: ${userText}</div>`;
     input.value = '';
+    chatHistory.push({ role: "user", content: userText });
 
     const botReply = await getAzureReply(userText);
     chatBox.innerHTML += `<div class="bot">🤖 Bot: ${botReply}</div>`;
     chatBox.scrollTop = chatBox.scrollHeight;
+    chatHistory.push({ role: "assistant", content: botReply });
+
   });
 });
 
@@ -470,3 +484,60 @@ if (recognition) {
   micButton.title = "Voice not supported in this browser";
 }
 
+
+
+
+async function analyzeIngredients(userId) {
+  try {
+    // Get user allergens
+    const prefsRes = await fetch(`http://localhost:5501/api/preferences/${userId}`);
+    const allergens = await prefsRes.json();
+
+    // Get latest scanned product
+    const scanRes = await fetch(`http://localhost:5501/api/scan-history/${userId}/latest`);
+    const lastScan = await scanRes.json();
+    const ingredients = Array.isArray(lastScan.ingredients) ? lastScan.ingredients.join(", ") : lastScan.ingredients;
+
+    const systemPrompt = `
+You are an allergen expert. A user has scanned a food product.
+Their allergies are: ${allergens.join(", ") || "none"}.
+
+Your task:
+- Analyze the ingredient list below
+- Warn if any ingredients may contain or be related to the user's allergens
+- Be cautious and prioritize safety
+
+Example:
+Allergen: peanuts
+Ingredients: sugar, milk, peanut oil
+→ Response: This product may be unsafe due to peanut oil.
+
+Now analyze:
+${ingredients}
+`;
+
+    const payload = {
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: "Are there any allergen risks here?" }
+      ],
+      temperature: 0.7,
+      max_tokens: 400
+    };
+
+    const res = await fetch(`${endpoint}/openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": apiKey
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content || "I couldn't analyze the ingredients.";
+  } catch (err) {
+    console.error("Ingredient NLP Error:", err);
+    return "Sorry, I couldn’t analyze the ingredients right now.";
+  }
+}
