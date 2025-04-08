@@ -9,12 +9,16 @@
     <script src="https://unpkg.com/compromise"></script> 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.16.0/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
+    <script src="https://cdn.tailwindcss.com"></script>
+    
 </head>
-<body>
-  <h1>Ask Grocery Guardian 🤖</h1>
+<body class="flex flex-col h-screen overflow-hidden bg-gray-100">
 
-  <div id="chat-box" class="chat-box"></div>
+    <h1 class="text-xl font-bold text-center mt-3 mb-2 text-gray-800">Ask Grocery Guardian 🤖</h1>
+
+  <div class="flex flex-col flex-1 overflow-hidden px-4 pb-20">
+    <div id="chat-box" class="flex-1 overflow-y-auto rounded-lg bg-white p-4 shadow-md space-y-3"></div>
+
 
   <form id="chat-form">
     <input type="text" id="user-input" placeholder="Ask about allergens, safe food, etc." required />
@@ -29,15 +33,15 @@
     <div class="recommend-container">
     <button id="recommendButton"><i class="fa-solid fa-heart-circle-check"></i> Recommend Safe Products</button>
     </div>
-    <!-- Navbar -->
-    <div class="navbar">
-        <ul>
-            <li><a href="main.html"><i class="fas fa-home"></i> Home</a></li>
-            <li><a href="scanning.html"><i class="fas fa-barcode"></i> Scan</a></li>
-            <li><a href="history.html"><i class="fas fa-history"></i> History</a></li>
-            <li><a href="profile.html"><i class="fas fa-user"></i> Profile</a></li>
-        </ul>
-    </div>
+</div>
+<div class="navbar fixed bottom-0 left-0 right-0 bg-white shadow-md p-3 z-50">
+    <ul class="flex justify-around text-sm text-gray-700">
+      <li><a href="main.html"><i class="fas fa-home"></i> Home</a></li>
+      <li><a href="scanning.html"><i class="fas fa-barcode"></i> Scan</a></li>
+      <li><a href="history.html"><i class="fas fa-history"></i> History</a></li>
+      <li><a href="profile.html"><i class="fas fa-user"></i> Profile</a></li>
+    </ul>
+  </div>
   <script src="../scripts/help.js"></script>
 </body>
 </html>

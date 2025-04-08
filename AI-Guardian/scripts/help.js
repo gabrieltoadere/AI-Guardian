@@ -439,12 +439,22 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!userText) return;
     
     
-    chatBox.innerHTML += `<div class="user">🧑 You: ${userText}</div>`;
+    chatBox.innerHTML += `
+  <div class="user-message bg-blue-100 rounded-lg p-3 shadow text-sm self-end max-w-[70%] ml-auto">
+    🧑 ${userText}
+  </div>`;
+
+
     input.value = '';
     chatHistory.push({ role: "user", content: userText });
 
     const botReply = await getAzureReply(userText);
-    chatBox.innerHTML += `<div class="bot">🤖 Bot: ${botReply}</div>`;
+    chatBox.innerHTML += `
+  <div class="bot-message bg-gray-200 rounded-lg p-3 shadow text-sm self-start max-w-[70%]">
+    🤖 ${botReply}
+  </div>`;
+
+
     chatBox.scrollTop = chatBox.scrollHeight;
     chatHistory.push({ role: "assistant", content: botReply });
 
@@ -470,7 +480,7 @@ if (recognition) {
 
   recognition.onresult = (event) => {
     const transcript = event.results[0][0].transcript;
-    userInput.value = transcript;
+    input.value = transcript;
     micButton.classList.remove("listening");
     sendBtn.click();
   };
