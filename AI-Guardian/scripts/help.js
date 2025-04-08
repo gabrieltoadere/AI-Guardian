@@ -242,13 +242,116 @@
 
 
 // Import axios (make sure axios is installed if running via Node.js)
-const axios = window.axios || require('axios');
+const axios = window.axios;
 
 // Azure OpenAI Setup
 const endpoint = "https://ai-chatbott.openai.azure.com/"; // NO trailing slash
 const apiKey = "RYXzx2E4wR6NOIbNIlk9rCZfQCKAjxTlShDpMDEhIxWtEQNMqGBXJQQJ99BDACYeBjFXJ3w3AAABACOGykDJ";
 const deploymentName = "chatbot"; // e.g. 'gpt-35-turbo'
 const apiVersion = "2023-12-01-preview"; // or newer if available
+
+
+
+
+async function getTopSafeProducts(userId) {
+  try {
+    const historyRes = await fetch(`http://localhost:5501/api/scanHistory/${userId}`);
+    const history = await historyRes.json();
+
+    const prefsRes = await fetch(`http://localhost:5501/api/preferences/${userId}`);
+    const allergens = await prefsRes.json();
+
+    const safeProducts = history.filter(item => {
+      const ingredients = item.ingredients || [];
+      return !allergens.some(allergen =>
+        ingredients.some(ing => ing.toLowerCase().includes(allergen.toLowerCase()))
+      );
+    });
+
+    const counts = {};
+    safeProducts.forEach(item => {
+      counts[item.product_name] = (counts[item.product_name] || 0) + 1;
+    });
+
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(entry => entry[0]); // product names only
+  } catch (err) {
+    console.error("Top product fetch error:", err);
+    return [];
+  }
+}
+
+document.getElementById("recommendButton").addEventListener("click", () => {
+  recommendSafeProducts(userId);
+});
+
+
+
+async function recommendSafeProducts(userId) {
+  try {
+    const topSafe = await getTopSafeProducts(userId);
+
+    if (topSafe.length === 0) {
+      addMessage("bot", "You haven’t scanned enough safe foods yet to give a recommendation.");
+      return;
+    }
+
+// Fetch user's real allergens
+const prefsRes = await fetch(`http://localhost:5501/api/preferences/${userId}`);
+const allergens = await prefsRes.json(); // comes back as an array
+
+// Build system prompt with real data
+const systemPrompt = `
+You are Grocery Guardian, a smart allergen-aware assistant.
+
+The user is allergic to: ${allergens.join(", ") || "none"}
+
+Your job:
+- Filter unsafe ingredients
+- Recommend suitable products
+- Explain clearly and kindly
+
+If the user asks if something is safe, always double check ingredients.
+If recommending, avoid allergens.
+`;
+
+
+    const payload = {
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: "What do you recommend I try next?" }
+      ],
+      temperature: 0.7,
+      max_tokens: 400
+    };
+
+    const res = await fetch(`${endpoint}/openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": apiKey
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (data.choices?.length > 0) {
+      addMessage("bot", data.choices[0].message.content.trim());
+    } else {
+      addMessage("bot", "I found some safe products, but couldn't generate a recommendation.");
+    }
+  } catch (err) {
+    console.error("Azure AI Recommendation Error:", err);
+    addMessage("bot", "Sorry, I couldn't generate a recommendation right now.");
+  }
+}
+
+
+
+
 
 async function getAzureReply(userInput) {
   const url = `${endpoint}openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`;
@@ -267,15 +370,39 @@ async function getAzureReply(userInput) {
     day: "numeric"
   });
 
-  
-  const body = {
-    messages: [
-      { role: "system", content: "You are a friendly assistant for helping users choose allergen-safe groceries. Today's date is ${today}" },
-      { role: "user", content: userInput }
-    ],
-    temperature: 0.7,
-    max_tokens: 500
-  };
+
+//this give the ai context as to what the app is about
+  const systemPrompt = `
+You are Grocery Guardian, a smart and safety-conscious grocery assistant.
+
+Your job is to:
+- Help users find food that fits their dietary preferences.
+- Warn them if a product contains allergens they want to avoid.
+- Explain things clearly in a natural, helpful tone.
+
+User preferences:
+• Allergies: peanuts, gluten
+• Diet: vegetarian
+
+Example conversations:
+User: Can you suggest a peanut-free snack?
+Assistant: Sure! Hippeas Organic Chickpea Puffs are nut-free and gluten-free.
+
+User: Can I eat this cereal if I’m avoiding dairy?
+Assistant: Let me check the ingredients... no milk or lactose, so it should be safe for you!
+
+Always prioritize safety and personalize answers based on the user's preferences.
+`;
+
+const body = {
+  messages: [
+    { role: "system", content: systemPrompt },
+    { role: "user", content: userInput }
+  ],
+  temperature: 0.7,
+  max_tokens: 500
+};
+
   
 
   try {
@@ -286,6 +413,8 @@ async function getAzureReply(userInput) {
     return "Sorry, I couldn't respond at the moment.";
   }
 }
+
+
 
 // Hook into the chat form
 document.addEventListener('DOMContentLoaded', () => {
@@ -307,3 +436,37 @@ document.addEventListener('DOMContentLoaded', () => {
     chatBox.scrollTop = chatBox.scrollHeight;
   });
 });
+
+
+
+const micButton = document.getElementById("micButton");
+
+const recognition = window.SpeechRecognition || window.webkitSpeechRecognition
+  ? new (window.SpeechRecognition || window.webkitSpeechRecognition)()
+  : null;
+
+if (recognition) {
+  recognition.lang = "en-US";
+  recognition.continuous = false;
+
+  micButton.addEventListener("click", () => {
+    micButton.classList.add("listening");
+    recognition.start();
+  });
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript;
+    userInput.value = transcript;
+    micButton.classList.remove("listening");
+    sendBtn.click();
+  };
+
+  recognition.onerror = () => {
+    alert("Voice recognition failed. Please try again.");
+    micButton.classList.remove("listening");
+  };
+} else {
+  micButton.disabled = true;
+  micButton.title = "Voice not supported in this browser";
+}
+

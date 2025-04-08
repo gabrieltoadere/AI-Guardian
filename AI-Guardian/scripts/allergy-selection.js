@@ -22,10 +22,10 @@
 
     function savePreferences() {
         const userId = user.id;
-        fetch("http://localhost:5000/api/preferences", {
+        fetch("http://localhost:5000/api/change-preferences", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: userId, allergens: allergens })
+            body: JSON.stringify({ userId, allergens })
         })
         .then(response => {
             if (!response.ok) throw new Error("Failed to save");
@@ -37,9 +37,9 @@
 
 
 
-//  try {
-//                 
-//                 console.log("Preferences updated:", selectedAllergies);
-//             } catch (err) {
-//                 console.error("Failed to save preferences:", err);
-//             }
+ try {
+                
+                console.log("Preferences updated:", selectedAllergies);
+            } catch (err) {
+                console.error("Failed to save preferences:", err);
+            }

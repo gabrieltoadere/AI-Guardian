@@ -6,13 +6,6 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const port = 5501;
 
-// const bcrypt = require('bcrypt');
-// const jwt = require('jsonwebtoken'); // for tokens
-// const SECRET_KEY = 'secret123'; // move this to .env in production!
-
-
-
-
 app.use(cors());
 app.use(bodyParser.json());
 
@@ -67,29 +60,6 @@ app.post('/api/update-status', (req, res) => {
 // );
 
 
-//I THINK USERS ALREADY EXISTS IN THE DATABASE
-// CREAT AN ACCOUNT TABLE
-// CREATE TABLE users (
-//     id INT AUTO_INCREMENT PRIMARY KEY,
-//     name VARCHAR(100),
-//     email VARCHAR(100) UNIQUE,
-//     username VARCHAR(100) UNIQUE,
-//     password VARCHAR(255)
-// );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 app.post('/login', (req,res) => {
@@ -121,17 +91,20 @@ app.post('/allergens', (req, res) => {
 
 
 app.patch('/update-allergens', async (req, res) => {
-    try {
-        const { userId, allergens } = req.body;
-        db.query(
-        'UPDATE users SET allergens = $1 WHERE id = $2',
-        [JSON.stringify(allergens), userId] 
-      );
+  const { userId, allergens } = req.body;
+  db.query(
+    'UPDATE users SET allergens = ? WHERE id = ?',
+    [JSON.stringify(allergens), userId],
+    (err) => {
+      if (err) {
+        console.error("Error saving preferences:", err);
+        return res.status(500).json({ error: "Failed to save preferences" });
+      }
       res.status(200).json({ success: true });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to update allergens" });
     }
-  });
+  );
+});
+
 
 // Save user name
 app.post('/api/user', (req, res) => {
@@ -336,13 +309,6 @@ app.post('/api/login', (req, res) => {
     });
   });
   
-
-
-
-
-
-
-
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
