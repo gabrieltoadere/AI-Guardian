@@ -17,13 +17,26 @@
     --border-radius-lg: 1rem;
   }
 
+  body.dark-mode {
+    --background-light: #121212;
+    --background-lighter: #1e1e1e;
+    --text-dark: #e0e0e0;
+    --text-light: #ffffff;
+    --primary-color: #66bb6a;
+    --primary-light: #81c784;
+    --primary-dark: #388e3c;
+    --secondary-color: #43a047;
+  }
+
   
-  
+
 /* Font and base styles */
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;
   background: #f3f4f6;
+  padding: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 #chat-box {

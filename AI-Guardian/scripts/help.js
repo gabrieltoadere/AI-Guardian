@@ -551,3 +551,22 @@ ${ingredients}
     return "Sorry, I couldn’t analyze the ingredients right now.";
   }
 }
+
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const toggle = document.getElementById("darkModeToggle");
+  const isDark = localStorage.getItem("theme") === "dark";
+
+  if (isDark) document.body.classList.add("dark-mode");
+
+  toggle.addEventListener("click", () => {
+    document.body.classList.toggle("dark-mode");
+    const mode = document.body.classList.contains("dark-mode") ? "dark" : "light";
+    localStorage.setItem("theme", mode);
+    toggle.innerText = mode === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode";
+  });
+
+  toggle.innerText = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
+});
