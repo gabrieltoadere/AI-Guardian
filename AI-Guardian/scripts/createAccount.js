@@ -18,7 +18,7 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, username, password })
     })
-    .then(res => res.json())
+    .then((res) => res.json())
     .then(data => {
       if (data.success) {
         alert("Registration successful! Redirecting to login...");
@@ -32,4 +32,3 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
       alert("An error occurred.");
     });
   });
-  

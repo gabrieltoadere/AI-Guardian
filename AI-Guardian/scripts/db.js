@@ -61,21 +61,6 @@ app.post('/api/update-status', (req, res) => {
 
 
 
-
-app.post('/login', (req,res) => {
-    const { user, pass } = req.body; // Destructure `user` and `pass` from frontend
-
-    const query = 'SELECT * FROM users';
-    db.query(query, [user, pass], (err, results) => {
-        if (err) {
-            console.error('Database error:', err);
-            return res.status(500).json({ error: 'Database error' });
-        }
-        res.json(results); // User exists
-    });
-});
-
-
 app.post('/allergens', (req, res) => {
     const id = req.body;
     const query = 'SELECT allergens FROM users WHERE id = ?'; // Adjust table/column names
@@ -225,17 +210,7 @@ app.get('/api/scan-history/:userId/latest', (req, res) => {
   });
   
 
-
-
 app.use(express.static(path.join(__dirname,'scripts')));
-
-
-
-
-
-
-
-
 
 
 // FUNCTION FOR CREATING ACCOUNT AND SETTING PASSWORD
@@ -282,8 +257,7 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-
-app.post('/api/login', (req, res) => {
+  app.post('/login/normal', (req, res) => {
     const { username, password } = req.body;
   
     if (!username || !password)
@@ -308,6 +282,61 @@ app.post('/api/login', (req, res) => {
       return res.json({ success: true, token });
     });
   });
+
+app.post('/login/phone', (req, res) => {
+    const { phone, password } = req.body;
+  
+    if (!phone || !password)
+      return res.status(400).json({ success: false, message: 'Missing credentials' });
+  
+    db.query('SELECT * FROM users WHERE phone = ?', [phone], async (err, results) => {
+      if (err) return res.status(500).json({ success: false, message: 'Database error' });
+  
+      if (results.length === 0)
+        return res.status(401).json({ success: false, message: 'Invalid phone or password' });
+  
+      const user = results[0];
+  
+      const match = await bcrypt.compare(password, user.password);
+      if (!match) {
+        return res.status(401).json({ success: false, message: 'Invalid username or password' });
+      }
+  
+      // Create a token
+      const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
+  
+      return res.json({ success: true, token });
+    });
+  });
+
+  app.post('/login/email', (req, res) => {
+    const { email, password } = req.body;
+  
+    if (!email || !password)
+      return res.status(400).json({ success: false, message: 'Missing credentials' });
+  
+    db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
+      if (err) return res.status(500).json({ success: false, message: 'Database error' });
+  
+      if (results.length === 0)
+        return res.status(401).json({ success: false, message: 'Invalid email or password' });
+  
+      const user = results[0];
+  
+      const match = await bcrypt.compare(password, user.password);
+      if (!match) {
+        return res.status(401).json({ success: false, message: 'Invalid email or password' });
+      }
+  
+      // Create a token
+      const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
+  
+      return res.json({ success: true, token });
+    });
+  });
+
+
+
   
 
 app.listen(port, () => {
