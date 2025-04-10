@@ -296,6 +296,8 @@ function addMessage(sender, text) {
 
   msg.textContent = sender === "user" ? `🧑 ${text}` : `🤖 ${text}`;
   chatBox.insertBefore(msg, document.getElementById("typingIndicator"));
+
+  // ✅ Scroll to bottom after message is added
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
@@ -312,7 +314,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const subscriptionKey = "F3IQZEZsRxA9rZDp5eqweyrHvSxUe6PLHjRb9CQNl2ztQIox87dxJQQJ99BDACYeBjFXJ3w3AAAYACOGucWO";
   const serviceRegion = "eastus";
 
-  const userId = localStorage.getItem("userId") || "1"; // fallback for testing
+  const userId = localStorage.getItem("userId") || "1";
 
   function showTyping() {
     typingIndicator.classList.remove("hidden");
@@ -516,3 +518,4 @@ Ingredients: ${ingredients}
     return "Sorry, I couldn’t analyze the ingredients right now.";
   }
 }
+
