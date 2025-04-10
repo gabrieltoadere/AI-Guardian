@@ -244,147 +244,15 @@ let chatHistory = [];
 const axios = window.axios;
 const endpoint = "https://ai-chatbott.openai.azure.com/";
 const apiKey = "RYXzx2E4wR6NOIbNIlk9rCZfQCKAjxTlShDpMDEhIxWtEQNMqGBXJQQJ99BDACYeBjFXJ3w3AAABACOGykDJ";
-const deploymentName = "chatbot";
-const apiVersion = "2023-12-01-preview";
+const deploymentName = "chatbot"; // e.g. 'gpt-35-turbo'
+const apiVersion = "2023-12-01-preview"; // or newer if available
 
-async function getAzureReply(userInput) {
-  const url = `${endpoint}openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`;
-  const headers = { "Content-Type": "application/json", "api-key": apiKey };
 
-  const systemPrompt = `
-You are Grocery Guardian, a smart and safety-conscious grocery assistant.
 
-Your job is to:
-- Help users find food that fits their dietary preferences.
-- Warn them if a product contains allergens they want to avoid.
-- Explain things clearly in a natural, helpful tone.
-
-User preferences:
-• Allergies: peanuts, gluten
-• Diet: vegetarian
-
-Always prioritize safety and personalize answers based on the user's preferences.
-`;
-
-  const body = {
-    messages: [
-      { role: "system", content: systemPrompt },
-      ...chatHistory.slice(-5),
-      { role: "user", content: userInput }
-    ],
-    temperature: 0.7,
-    max_tokens: 500
-  };
-
-  try {
-    const response = await axios.post(url, body, { headers });
-    return response.data.choices[0].message.content;
-  } catch (error) {
-    console.error("Azure OpenAI Error:", error);
-    return "Sorry, I couldn't respond at the moment.";
-  }
-}
-
-function addMessage(sender, text) {
-  const chatBox = document.getElementById("chat-box");
-  const msg = document.createElement("div");
-
-  msg.className =
-    sender === "user"
-      ? "user-message bg-blue-100 rounded-lg p-3 shadow text-sm self-end max-w-[70%] ml-auto"
-      : "bot-message bg-gray-200 rounded-lg p-3 shadow text-sm self-start max-w-[70%]";
-
-  msg.textContent = sender === "user" ? `🧑 ${text}` : `🤖 ${text}`;
-  chatBox.insertBefore(msg, document.getElementById("typingIndicator"));
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  const form = document.getElementById("chat-form");
-  const input = document.getElementById("user-input");
-  const chatBox = document.getElementById("chat-box");
-  const typingIndicator = document.getElementById("typingIndicator");
-  const micStatus = document.getElementById("micStatus");
-  const micButton = document.getElementById("micButton");
-  const toggle = document.getElementById("darkModeToggle");
-
-  const speechSdk = window.SpeechSDK;
-  const subscriptionKey = "F3IQZEZsRxA9rZDp5eqweyrHvSxUe6PLHjRb9CQNl2ztQIox87dxJQQJ99BDACYeBjFXJ3w3AAAYACOGucWO";
-  const serviceRegion = "eastus";
-
-  const userId = localStorage.getItem("userId") || "1"; // fallback for testing
-
-  function showTyping() {
-    typingIndicator.classList.remove("hidden");
-  }
-
-  function hideTyping() {
-    typingIndicator.classList.add("hidden");
-  }
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const userText = input.value.trim();
-    if (!userText) return;
-
-    addMessage("user", userText);
-    input.value = "";
-    chatHistory.push({ role: "user", content: userText });
-
-    showTyping();
-    const botReply = await getAzureReply(userText);
-    hideTyping();
-
-    addMessage("bot", botReply);
-    chatHistory.push({ role: "assistant", content: botReply });
-  });
-
-  micButton.addEventListener("click", () => {
-    micStatus.classList.remove("hidden");
-    const speechConfig = speechSdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
-    speechConfig.speechRecognitionLanguage = "en-US";
-
-    const audioConfig = speechSdk.AudioConfig.fromDefaultMicrophoneInput();
-    const recognizer = new speechSdk.SpeechRecognizer(speechConfig, audioConfig);
-
-    recognizer.recognizeOnceAsync((result) => {
-      micStatus.classList.add("hidden");
-
-      if (result.reason === speechSdk.ResultReason.RecognizedSpeech) {
-        input.value = result.text;
-        document.getElementById("sendButton").click();
-      } else {
-        alert("Speech not recognized. Try again.");
-      }
-
-      recognizer.close();
-    });
-  });
-
-  if (toggle) {
-    const isDark = localStorage.getItem("theme") === "dark";
-    if (isDark) document.body.classList.add("dark-mode");
-
-    toggle.addEventListener("click", () => {
-      document.body.classList.toggle("dark-mode");
-      const mode = document.body.classList.contains("dark-mode") ? "dark" : "light";
-      localStorage.setItem("theme", mode);
-      toggle.innerText = mode === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode";
-    });
-
-    toggle.innerText = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
-  }
-
-  document.getElementById("recommendButton").addEventListener("click", () => {
-    recommendSafeProducts(userId);
-  });
-});
-
-// --------- Other Functions ----------
 
 async function getTopSafeProducts(userId) {
   try {
-    const historyRes = await fetch(`http://localhost:5501/api/scanHistory/${userId}`);
+    const historyRes = await fetch(`http://localhost:5501/api/scan-history/${userId}`);
     const history = await historyRes.json();
 
     const prefsRes = await fetch(`http://localhost:5501/api/preferences/${userId}`);

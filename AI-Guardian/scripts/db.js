@@ -75,7 +75,7 @@ app.post('/allergens', (req, res) => {
 });
 
 
-app.patch('/update-allergens', async (req, res) => {
+app.post('/update-allergens', async (req, res) => {
   const { userId, allergens } = req.body;
   db.query(
     'UPDATE users SET allergens = ? WHERE id = ?',
@@ -108,6 +108,18 @@ app.post('/api/user', (req, res) => {
       res.send({ name });
     });
   });
+
+  app.post('/reload/user',(req,res) => {
+    const {id}= req.body;
+    db.query('SELECT * FROM users WHERE id=?',[id] ,(err,results) => {
+      if(err) {
+        console.error("Error reloading user: " , err);
+        return;
+      }
+      console.log(results[0]);
+      res.json(results[0]);
+    })
+  })
 
   // Save user allergen preferences
 app.post('/change-preferences', (req, res) => {
@@ -279,7 +291,7 @@ app.post('/api/register', async (req, res) => {
       // Create a token
       // const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
   
-      return res.json({ success: true});
+      return res.json({ success: true,user});
     });
   });
 
@@ -305,7 +317,7 @@ app.post('/login/phone', (req, res) => {
       // Create a token
       // const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
   
-      return res.json({ success: true});
+      return res.json({ success: true,user});
     });
   });
 
@@ -331,7 +343,7 @@ app.post('/login/phone', (req, res) => {
       // Create a token
       // const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
   
-      return res.json({ success: true});
+      return res.json({ success: true,user});
     });
   });
 

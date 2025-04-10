@@ -11,11 +11,11 @@ document.getElementById("profilePicInput")?.addEventListener("change", function(
     }
 });
 
-const userId = 1; // Use dynamic ID once login is integrated
-
+const user = JSON.parse(localStorage.getItem('currentUser')); 
+const userId = user.id;
 async function fetchAllergiesFromDB(userId) {
     try {
-        const res = await fetch(`http://localhost:5000/api/preferences/${userId}`);
+        const res = await fetch(`http://localhost:5501/api/preferences/${userId}`);
         return await res.json();
     } catch (err) {
         console.error("Error fetching allergies:", err);
@@ -25,7 +25,7 @@ async function fetchAllergiesFromDB(userId) {
 
 async function fetchUserNameFromDB(userId) {
     try {
-        const res = await fetch(`http://localhost:5000/api/user/${userId}`);
+        const res = await fetch(`http://localhost:5501/api/user/${userId}`);
         const data = await res.json();
         return data.name;
     } catch (err) {
@@ -36,7 +36,7 @@ async function fetchUserNameFromDB(userId) {
 
 async function saveUserNameToDB(userId, name) {
     try {
-        await fetch("http://localhost:5000/api/user", {
+        await fetch("http://localhost:5501/api/user", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ userId, name })
