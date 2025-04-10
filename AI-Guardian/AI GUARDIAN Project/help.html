@@ -12,12 +12,21 @@
     <script src="https://cdn.tailwindcss.com"></script>
     
 </head>
+<script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+
 <body class="flex flex-col h-screen overflow-hidden">
 
     <h1 class="text-xl font-bold text-center mt-3 mb-2 text-gray-800">Ask Grocery Guardian 🤖</h1>
 
   <div class="flex flex-col flex-1 overflow-hidden px-4 pb-20">
-    <div id="chat-box" class="flex-1 overflow-y-auto rounded-lg bg-white p-4 shadow-md space-y-3"></div>
+    
+    <div id="chat-box" class="flex-1 overflow-y-auto rounded-lg bg-white p-4 shadow-md space-y-3">
+      
+      <div id="typingIndicator" class="hidden flex items-center text-sm text-gray-500 mb-2 animate-fade-in">
+        🤖 Grocery Guardian is typing<span class="dots ml-1"><span>.</span><span>.</span><span>.</span></span>
+      </div>
+
+    </div>
 
 
     <button id="darkModeToggle" class="absolute top-2 right-4 text-sm bg-white border border-gray-300 rounded px-3 py-1 shadow-sm z-50">
@@ -26,11 +35,14 @@
       
 
   <form id="chat-form">
+    
     <input type="text" id="user-input" placeholder="Ask about allergens, safe food, etc." required />
-    <button type="submit">Send</button>
+    <button type="submit" id="sendButton">Send</button>
     <button id="micButton" title="Start voice input">
-        <i class="fas fa-microphone"></i>
-      </button>
+      <i class="fas fa-microphone"></i>
+    </button>
+    <span id="micStatus" class="text-sm text-green-600 ml-2 hidden">🎙️ Listening...</span>
+    
       
   </form>
     

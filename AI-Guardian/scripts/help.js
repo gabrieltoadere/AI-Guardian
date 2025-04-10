@@ -432,6 +432,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const input = document.getElementById('user-input');
   const chatBox = document.getElementById('chat-box');
 
+
+  function showTyping() {
+    document.getElementById("typingIndicator").classList.remove("hidden");
+  }
+  
+  function hideTyping() {
+    document.getElementById("typingIndicator").classList.add("hidden");
+  }
+  
+
+  
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -448,7 +460,12 @@ document.addEventListener('DOMContentLoaded', () => {
     input.value = '';
     chatHistory.push({ role: "user", content: userText });
 
+    showTyping();
+
     const botReply = await getAzureReply(userText);
+
+    hideTyping();
+
     chatBox.innerHTML += `
   <div class="bot-message bg-gray-200 rounded-lg p-3 shadow text-sm self-start max-w-[70%]">
     🤖 ${botReply}
@@ -463,36 +480,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-const micButton = document.getElementById("micButton");
 
-const recognition = window.SpeechRecognition || window.webkitSpeechRecognition
-  ? new (window.SpeechRecognition || window.webkitSpeechRecognition)()
-  : null;
+const micStatus = document.getElementById("micStatus");
+const speechSdk = window.SpeechSDK;
+const subscriptionKey = "F3IQZEZsRxA9rZDp5eqweyrHvSxUe6PLHjRb9CQNl2ztQIox87dxJQQJ99BDACYeBjFXJ3w3AAAYACOGucWO";
+const serviceRegion = "eastus"; // e.g., "eastus"
 
-if (recognition) {
-  recognition.lang = "en-US";
-  recognition.continuous = false;
+document.getElementById("micButton").addEventListener("click", () => {
+  micStatus.classList.remove("hidden");
+  const speechConfig = speechSdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
+  speechConfig.speechRecognitionLanguage = "en-US";
 
-  micButton.addEventListener("click", () => {
-    micButton.classList.add("listening");
-    recognition.start();
+  const audioConfig = speechSdk.AudioConfig.fromDefaultMicrophoneInput();
+  const recognizer = new speechSdk.SpeechRecognizer(speechConfig, audioConfig);
+
+  recognizer.recognizeOnceAsync(result => {
+    micStatus.classList.add("hidden");
+
+    if (result.reason === speechSdk.ResultReason.RecognizedSpeech) {
+      document.getElementById("user-input").value = result.text;
+      document.getElementById("sendButton").click();
+    } else {
+      alert("Speech not recognized. Try again.");
+    }
+
+    recognizer.close();
   });
+});
 
-  recognition.onresult = (event) => {
-    const transcript = event.results[0][0].transcript;
-    input.value = transcript;
-    micButton.classList.remove("listening");
-    sendBtn.click();
-  };
 
-  recognition.onerror = () => {
-    alert("Voice recognition failed. Please try again.");
-    micButton.classList.remove("listening");
-  };
-} else {
-  micButton.disabled = true;
-  micButton.title = "Voice not supported in this browser";
-}
 
 
 
