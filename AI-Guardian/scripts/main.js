@@ -1,18 +1,24 @@
 let listActive = false;
 
 async function displayAllergens(){
-    const userString = localStorage.getItem('currentUser');
     const allergensList = document.getElementById('allergens-list')
-    const user = JSON.parse(userString);
+    const user = JSON.parse(localStorage.getItem('currentUser'));
     console.log('user:',user);
     
 
     const allergens =JSON.parse(user.allergens);
-    allergens.forEach(allergen => {
+    if(allergens) {
+            allergens.forEach(allergen => {
+            const li = document.createElement('li');
+            li.textContent = allergen; 
+            allergensList.appendChild(li);
+        });
+    } else {
         const li = document.createElement('li');
-        li.textContent = allergen; 
+        li.textContent = 'No allergens'; 
         allergensList.appendChild(li);
-    });
+    }
+    
 }
 function makeNewList()
 {
