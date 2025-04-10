@@ -238,21 +238,149 @@
 //   if (e.key === "Enter") sendBtn.click();
 // });
 
-
-
 let chatHistory = [];
 
-// Import axios (make sure axios is installed if running via Node.js)
-const axios = window.axios;
-
 // Azure OpenAI Setup
-const endpoint = "https://ai-chatbott.openai.azure.com/"; // NO trailing slash
+const axios = window.axios;
+const endpoint = "https://ai-chatbott.openai.azure.com/";
 const apiKey = "RYXzx2E4wR6NOIbNIlk9rCZfQCKAjxTlShDpMDEhIxWtEQNMqGBXJQQJ99BDACYeBjFXJ3w3AAABACOGykDJ";
-const deploymentName = "chatbot"; // e.g. 'gpt-35-turbo'
-const apiVersion = "2023-12-01-preview"; // or newer if available
+const deploymentName = "chatbot";
+const apiVersion = "2023-12-01-preview";
 
+async function getAzureReply(userInput) {
+  const url = `${endpoint}openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`;
+  const headers = { "Content-Type": "application/json", "api-key": apiKey };
 
+  const systemPrompt = `
+You are Grocery Guardian, a smart and safety-conscious grocery assistant.
 
+Your job is to:
+- Help users find food that fits their dietary preferences.
+- Warn them if a product contains allergens they want to avoid.
+- Explain things clearly in a natural, helpful tone.
+
+User preferences:
+• Allergies: peanuts, gluten
+• Diet: vegetarian
+
+Always prioritize safety and personalize answers based on the user's preferences.
+`;
+
+  const body = {
+    messages: [
+      { role: "system", content: systemPrompt },
+      ...chatHistory.slice(-5),
+      { role: "user", content: userInput }
+    ],
+    temperature: 0.7,
+    max_tokens: 500
+  };
+
+  try {
+    const response = await axios.post(url, body, { headers });
+    return response.data.choices[0].message.content;
+  } catch (error) {
+    console.error("Azure OpenAI Error:", error);
+    return "Sorry, I couldn't respond at the moment.";
+  }
+}
+
+function addMessage(sender, text) {
+  const chatBox = document.getElementById("chat-box");
+  const msg = document.createElement("div");
+
+  msg.className =
+    sender === "user"
+      ? "user-message bg-blue-100 rounded-lg p-3 shadow text-sm self-end max-w-[70%] ml-auto"
+      : "bot-message bg-gray-200 rounded-lg p-3 shadow text-sm self-start max-w-[70%]";
+
+  msg.textContent = sender === "user" ? `🧑 ${text}` : `🤖 ${text}`;
+  chatBox.insertBefore(msg, document.getElementById("typingIndicator"));
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("chat-form");
+  const input = document.getElementById("user-input");
+  const chatBox = document.getElementById("chat-box");
+  const typingIndicator = document.getElementById("typingIndicator");
+  const micStatus = document.getElementById("micStatus");
+  const micButton = document.getElementById("micButton");
+  const toggle = document.getElementById("darkModeToggle");
+
+  const speechSdk = window.SpeechSDK;
+  const subscriptionKey = "F3IQZEZsRxA9rZDp5eqweyrHvSxUe6PLHjRb9CQNl2ztQIox87dxJQQJ99BDACYeBjFXJ3w3AAAYACOGucWO";
+  const serviceRegion = "eastus";
+
+  const userId = localStorage.getItem("userId") || "1"; // fallback for testing
+
+  function showTyping() {
+    typingIndicator.classList.remove("hidden");
+  }
+
+  function hideTyping() {
+    typingIndicator.classList.add("hidden");
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const userText = input.value.trim();
+    if (!userText) return;
+
+    addMessage("user", userText);
+    input.value = "";
+    chatHistory.push({ role: "user", content: userText });
+
+    showTyping();
+    const botReply = await getAzureReply(userText);
+    hideTyping();
+
+    addMessage("bot", botReply);
+    chatHistory.push({ role: "assistant", content: botReply });
+  });
+
+  micButton.addEventListener("click", () => {
+    micStatus.classList.remove("hidden");
+    const speechConfig = speechSdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
+    speechConfig.speechRecognitionLanguage = "en-US";
+
+    const audioConfig = speechSdk.AudioConfig.fromDefaultMicrophoneInput();
+    const recognizer = new speechSdk.SpeechRecognizer(speechConfig, audioConfig);
+
+    recognizer.recognizeOnceAsync((result) => {
+      micStatus.classList.add("hidden");
+
+      if (result.reason === speechSdk.ResultReason.RecognizedSpeech) {
+        input.value = result.text;
+        document.getElementById("sendButton").click();
+      } else {
+        alert("Speech not recognized. Try again.");
+      }
+
+      recognizer.close();
+    });
+  });
+
+  if (toggle) {
+    const isDark = localStorage.getItem("theme") === "dark";
+    if (isDark) document.body.classList.add("dark-mode");
+
+    toggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark-mode");
+      const mode = document.body.classList.contains("dark-mode") ? "dark" : "light";
+      localStorage.setItem("theme", mode);
+      toggle.innerText = mode === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode";
+    });
+
+    toggle.innerText = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
+  }
+
+  document.getElementById("recommendButton").addEventListener("click", () => {
+    recommendSafeProducts(userId);
+  });
+});
+
+// --------- Other Functions ----------
 
 async function getTopSafeProducts(userId) {
   try {
@@ -262,49 +390,40 @@ async function getTopSafeProducts(userId) {
     const prefsRes = await fetch(`http://localhost:5501/api/preferences/${userId}`);
     const allergens = await prefsRes.json();
 
-    const safeProducts = history.filter(item => {
+    const safeProducts = history.filter((item) => {
       const ingredients = item.ingredients || [];
-      return !allergens.some(allergen =>
-        ingredients.some(ing => ing.toLowerCase().includes(allergen.toLowerCase()))
+      return !allergens.some((allergen) =>
+        ingredients.some((ing) => ing.toLowerCase().includes(allergen.toLowerCase()))
       );
     });
 
     const counts = {};
-    safeProducts.forEach(item => {
+    safeProducts.forEach((item) => {
       counts[item.product_name] = (counts[item.product_name] || 0) + 1;
     });
 
     return Object.entries(counts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3)
-      .map(entry => entry[0]); // product names only
+      .map((entry) => entry[0]);
   } catch (err) {
     console.error("Top product fetch error:", err);
     return [];
   }
 }
 
-document.getElementById("recommendButton").addEventListener("click", () => {
-  recommendSafeProducts(userId);
-});
-
-
-
 async function recommendSafeProducts(userId) {
   try {
     const topSafe = await getTopSafeProducts(userId);
-
     if (topSafe.length === 0) {
       addMessage("bot", "You haven’t scanned enough safe foods yet to give a recommendation.");
       return;
     }
 
-// Fetch user's real allergens
-const prefsRes = await fetch(`http://localhost:5501/api/preferences/${userId}`);
-const allergens = await prefsRes.json(); // comes back as an array
+    const prefsRes = await fetch(`http://localhost:5501/api/preferences/${userId}`);
+    const allergens = await prefsRes.json();
 
-// Build system prompt with real data
-const systemPrompt = `
+    const systemPrompt = `
 You are Grocery Guardian, a smart allergen-aware assistant.
 
 The user is allergic to: ${allergens.join(", ") || "none"}
@@ -317,7 +436,6 @@ Your job:
 If the user asks if something is safe, always double check ingredients.
 If recommending, avoid allergens.
 `;
-
 
     const payload = {
       messages: [
@@ -350,179 +468,16 @@ If recommending, avoid allergens.
   }
 }
 
-
-
-
-
-async function getAzureReply(userInput) {
-  
-  const url = `${endpoint}openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`;
-
-  const headers = {
-    "Content-Type": "application/json",
-    "api-key": apiKey
-  };
-
-
-  const today = new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric"
-  });
-
-
-//this give the ai context as to what the app is about
-  const systemPrompt = `
-You are Grocery Guardian, a smart and safety-conscious grocery assistant.
-
-Your job is to:
-- Help users find food that fits their dietary preferences.
-- Warn them if a product contains allergens they want to avoid.
-- Explain things clearly in a natural, helpful tone.
-
-User preferences:
-• Allergies: peanuts, gluten
-• Diet: vegetarian
-
-Example conversations:
-User: Can you suggest a peanut-free snack?
-Assistant: Sure! Hippeas Organic Chickpea Puffs are nut-free and gluten-free.
-
-User: Can I eat this cereal if I’m avoiding dairy?
-Assistant: Let me check the ingredients... no milk or lactose, so it should be safe for you!
-
-Always prioritize safety and personalize answers based on the user's preferences.
-`;
-
-const body = {
-  messages: [
-    { role: "system", content: systemPrompt },
-    ...chatHistory.slice(-5), // include up to last 5 exchanges
-    { role: "user", content: userInput }
-  ],
-  temperature: 0.7,
-  max_tokens: 500
-};
-
-
-  
-
-  try {
-    const response = await axios.post(url, body, { headers });
-    return response.data.choices[0].message.content;
-  } catch (error) {
-    console.error("Azure OpenAI Error:", error);
-    return "Sorry, I couldn't respond at the moment.";
-  }
-
-
-  if (userText.toLowerCase().includes("ingredients")) {
-    const analysis = await analyzeIngredients(userId);
-    return analysis;
-  }
-  
-}
-
-
-
-// Hook into the chat form
-document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('chat-form');
-  const input = document.getElementById('user-input');
-  const chatBox = document.getElementById('chat-box');
-
-
-  function showTyping() {
-    document.getElementById("typingIndicator").classList.remove("hidden");
-  }
-  
-  function hideTyping() {
-    document.getElementById("typingIndicator").classList.add("hidden");
-  }
-  
-
-  
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const userText = input.value.trim();
-    if (!userText) return;
-    
-    
-    chatBox.innerHTML += `
-  <div class="user-message bg-blue-100 rounded-lg p-3 shadow text-sm self-end max-w-[70%] ml-auto">
-    🧑 ${userText}
-  </div>`;
-
-
-    input.value = '';
-    chatHistory.push({ role: "user", content: userText });
-
-    showTyping();
-
-    const botReply = await getAzureReply(userText);
-
-    hideTyping();
-
-    chatBox.innerHTML += `
-  <div class="bot-message bg-gray-200 rounded-lg p-3 shadow text-sm self-start max-w-[70%]">
-    🤖 ${botReply}
-  </div>`;
-
-
-    chatBox.scrollTop = chatBox.scrollHeight;
-    chatHistory.push({ role: "assistant", content: botReply });
-
-  });
-});
-
-
-
-
-const micStatus = document.getElementById("micStatus");
-const speechSdk = window.SpeechSDK;
-const subscriptionKey = "F3IQZEZsRxA9rZDp5eqweyrHvSxUe6PLHjRb9CQNl2ztQIox87dxJQQJ99BDACYeBjFXJ3w3AAAYACOGucWO";
-const serviceRegion = "eastus"; // e.g., "eastus"
-
-document.getElementById("micButton").addEventListener("click", () => {
-  micStatus.classList.remove("hidden");
-  const speechConfig = speechSdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
-  speechConfig.speechRecognitionLanguage = "en-US";
-
-  const audioConfig = speechSdk.AudioConfig.fromDefaultMicrophoneInput();
-  const recognizer = new speechSdk.SpeechRecognizer(speechConfig, audioConfig);
-
-  recognizer.recognizeOnceAsync(result => {
-    micStatus.classList.add("hidden");
-
-    if (result.reason === speechSdk.ResultReason.RecognizedSpeech) {
-      document.getElementById("user-input").value = result.text;
-      document.getElementById("sendButton").click();
-    } else {
-      alert("Speech not recognized. Try again.");
-    }
-
-    recognizer.close();
-  });
-});
-
-
-
-
-
-
 async function analyzeIngredients(userId) {
   try {
-    // Get user allergens
     const prefsRes = await fetch(`http://localhost:5501/api/preferences/${userId}`);
     const allergens = await prefsRes.json();
 
-    // Get latest scanned product
     const scanRes = await fetch(`http://localhost:5501/api/scan-history/${userId}/latest`);
     const lastScan = await scanRes.json();
-    const ingredients = Array.isArray(lastScan.ingredients) ? lastScan.ingredients.join(", ") : lastScan.ingredients;
+    const ingredients = Array.isArray(lastScan.ingredients)
+      ? lastScan.ingredients.join(", ")
+      : lastScan.ingredients;
 
     const systemPrompt = `
 You are an allergen expert. A user has scanned a food product.
@@ -533,13 +488,7 @@ Your task:
 - Warn if any ingredients may contain or be related to the user's allergens
 - Be cautious and prioritize safety
 
-Example:
-Allergen: peanuts
-Ingredients: sugar, milk, peanut oil
-→ Response: This product may be unsafe due to peanut oil.
-
-Now analyze:
-${ingredients}
+Ingredients: ${ingredients}
 `;
 
     const payload = {
@@ -567,22 +516,3 @@ ${ingredients}
     return "Sorry, I couldn’t analyze the ingredients right now.";
   }
 }
-
-
-
-
-document.addEventListener("DOMContentLoaded", () => {
-  const toggle = document.getElementById("darkModeToggle");
-  const isDark = localStorage.getItem("theme") === "dark";
-
-  if (isDark) document.body.classList.add("dark-mode");
-
-  toggle.addEventListener("click", () => {
-    document.body.classList.toggle("dark-mode");
-    const mode = document.body.classList.contains("dark-mode") ? "dark" : "light";
-    localStorage.setItem("theme", mode);
-    toggle.innerText = mode === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode";
-  });
-
-  toggle.innerText = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
-});
