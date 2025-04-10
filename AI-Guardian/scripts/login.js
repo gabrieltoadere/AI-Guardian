@@ -8,7 +8,7 @@ document.querySelector(".login-btn").addEventListener("click", async () => {
     const rejectDiv = document.getElementById('reject-div');
 
     try {
-        const response = await fetch('http://localhost:5501/login/normal', {
+        const response = await fetch('http://localhost:5501/loginnormal', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username: username, password: password }),
@@ -16,7 +16,7 @@ document.querySelector(".login-btn").addEventListener("click", async () => {
 
         const data = await response.json();
         console.log('Received:', data);
-        if(data[0].username === username && data[0].password===password) {
+        if(data.success) {
             window.location.href="main.html";
         }
     } catch (error) {

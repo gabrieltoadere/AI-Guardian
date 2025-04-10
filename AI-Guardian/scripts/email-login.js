@@ -12,7 +12,7 @@ document.querySelector(".login-btn").addEventListener("click", async () => {
 
         const data = await response.json();
         console.log('Received:', data);
-        if(data[0].email === email && data[0].password===password) {
+        if(data.success) {
             window.location.href="main.html";
         }
     } catch (error) {

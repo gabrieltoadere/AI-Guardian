@@ -237,11 +237,11 @@ app.post('/api/register', async (req, res) => {
       }
 
       // Hash password
-      const hashedPassword = await bcrypt.hash(password, 10);
+      // const hashedPassword = await bcrypt.hash(password, 10);
 
       // Insert new user
       db.query('INSERT INTO users (name, email, username, password) VALUES (?, ?, ?, ?)',
-        [name, email, username, hashedPassword],
+        [name, email, username, password],
         (err) => {
           if (err) {
             console.error('Insert error:', err);
@@ -257,7 +257,7 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-  app.post('/login/normal', (req, res) => {
+  app.post('/loginnormal', (req, res) => {
     const { username, password } = req.body;
   
     if (!username || !password)
@@ -271,15 +271,15 @@ app.post('/api/register', async (req, res) => {
   
       const user = results[0];
   
-      const match = await bcrypt.compare(password, user.password);
+      const match = (user.password===password);
       if (!match) {
         return res.status(401).json({ success: false, message: 'Invalid username or password' });
       }
   
       // Create a token
-      const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
+      // const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
   
-      return res.json({ success: true, token });
+      return res.json({ success: true});
     });
   });
 
@@ -297,15 +297,15 @@ app.post('/login/phone', (req, res) => {
   
       const user = results[0];
   
-      const match = await bcrypt.compare(password, user.password);
+      const match = (user.password===password);
       if (!match) {
         return res.status(401).json({ success: false, message: 'Invalid username or password' });
       }
   
       // Create a token
-      const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
+      // const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
   
-      return res.json({ success: true, token });
+      return res.json({ success: true});
     });
   });
 
@@ -323,15 +323,15 @@ app.post('/login/phone', (req, res) => {
   
       const user = results[0];
   
-      const match = await bcrypt.compare(password, user.password);
+      const match = (user.password===password);
       if (!match) {
         return res.status(401).json({ success: false, message: 'Invalid email or password' });
       }
   
       // Create a token
-      const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
+      // const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
   
-      return res.json({ success: true, token });
+      return res.json({ success: true});
     });
   });
 
