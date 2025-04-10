@@ -251,12 +251,12 @@ const apiKey = "RYXzx2E4wR6NOIbNIlk9rCZfQCKAjxTlShDpMDEhIxWtEQNMqGBXJQQJ99BDACYe
 const deploymentName = "chatbot"; // e.g. 'gpt-35-turbo'
 const apiVersion = "2023-12-01-preview"; // or newer if available
 
-
-
+const user = JSON.parse(localStorage.getItem('currentUser'));
+const userId= user.id;
 
 async function getTopSafeProducts(userId) {
   try {
-    const historyRes = await fetch(`http://localhost:5501/api/scanHistory/${userId}`);
+    const historyRes = await fetch(`http://localhost:5501/api/scan-history/${userId}`);
     const history = await historyRes.json();
 
     const prefsRes = await fetch(`http://localhost:5501/api/preferences/${userId}`);
