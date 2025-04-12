@@ -10,57 +10,45 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.16.0/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-  
+    
 </head>
-<script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+<body class="flex flex-col h-screen overflow-hidden">
 
-<body class="flex flex-col h-screen bg-gray-100">
+    <h1 class="text-xl font-bold text-center mt-3 mb-2 text-gray-800">Ask Grocery Guardian 🤖</h1>
 
-  <!-- Header -->
-  <h1 class="text-xl font-bold text-center mt-3 mb-2 text-gray-800">Ask Grocery Guardian 🤖</h1>
+  <div class="flex flex-col flex-1 overflow-hidden px-4 pb-20">
+    <div id="chat-box" class="flex-1 overflow-y-auto rounded-lg bg-white p-4 shadow-md space-y-3"></div>
 
-  <!-- Main flex container -->
-  <div class="flex flex-col flex-1 overflow-hidden">
 
-    <!-- Scrollable Chat Section -->
-    <div id="chat-box" class="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-white rounded-t-lg shadow-md mx-3">
-      <!-- Messages will go here -->
-      <div id="typingIndicator" class="hidden flex items-center text-sm text-gray-500 animate-fade-in">
-        🤖 Grocery Guardian is typing<span class="dots ml-1"><span>.</span><span>.</span><span>.</span></span>
-      </div>
-    </div>
+    <button id="darkModeToggle" class="absolute top-2 right-4 text-sm bg-white border border-gray-300 rounded px-3 py-1 shadow-sm z-50">
+        🌙 Dark Mode
+      </button>
+      
 
-    <!-- Input Area -->
-    <form id="chat-form" class="flex items-center gap-2 px-4 py-2 bg-white border-t shadow z-10">
-      <input type="text" id="user-input" class="flex-1 px-4 py-2 border rounded-md" placeholder="Ask about allergens, safe food, etc." required />
-      <button type="submit" id="sendButton" class="bg-green-600 text-white px-4 py-2 rounded-md">Send</button>
-      <button id="micButton" title="Start voice input" class="text-green-800 px-3 text-xl">
+  <form id="chat-form">
+    <input type="text" id="user-input" placeholder="Ask about allergens, safe food, etc." required />
+    <button type="submit">Send</button>
+    <button id="micButton" title="Start voice input">
         <i class="fas fa-microphone"></i>
       </button>
-      <span id="micStatus" class="text-sm text-green-600 ml-2 hidden">🎙️ Listening...</span>
-    </form>
-
-    <!-- Recommend Button -->
-    <div class="px-4 py-3 bg-white shadow-inner z-10">
-      <button id="recommendButton" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded">
-        <i class="fa-solid fa-heart-circle-check"></i> Recommend Safe Products
-      </button>
+      
+  </form>
+    
+    <!-- Recommendation Button -->
+    <div class="recommend-container">
+    <button id="recommendButton"><i class="fa-solid fa-heart-circle-check"></i> Recommend Safe Products</button>
     </div>
-  </div>
-
-  <!-- Bottom Navbar -->
-  <div class="navbar fixed bottom-0 left-0 right-0 bg-white shadow-md p-3 z-50">
+</div>
+<div class="navbar fixed bottom-0 left-0 right-0 bg-white shadow-md p-3 z-50">
     <ul class="flex justify-around text-sm text-gray-700">
       <li><a href="main.html"><i class="fas fa-home"></i> Home</a></li>
-      <li><a href="scanning.html"><i class="fas fa-barcode"></i> Scan</a></li>
+      <li><a href="scanIndex.html"><i class="fas fa-barcode"></i> Scan</a></li>
       <li><a href="history.html"><i class="fas fa-history"></i> History</a></li>
       <li><a href="profile.html"><i class="fas fa-user"></i> Profile</a></li>
     </ul>
   </div>
-
   <script src="../scripts/help.js"></script>
 </body>
-
 </html>
 
 

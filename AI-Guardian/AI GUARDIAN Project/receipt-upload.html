@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt Upload</title>
+    <link rel="stylesheet" href="/AI-Guardian/css/receipt-upload.css">
+</head>
+<body>
+    <h1>Upload Receipt</h1>
+    
+    <input type="file" id="receiptUpload" accept="image/*">
+    <label for="receiptUpload" class="upload-button">Choose Receipt Image</label>
+
+    <div id="receiptSection" class="hidden">
+        <label>Your Receipt:</label>
+        <pre id="receiptContent"></pre>
+        <label>Products You Bought:</label>
+        <p id="matchedProducts">-</p>
+
+        <div id="productList"></div>
+        <div id="totalValueDisplay"></div>
+        <button id="addItemButton">Add Item</button>
+        <button id="confirmItemsButton">Confirm</button>
+    </div>
+
+    <a href="scanIndex.html" class="back-button">Back to Main</a>
+
+    <script src="scripts/receipt-upload.js"></script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+/* ================ BASE STYLES ================ */
+:root {
+    --primary-color: #2e7d32;
+    --primary-light: #81c784;
+    --primary-dark: #1b5e20;
+    --secondary-color: #388e3c;
+    --background-light: #f8faf8;
+    --text-dark: #2d3748;
+    --text-light: #ffffff;
+    --text-muted: #718096;
+    --danger: #e53935;
+    --success: #43a047;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --border-radius-sm: 10px;
+    --border-radius-md: 14px;
+}
+
+body {
+    background-color: var(--background-light);
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+/* ================ HEADER STYLES ================ */
+.header {
+    text-align: center;
+    padding: 2rem 1rem 1rem;
+}
+
+.header h1 {
+    font-weight: 600;
+    font-size: 2rem;
+    color: var(--primary-dark);
+    margin: 0 0 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.header h1 i {
+    font-size: 1.8rem;
+}
+
+.subtitle {
+    color: var(--text-muted);
+    font-size: 1rem;
+    font-weight: 400;
+    margin: 0;
+}
+
+/* ================ MENU CONTAINER ================ */
+.menu-container {
+    padding: 0 1.5rem 5rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* ================ MENU ITEMS ================ */
+.menu-item {
+    display: flex;
+    align-items: center;
+    background: white;
+    color: var(--text-dark);
+    text-decoration: none;
+    padding: 1.25rem;
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border-left: 4px solid var(--primary-color);
+    position: relative;
+}
+
+.menu-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    background: white;
+}
+
+.menu-icon {
+    width: 44px;
+    height: 44px;
+    background-color: var(--primary-light);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    color: white;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.menu-content {
+    flex-grow: 1;
+}
+
+.menu-title {
+    font-weight: 500;
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.menu-desc {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 400;
+}
+
+.arrow {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-left: 0.5rem;
+    transition: transform 0.3s ease;
+}
+
+.menu-item:hover .arrow {
+    transform: translateX(3px);
+    color: var(--primary-color);
+}
+
+/* Allergen Preferences Special Styling */
+.allergy-item {
+    border-left-color: var(--danger);
+}
+
+.allergy-item .menu-icon {
+    background-color: var(--danger);
+}
+
+/* ================ CHATBOT ICON ================ */
+.chatbot-icon {
+    position: fixed;
+    bottom: 5rem;
+    right: 1.5rem;
+    width: 56px;
+    height: 56px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    z-index: 99;
+    transition: all 0.3s ease;
+}
+
+.chatbot-icon:hover {
+    transform: scale(1.1) translateY(-3px);
+    background-color: var(--primary-dark);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* ================ MOBILE OPTIMIZATIONS ================ */
+@media screen and (max-width: 480px) {
+    .header {
+        padding: 1.5rem 1rem 0.5rem;
+    }
+    
+    .header h1 {
+        font-size: 1.6rem;
+    }
+    
+    .menu-container {
+        padding: 0 1rem 5rem;
+    }
+    
+    .menu-item {
+        padding: 1rem;
+    }
+    
+    .menu-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .menu-title {
+        font-size: 1rem;
+    }
+    
+    .menu-desc {
+        font-size: 0.8rem;
+    }
+}
