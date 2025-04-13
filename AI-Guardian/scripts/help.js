@@ -269,22 +269,89 @@ function addMessage(sender, text) {
   const msg = document.createElement("div");
 
   msg.className = sender === "user"
-    ? "user-message bg-blue-100 rounded-lg p-3 shadow text-sm self-end max-w-[70%] ml-auto"
-    : "bot-message bg-gray-200 rounded-lg p-3 shadow text-sm self-start max-w-[70%]";
-
-    msg.innerHTML = sender === "user"
-  ? `<div class="text-sm font-semibold mb-1 text-right text-green-700">You</div>${text}`
-  : `<div class="text-sm font-semibold mb-1 text-left text-gray-600">Grocery Guardian</div>${formatBotMessage(text)}`
+  ? "user-message bg-blue-100 rounded-lg px-3 py-2 text-sm sm:text-base self-end max-w-[80%] ml-auto"
+  : "bot-message bg-gray-200 rounded-lg px-3 py-2 text-sm sm:text-base self-start max-w-[80%]";
 
 
-  
+  msg.innerHTML = sender === "user" ? `🧑 ${text}` : `🤖 ${formatBotMessage(text)}`;
+
+  // ✅ Add long press/tap to copy
+  let pressTimer;
+  msg.addEventListener("mousedown", () => {
+    pressTimer = setTimeout(() => {
+      navigator.clipboard.writeText(text);
+      showToast("📋 Message copied!");
+    }, 600); // Long press after 600ms
+  });
+
+  msg.addEventListener("mouseup", () => clearTimeout(pressTimer));
+  msg.addEventListener("mouseleave", () => clearTimeout(pressTimer));
+
   chatBox.insertBefore(msg, typingIndicator);
   chatBox.scrollTo({
     top: chatBox.scrollHeight,
     behavior: "smooth"
   });
-  
 }
+
+
+
+//quick reply function
+function renderQuickReplies(replies = []) {
+  const chatBox = document.getElementById("chat-box");
+  const container = document.createElement("div");
+  container.className = "flex flex-wrap gap-2 mt-1";
+
+  replies.forEach(label => {
+    const button = document.createElement("button");
+    button.className = "bg-green-100 hover:bg-green-200 text-green-800 px-3 py-1 rounded-full text-sm font-medium shadow";
+    button.textContent = label;
+
+    // Define what each button does
+    button.addEventListener("click", async () => {
+      if (label.includes("Copy")) {
+        const last = chatHistory.slice().reverse().find(msg => msg.role === "user" && msg.content.startsWith("Image text:"));
+        if (last) {
+          await navigator.clipboard.writeText(last.content.replace("Image text:", "").trim());
+          showToast("✅ Copied to clipboard!");
+        } else {
+          showToast("⚠️ Nothing to copy.");
+        }
+      }
+
+      if (label.includes("Scan")) {
+        document.getElementById("liveCameraButton").click();
+      }
+
+      if (label.includes("Save")) {
+        showToast("✅ Product saved!");
+        // Optionally: POST to /api/save-product
+      }
+
+      // Remove buttons after use
+      container.remove();
+    });
+
+    container.appendChild(button);
+  });
+
+  chatBox.appendChild(container);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function showToast(message) {
+  const toast = document.createElement("div");
+  toast.textContent = message;
+  toast.className = "fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-green-700 text-white px-4 py-2 rounded shadow z-50 text-sm animate-fade-in";
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.remove();
+  }, 2000);
+}
+
+
+
 
 async function getAzureReply(userInput) {
   const systemPrompt = `
@@ -360,9 +427,24 @@ document.addEventListener("DOMContentLoaded", () => {
     chatHistory.push({ role: "user", content: userText });
     input.value = "";
     showTyping();
+
+
+
     const reply = await getAzureReply(userText);
-    hideTyping();
-    addMessage("bot", reply);
+
+// Simulate typing delay
+setTimeout(() => {
+  hideTyping();
+  addMessage("bot", reply);
+  chatHistory.push({ role: "assistant", content: reply });
+
+  // Optional: show quick replies here
+  // renderQuickReplies(["📋 Copy Ingredients", "🔍 Scan Another"]);
+}, 1200); // 1200ms = 1.2 seconds
+
+
+
+
     chatHistory.push({ role: "assistant", content: reply });
   });
 
@@ -400,7 +482,18 @@ document.addEventListener("DOMContentLoaded", () => {
     if (text) {
       chatHistory.push({ role: "user", content: `Image text: ${text}` });
       const result = await analyzeIngredientsFromText(userId, text);
-      addMessage("bot", result);
+
+
+      setTimeout(() => {
+        hideTyping();
+        addMessage("bot", result);
+        chatHistory.push({ role: "assistant", content: result });
+        renderQuickReplies(["📋 Copy Ingredients", "🔍 Scan Another", "✅ Save Product"]);
+      }, 1200);
+      
+
+
+      renderQuickReplies(["📋 Copy Ingredients", "🔍 Scan Another", "✅ Save Product"]);
       chatHistory.push({ role: "assistant", content: result });
     } else {
       addMessage("bot", "Could not read text from image.");
@@ -408,6 +501,44 @@ document.addEventListener("DOMContentLoaded", () => {
     hideTyping();
   });
 
+
+  document.getElementById("testQuickReplies").addEventListener("click", () => {
+    addMessage("bot", "Here’s what you can do next:");
+    renderQuickReplies(["📋 Copy Ingredients", "🔍 Scan Another", "✅ Save Product"]);
+  });
+  
+
+  document.getElementById("clearChatButton").addEventListener("click", () => {
+    const chatBox = document.getElementById("chat-box");
+    chatBox.innerHTML = ''; // Clear all messages
+  
+    // Add typing indicator back
+    const typing = document.createElement("div");
+    typing.id = "typingIndicator";
+    typing.className = "hidden flex items-center text-sm text-gray-500 animate-fade-in";
+    typing.innerHTML = `🤖 Grocery Guardian is typing<span class="dots ml-1"><span>.</span><span>.</span><span>.</span></span>`;
+    chatBox.appendChild(typing);
+  
+    chatHistory = []; // Reset chat history
+    showToast("✅ Chat cleared.");
+  });
+  
+
+
+
+  function showToast(message = "✅ Copied to clipboard!") {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.classList.remove("hidden");
+    toast.style.opacity = "1";
+  
+    setTimeout(() => {
+      toast.style.opacity = "0";
+      setTimeout(() => toast.classList.add("hidden"), 300);
+    }, 2000);
+  }
+
+  
 
 
   // cameraBtn.addEventListener("click", async () => {

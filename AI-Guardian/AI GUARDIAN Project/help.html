@@ -17,50 +17,59 @@
   <!-- Header -->
   <h1 class="text-xl font-bold text-center mt-3 mb-2 text-gray-800">Ask Grocery Guardian 🤖</h1>
 
-  <!-- Main flex container -->
-  <div class="flex flex-col flex-1 overflow-hidden mb-24">
+ <!-- Main flex container -->
+ <div class="flex flex-col flex-1 overflow-hidden mb-[140px] sm:mb-20">
+
 
     <div id="contextChips" class="flex flex-wrap gap-2 px-4 py-2 text-sm text-gray-700">
       <!-- Chips will be inserted here -->
     </div>
 
     
-    
+
     <!-- Scrollable Chat Section -->
-    <div id="chat-box" class="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-white rounded-t-lg shadow-md mx-3">
+    <div id="chat-box"
+  class="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-white rounded-t-lg shadow-md mx-3 max-h-[calc(100vh-220px)] sm:max-h-full">
+
+
       <div id="typingIndicator" class="hidden flex items-center text-sm text-gray-500 animate-fade-in">
         🤖 Grocery Guardian is typing<span class="dots ml-1"><span>.</span><span>.</span><span>.</span></span>
       </div>
     </div>
 
     <!-- Input Area -->
-    <form id="chat-form" class="flex items-center gap-2 px-4 py-2 bg-white border-t shadow z-10">
-      <input type="text" id="user-input" class="flex-1 px-4 py-2 border rounded-md" placeholder="Ask about allergens, safe food, etc." required />
-      <button type="submit" id="sendButton" class="bg-green-600 text-white px-4 py-2 rounded-md">Send</button>
-      <button id="micButton" title="Start voice input" class="text-green-800 px-3 text-xl">
-        <i class="fas fa-microphone"></i>
-      </button>
+    <form id="chat-form"
+  class="flex flex-wrap sm:flex-nowrap items-center gap-2 px-2 py-2 bg-white border-t shadow z-40 fixed bottom-[64px] w-full sm:static max-w-full">
+
+
+  <input type="text" id="user-input"
+  class="flex-1 min-w-0 px-4 py-2 border rounded-md text-sm"
+  placeholder="Ask about allergens, safe food, etc." required />
+
+  <button type="submit" id="sendButton"
+  class="bg-green-600 text-white px-3 py-2 text-sm rounded-md whitespace-nowrap">Send</button>
+
+<button id="micButton"
+  class="text-green-800 px-3 py-2 text-xl rounded whitespace-nowrap">
+  <i class="fas fa-microphone"></i>
+</button>
+      
       <input type="file" id="imageInput" accept="image/*" class="hidden" />
-      <button id="uploadImageButton" title="Upload label image" class="text-green-800 dark:text-green-300 px-3 text-xl">
-        <i class="fas fa-camera"></i>
-      </button>
-      <!-- <button id="liveCameraButton" type="button" title="Use camera" class="text-green-800 dark:text-green-300 px-3 text-xl">
-        <i class="fas fa-video"></i>
-      </button> -->
+      <button id="uploadImageButton"
+  class="text-green-800 px-3 py-2 text-xl rounded whitespace-nowrap">
+  <i class="fas fa-camera"></i>
+</button>
+      
       <span id="micStatus" class="text-sm text-green-600 ml-2 hidden">🎙️ Listening...</span>
     </form>
 
-    <!-- Modal camera preview
-    <div id="cameraModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
-      <div class="bg-white dark:bg-gray-900 p-4 rounded shadow-md flex flex-col gap-4">
-        <video id="videoStream" autoplay playsinline class="w-full max-w-sm rounded bg-black"></video>
-        <div class="flex justify-between gap-4">
-          <button id="captureButton" type="button" class="bg-green-600 text-white px-4 py-2 rounded">Capture</button>
-          <button id="closeCamera" type="button" class="bg-gray-600 text-white px-4 py-2 rounded">Cancel</button>
-        </div>
-      </div>
-    </div> -->
 
+    <!-- Test Quick Reply Button -->
+  <div class="px-4 py-2 bg-white shadow-inner z-10">
+    <button id="testQuickReplies" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 rounded">
+      Quick Replies
+    </button>
+  </div>
     <!-- Recommend Button -->
     <div class="px-4 py-3 bg-white shadow-inner z-10">
       <button id="recommendButton" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded">
@@ -68,6 +77,8 @@
       </button>
     </div>
   </div>
+
+
 
   <!-- Bottom Navbar -->
   <div class="navbar fixed bottom-0 left-0 right-0 bg-white shadow-md p-3 z-50">
@@ -79,8 +90,15 @@
     </ul>
   </div>
 
+  <!-- Clear Chat Floating Button -->
+<button id="clearChatButton" title="Clear Chat"
+class="fixed bottom-24 right-4 bg-red-500 hover:bg-red-600 text-white p-3 rounded-full shadow-lg z-50 text-xl">
+🧹
+</button>
+
   <!-- Azure Speech SDK -->
   <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
   <script src="../scripts/help.js"></script>
+  
 </body>
 </html>
