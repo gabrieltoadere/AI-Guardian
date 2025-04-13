@@ -1,30 +1,33 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Help Center</title>
-    <link rel="stylesheet" href="/AI-Guardian/css/help.css">
-    <link rel="stylesheet" href="/AI-Guardian/css/common.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://unpkg.com/compromise"></script> 
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.16.0/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-  
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Help Center</title>
+  <link rel="stylesheet" href="/AI-Guardian/css/help.css">
+  <link rel="stylesheet" href="/AI-Guardian/css/common.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://unpkg.com/compromise"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.16.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
 
-<body class="flex flex-col h-screen bg-gray-100">
-
+<body class="flex flex-col min-h-screen bg-gray-100">
   <!-- Header -->
   <h1 class="text-xl font-bold text-center mt-3 mb-2 text-gray-800">Ask Grocery Guardian 🤖</h1>
 
   <!-- Main flex container -->
-  <div class="flex flex-col flex-1 overflow-hidden">
+  <div class="flex flex-col flex-1 overflow-hidden mb-24">
 
+    <div id="contextChips" class="flex flex-wrap gap-2 px-4 py-2 text-sm text-gray-700">
+      <!-- Chips will be inserted here -->
+    </div>
+
+    
+    
     <!-- Scrollable Chat Section -->
     <div id="chat-box" class="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-white rounded-t-lg shadow-md mx-3">
-      <!-- Messages will go here -->
       <div id="typingIndicator" class="hidden flex items-center text-sm text-gray-500 animate-fade-in">
         🤖 Grocery Guardian is typing<span class="dots ml-1"><span>.</span><span>.</span><span>.</span></span>
       </div>
@@ -37,8 +40,26 @@
       <button id="micButton" title="Start voice input" class="text-green-800 px-3 text-xl">
         <i class="fas fa-microphone"></i>
       </button>
+      <input type="file" id="imageInput" accept="image/*" class="hidden" />
+      <button id="uploadImageButton" title="Upload label image" class="text-green-800 dark:text-green-300 px-3 text-xl">
+        <i class="fas fa-camera"></i>
+      </button>
+      <!-- <button id="liveCameraButton" type="button" title="Use camera" class="text-green-800 dark:text-green-300 px-3 text-xl">
+        <i class="fas fa-video"></i>
+      </button> -->
       <span id="micStatus" class="text-sm text-green-600 ml-2 hidden">🎙️ Listening...</span>
     </form>
+
+    <!-- Modal camera preview
+    <div id="cameraModal" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-50">
+      <div class="bg-white dark:bg-gray-900 p-4 rounded shadow-md flex flex-col gap-4">
+        <video id="videoStream" autoplay playsinline class="w-full max-w-sm rounded bg-black"></video>
+        <div class="flex justify-between gap-4">
+          <button id="captureButton" type="button" class="bg-green-600 text-white px-4 py-2 rounded">Capture</button>
+          <button id="closeCamera" type="button" class="bg-gray-600 text-white px-4 py-2 rounded">Cancel</button>
+        </div>
+      </div>
+    </div> -->
 
     <!-- Recommend Button -->
     <div class="px-4 py-3 bg-white shadow-inner z-10">
@@ -58,9 +79,8 @@
     </ul>
   </div>
 
+  <!-- Azure Speech SDK -->
+  <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
   <script src="../scripts/help.js"></script>
 </body>
-
 </html>
-
-
