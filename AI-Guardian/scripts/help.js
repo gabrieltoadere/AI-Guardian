@@ -1,4 +1,4 @@
-// // help.js - Enhanced Chat Logic with OpenAI API
+                                                                                                                                                   // // help.js - Enhanced Chat Logic with OpenAI API
 
 // let chatHistory = [];
 
@@ -760,3 +760,4 @@ function formatBotMessage(text) {
     .replace(/#/g, "")                                          // remove all other hash symbols
     .trim();
 }
+         
