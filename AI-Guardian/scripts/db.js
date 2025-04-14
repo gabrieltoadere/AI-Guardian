@@ -9,12 +9,13 @@ const port = 5501;
 app.use(cors());
 app.use(bodyParser.json());
 
-
 const db = mysql.createConnection({
-    host: 'webcourse.cs.nuim.ie',
-    user:'u240669',
-    password:'reeGeewo1egeeCha',
-    database:'cs230_u240669',
+    host: 'ai-guardian.mysql.database.azure.com',
+    user:'aiGuard',
+    password:'28-fourth-25',
+    database:'aiguardian',
+    port: 3306,
+  ssl: { rejectUnauthorized: false }
 });
 
 db.connect((err) => {
