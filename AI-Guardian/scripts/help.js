@@ -238,35 +238,129 @@
 //   if (e.key === "Enter") sendBtn.click();
 // });
 
-let chatHistory = [];
 
-// Azure OpenAI Setup
+
+
+console.log("✅ help.js loaded");
+
+let chatHistory = [];
 const axios = window.axios;
+
 const endpoint = "https://ai-chatbott.openai.azure.com/";
 const apiKey = "RYXzx2E4wR6NOIbNIlk9rCZfQCKAjxTlShDpMDEhIxWtEQNMqGBXJQQJ99BDACYeBjFXJ3w3AAABACOGykDJ";
 const deploymentName = "chatbot";
 const apiVersion = "2023-12-01-preview";
 
-async function getAzureReply(userInput) {
-  const url = `${endpoint}openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`;
-  const headers = { "Content-Type": "application/json", "api-key": apiKey };
+const computerVisionKey = "DuEhx6ZRkN5PK5LaQp5AFONLUE91HjrD9aGl8kyyWJRy9VSOeGXrJQQJ99BDACYeBjFXJ3w3AAAFACOGcOoP";
+const computerVisionEndpoint = "https://grocery-vision.cognitiveservices.azure.com/";
 
+const typingIndicator = document.getElementById("typingIndicator");
+
+function showTyping() {
+  typingIndicator?.classList.remove("hidden");
+}
+
+function hideTyping() {
+  typingIndicator?.classList.add("hidden");
+}
+
+function addMessage(sender, text) {
+  const chatBox = document.getElementById("chat-box");
+  const msg = document.createElement("div");
+
+  msg.className = sender === "user"
+  ? "user-message bg-blue-100 rounded-lg px-3 py-2 text-sm sm:text-base self-end max-w-[80%] ml-auto"
+  : "bot-message bg-gray-200 rounded-lg px-3 py-2 text-sm sm:text-base self-start max-w-[80%]";
+
+
+  msg.innerHTML = sender === "user" ? `🧑 ${text}` : `🤖 ${formatBotMessage(text)}`;
+
+  // ✅ Add long press/tap to copy
+  let pressTimer;
+  msg.addEventListener("mousedown", () => {
+    pressTimer = setTimeout(() => {
+      navigator.clipboard.writeText(text);
+      showToast("📋 Message copied!");
+    }, 600); // Long press after 600ms
+  });
+
+  msg.addEventListener("mouseup", () => clearTimeout(pressTimer));
+  msg.addEventListener("mouseleave", () => clearTimeout(pressTimer));
+
+  chatBox.insertBefore(msg, typingIndicator);
+  chatBox.scrollTo({
+    top: chatBox.scrollHeight,
+    behavior: "smooth"
+  });
+}
+
+
+
+//quick reply function
+function renderQuickReplies(replies = []) {
+  const chatBox = document.getElementById("chat-box");
+  const container = document.createElement("div");
+  container.className = "flex flex-wrap gap-2 mt-1";
+
+  replies.forEach(label => {
+    const button = document.createElement("button");
+    button.className = "bg-green-100 hover:bg-green-200 text-green-800 px-3 py-1 rounded-full text-sm font-medium shadow";
+    button.textContent = label;
+
+    // Define what each button does
+    button.addEventListener("click", async () => {
+      if (label.includes("Copy")) {
+        const last = chatHistory.slice().reverse().find(msg => msg.role === "user" && msg.content.startsWith("Image text:"));
+        if (last) {
+          await navigator.clipboard.writeText(last.content.replace("Image text:", "").trim());
+          showToast("✅ Copied to clipboard!");
+        } else {
+          showToast("⚠️ Nothing to copy.");
+        }
+      }
+
+      if (label.includes("Scan")) {
+        document.getElementById("liveCameraButton").click();
+      }
+
+      if (label.includes("Save")) {
+        showToast("✅ Product saved!");
+        // Optionally: POST to /api/save-product
+      }
+
+      // Remove buttons after use
+      container.remove();
+    });
+
+    container.appendChild(button);
+  });
+
+  chatBox.appendChild(container);
+  chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function showToast(message) {
+  const toast = document.createElement("div");
+  toast.textContent = message;
+  toast.className = "fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-green-700 text-white px-4 py-2 rounded shadow z-50 text-sm animate-fade-in";
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.remove();
+  }, 2000);
+}
+
+
+
+
+async function getAzureReply(userInput) {
   const systemPrompt = `
 You are Grocery Guardian, a smart and safety-conscious grocery assistant.
-
-Your job is to:
-- Help users find food that fits their dietary preferences.
-- Warn them if a product contains allergens they want to avoid.
-- Explain things clearly in a natural, helpful tone.
-
-User preferences:
-• Allergies: peanuts, gluten
-• Diet: vegetarian
-
-Always prioritize safety and personalize answers based on the user's preferences.
+User preferences: Allergies: peanuts, gluten | Diet: vegetarian
+Be natural, helpful, and prioritize allergen safety.
 `;
 
-  const body = {
+  const payload = {
     messages: [
       { role: "system", content: systemPrompt },
       ...chatHistory.slice(-5),
@@ -277,103 +371,240 @@ Always prioritize safety and personalize answers based on the user's preferences
   };
 
   try {
-    const response = await axios.post(url, body, { headers });
-    return response.data.choices[0].message.content;
-  } catch (error) {
-    console.error("Azure OpenAI Error:", error);
-    return "Sorry, I couldn't respond at the moment.";
+    const url = `${endpoint}openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`;
+    const headers = { "Content-Type": "application/json", "api-key": apiKey };
+    const res = await axios.post(url, payload, { headers });
+    return res.data.choices[0].message.content;
+  } catch (err) {
+    console.error("Chat error:", err);
+    return "Sorry, I couldn't respond right now.";
   }
 }
 
-function addMessage(sender, text) {
-  const chatBox = document.getElementById("chat-box");
-  const msg = document.createElement("div");
 
-  msg.className =
-    sender === "user"
-      ? "user-message bg-blue-100 rounded-lg p-3 shadow text-sm self-end max-w-[70%] ml-auto"
-      : "bot-message bg-gray-200 rounded-lg p-3 shadow text-sm self-start max-w-[70%]";
 
-  msg.textContent = sender === "user" ? `🧑 ${text}` : `🤖 ${text}`;
-  chatBox.insertBefore(msg, document.getElementById("typingIndicator"));
+ //Allergen/Dietary “Memory Chips”
+ async function loadContextChips(userId) {
+  try {
+    const res = await fetch(`http://localhost:5501/api/preferences/${userId}`);
+    const data = await res.json();
 
-  // ✅ Scroll to bottom after message is added
-  chatBox.scrollTop = chatBox.scrollHeight;
+    const context = document.getElementById("contextChips");
+    context.innerHTML = ""; // clear old
+
+    if (data.length > 0) {
+      context.innerHTML += `<div class="context-chip">⚠️ Allergies: ${data.join(", ")}</div>`;
+    }
+
+    // Optional: add fixed diet info if you want
+    context.innerHTML += `<div class="context-chip">🥦 Diet: vegetarian</div>`;
+  } catch (err) {
+    console.error("Failed to load context chips:", err);
+  }
 }
+
+
+
 
 document.addEventListener("DOMContentLoaded", () => {
+  
   const form = document.getElementById("chat-form");
   const input = document.getElementById("user-input");
-  const chatBox = document.getElementById("chat-box");
-  const typingIndicator = document.getElementById("typingIndicator");
-  const micStatus = document.getElementById("micStatus");
   const micButton = document.getElementById("micButton");
+  const micStatus = document.getElementById("micStatus");
+  const uploadBtn = document.getElementById("uploadImageButton");
+  const imageInput = document.getElementById("imageInput");
+  const cameraBtn = document.getElementById("liveCameraButton");
   const toggle = document.getElementById("darkModeToggle");
-
-  const speechSdk = window.SpeechSDK;
-  const subscriptionKey = "F3IQZEZsRxA9rZDp5eqweyrHvSxUe6PLHjRb9CQNl2ztQIox87dxJQQJ99BDACYeBjFXJ3w3AAAYACOGucWO";
-  const serviceRegion = "eastus";
-
   const userId = localStorage.getItem("userId") || "1";
-
-  function showTyping() {
-    typingIndicator.classList.remove("hidden");
-  }
-
-  function hideTyping() {
-    typingIndicator.classList.add("hidden");
-  }
+  loadContextChips(userId);
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const userText = input.value.trim();
     if (!userText) return;
-
     addMessage("user", userText);
-    input.value = "";
     chatHistory.push({ role: "user", content: userText });
-
+    input.value = "";
     showTyping();
-    const botReply = await getAzureReply(userText);
-    hideTyping();
 
-    addMessage("bot", botReply);
-    chatHistory.push({ role: "assistant", content: botReply });
+
+
+    const reply = await getAzureReply(userText);
+
+// Simulate typing delay
+setTimeout(() => {
+  hideTyping();
+  addMessage("bot", reply);
+  chatHistory.push({ role: "assistant", content: reply });
+
+  // Optional: show quick replies here
+  // renderQuickReplies(["📋 Copy Ingredients", "🔍 Scan Another"]);
+}, 1200); // 1200ms = 1.2 seconds
+
+
+
+
+    chatHistory.push({ role: "assistant", content: reply });
   });
+
+  const speechSdk = window.SpeechSDK;
+  const speechKey = "F3IQZEZsRxA9rZDp5eqweyrHvSxUe6PLHjRb9CQNl2ztQIox87dxJQQJ99BDACYeBjFXJ3w3AAAYACOGucWO";
+  const region = "eastus";
 
   micButton.addEventListener("click", () => {
     micStatus.classList.remove("hidden");
-    const speechConfig = speechSdk.SpeechConfig.fromSubscription(subscriptionKey, serviceRegion);
-    speechConfig.speechRecognitionLanguage = "en-US";
+    const config = speechSdk.SpeechConfig.fromSubscription(speechKey, region);
+    config.speechRecognitionLanguage = "en-US";
+    const audio = speechSdk.AudioConfig.fromDefaultMicrophoneInput();
+    const recognizer = new speechSdk.SpeechRecognizer(config, audio);
 
-    const audioConfig = speechSdk.AudioConfig.fromDefaultMicrophoneInput();
-    const recognizer = new speechSdk.SpeechRecognizer(speechConfig, audioConfig);
-
-    recognizer.recognizeOnceAsync((result) => {
+    recognizer.recognizeOnceAsync(result => {
       micStatus.classList.add("hidden");
-
       if (result.reason === speechSdk.ResultReason.RecognizedSpeech) {
         input.value = result.text;
         document.getElementById("sendButton").click();
       } else {
-        alert("Speech not recognized. Try again.");
+        alert("Speech not recognized.");
       }
-
       recognizer.close();
     });
   });
 
+  uploadBtn.addEventListener("click", () => imageInput.click());
+
+  imageInput.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    addMessage("user", "📷 Uploaded image...");
+    showTyping();
+    const text = await extractTextFromImage(file);
+    if (text) {
+      chatHistory.push({ role: "user", content: `Image text: ${text}` });
+      const result = await analyzeIngredientsFromText(userId, text);
+
+
+      setTimeout(() => {
+        hideTyping();
+        addMessage("bot", result);
+        chatHistory.push({ role: "assistant", content: result });
+        renderQuickReplies(["📋 Copy Ingredients", "🔍 Scan Another", "✅ Save Product"]);
+      }, 1200);
+      
+
+
+      renderQuickReplies(["📋 Copy Ingredients", "🔍 Scan Another", "✅ Save Product"]);
+      chatHistory.push({ role: "assistant", content: result });
+    } else {
+      addMessage("bot", "Could not read text from image.");
+    }
+    hideTyping();
+  });
+
+
+  document.getElementById("testQuickReplies").addEventListener("click", () => {
+    addMessage("bot", "Here’s what you can do next:");
+    renderQuickReplies(["📋 Copy Ingredients", "🔍 Scan Another", "✅ Save Product"]);
+  });
+  
+
+  document.getElementById("clearChatButton").addEventListener("click", () => {
+    const chatBox = document.getElementById("chat-box");
+    chatBox.innerHTML = ''; // Clear all messages
+  
+    // Add typing indicator back
+    const typing = document.createElement("div");
+    typing.id = "typingIndicator";
+    typing.className = "hidden flex items-center text-sm text-gray-500 animate-fade-in";
+    typing.innerHTML = `🤖 Grocery Guardian is typing<span class="dots ml-1"><span>.</span><span>.</span><span>.</span></span>`;
+    chatBox.appendChild(typing);
+  
+    chatHistory = []; // Reset chat history
+    showToast("✅ Chat cleared.");
+  });
+  
+
+
+
+  function showToast(message = "✅ Copied to clipboard!") {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.classList.remove("hidden");
+    toast.style.opacity = "1";
+  
+    setTimeout(() => {
+      toast.style.opacity = "0";
+      setTimeout(() => toast.classList.add("hidden"), 300);
+    }, 2000);
+  }
+
+  
+
+
+  // cameraBtn.addEventListener("click", async () => {
+  //   const modal = document.getElementById("cameraModal");
+  //   const video = document.getElementById("videoStream");
+  //   modal.classList.remove("hidden");
+  //   try {
+  //     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+  //     video.srcObject = stream;
+  //     video.setAttribute("autoplay", true);
+  //     video.setAttribute("playsinline", true);
+  //     video.play();
+  //   } catch (err) {
+  //     alert("Camera access blocked.");
+  //     modal.classList.add("hidden");
+  //   }
+  // });
+
+  // document.getElementById("closeCamera").addEventListener("click", stopCamera);
+
+  // document.getElementById("captureButton").addEventListener("click", async () => {
+  //   const video = document.getElementById("videoStream");
+  //   const canvas = document.createElement("canvas");
+  //   canvas.width = video.videoWidth;
+  //   canvas.height = video.videoHeight;
+  //   canvas.getContext("2d").drawImage(video, 0, 0);
+  //   stopCamera();
+  //   const blob = await new Promise(res => canvas.toBlob(res, "image/jpeg"));
+  //   addMessage("user", "📸 Captured image...");
+  //   showTyping();
+  //   const text = await extractTextFromImage(blob);
+  //   if (text) {
+  //     chatHistory.push({ role: "user", content: `Image text: ${text}` });
+  //     const result = await analyzeIngredientsFromText(userId, text);
+  //     addMessage("bot", result);
+  //     chatHistory.push({ role: "assistant", content: result });
+  //   } else {
+  //     addMessage("bot", "No readable text found.");
+  //   }
+  //   hideTyping();
+  // });
+
+  // function stopCamera() {
+  //   const modal = document.getElementById("cameraModal");
+  //   const video = document.getElementById("videoStream");
+  //   const stream = video.srcObject;
+  //   if (stream) {
+  //     stream.getTracks().forEach(track => track.stop());
+  //     video.srcObject = null;
+  //   }
+  //   modal.classList.add("hidden");
+  // }
+
+
+
+
+
   if (toggle) {
     const isDark = localStorage.getItem("theme") === "dark";
-    if (isDark) document.body.classList.add("dark-mode");
-
+    if (isDark) document.documentElement.classList.add("dark");
     toggle.addEventListener("click", () => {
-      document.body.classList.toggle("dark-mode");
-      const mode = document.body.classList.contains("dark-mode") ? "dark" : "light";
+      document.documentElement.classList.toggle("dark");
+      const mode = document.documentElement.classList.contains("dark") ? "dark" : "light";
       localStorage.setItem("theme", mode);
       toggle.innerText = mode === "dark" ? "☀️ Light Mode" : "🌙 Dark Mode";
     });
-
     toggle.innerText = isDark ? "☀️ Light Mode" : "🌙 Dark Mode";
   }
 
@@ -382,72 +613,107 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// --------- Other Functions ----------
+
+
+async function extractTextFromImage(file) {
+  const url = `${computerVisionEndpoint}vision/v3.2/read/analyze`;
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Ocp-Apim-Subscription-Key": computerVisionKey,
+        "Content-Type": "application/octet-stream"
+      },
+      body: file
+    });
+    if (!res.ok) throw new Error("OCR request failed");
+    const operationLocation = res.headers.get("operation-location");
+    await new Promise(r => setTimeout(r, 3000));
+    const result = await fetch(operationLocation, {
+      headers: { "Ocp-Apim-Subscription-Key": computerVisionKey }
+    });
+    const data = await result.json();
+    const lines = data.analyzeResult?.readResults?.flatMap(page =>
+      page.lines.map(line => line.text)
+    );
+    return lines?.join(" ") || null;
+  } catch (err) {
+    console.error("OCR failed:", err);
+    return null;
+  }
+}
+
+async function analyzeIngredientsFromText(userId, ingredients) {
+  try {
+    const prefs = await fetch(`http://localhost:5501/api/preferences/${userId}`).then(r => r.json());
+    const prompt = `
+You are a food safety expert. User is allergic to: ${prefs.join(", ") || "none"}
+Label: "${ingredients}"
+Analyze the ingredients for allergen risks.
+`;
+    const payload = {
+      messages: [
+        { role: "system", content: prompt },
+        { role: "user", content: "Is this safe to eat?" }
+      ],
+      temperature: 0.7,
+      max_tokens: 500
+    };
+    const res = await fetch(`${endpoint}/openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": apiKey
+      },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content || "No result.";
+  } catch (err) {
+    console.error("Analysis failed:", err);
+    return "Error analyzing ingredients.";
+  }
+}
 
 async function getTopSafeProducts(userId) {
   try {
-    const historyRes = await fetch(`http://localhost:5501/api/scanHistory/${userId}`);
-    const history = await historyRes.json();
-
-    const prefsRes = await fetch(`http://localhost:5501/api/preferences/${userId}`);
-    const allergens = await prefsRes.json();
-
-    const safeProducts = history.filter((item) => {
-      const ingredients = item.ingredients || [];
-      return !allergens.some((allergen) =>
-        ingredients.some((ing) => ing.toLowerCase().includes(allergen.toLowerCase()))
-      );
-    });
-
+    const [history, allergens] = await Promise.all([
+      fetch(`http://localhost:5501/api/scanHistory/${userId}`).then(r => r.json()),
+      fetch(`http://localhost:5501/api/preferences/${userId}`).then(r => r.json())
+    ]);
+    const safe = history.filter(item =>
+      !allergens.some(a => item.ingredients?.some(ing => ing.toLowerCase().includes(a.toLowerCase())))
+    );
     const counts = {};
-    safeProducts.forEach((item) => {
-      counts[item.product_name] = (counts[item.product_name] || 0) + 1;
-    });
-
-    return Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
-      .map((entry) => entry[0]);
+    safe.forEach(item => counts[item.product_name] = (counts[item.product_name] || 0) + 1);
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name]) => name);
   } catch (err) {
-    console.error("Top product fetch error:", err);
+    console.error("Safe product lookup failed:", err);
     return [];
   }
 }
 
 async function recommendSafeProducts(userId) {
   try {
-    const topSafe = await getTopSafeProducts(userId);
-    if (topSafe.length === 0) {
-      addMessage("bot", "You haven’t scanned enough safe foods yet to give a recommendation.");
+    const products = await getTopSafeProducts(userId);
+    if (products.length === 0) {
+      addMessage("bot", "You haven’t scanned enough safe foods to recommend anything yet.");
       return;
     }
-
-    const prefsRes = await fetch(`http://localhost:5501/api/preferences/${userId}`);
-    const allergens = await prefsRes.json();
-
-    const systemPrompt = `
-You are Grocery Guardian, a smart allergen-aware assistant.
-
-The user is allergic to: ${allergens.join(", ") || "none"}
-
-Your job:
-- Filter unsafe ingredients
-- Recommend suitable products
-- Explain clearly and kindly
-
-If the user asks if something is safe, always double check ingredients.
-If recommending, avoid allergens.
+    const allergens = await fetch(`http://localhost:5501/api/preferences/${userId}`).then(r => r.json());
+    const prompt = `
+You are Grocery Guardian, an allergen-aware assistant.
+User allergies: ${allergens.join(", ") || "none"}
+Recommend safe foods avoiding allergens.
 `;
-
     const payload = {
       messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: "What do you recommend I try next?" }
+        { role: "system", content: prompt },
+        { role: "user", content: "What safe products do you recommend?" }
       ],
       temperature: 0.7,
       max_tokens: 400
     };
-
     const res = await fetch(`${endpoint}/openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`, {
       method: "POST",
       headers: {
@@ -456,66 +722,41 @@ If recommending, avoid allergens.
       },
       body: JSON.stringify(payload)
     });
-
     const data = await res.json();
-
-    if (data.choices?.length > 0) {
-      addMessage("bot", data.choices[0].message.content.trim());
-    } else {
-      addMessage("bot", "I found some safe products, but couldn't generate a recommendation.");
-    }
+    const response = data.choices?.[0]?.message?.content || "Could not generate recommendation.";
+    addMessage("bot", response);
   } catch (err) {
-    console.error("Azure AI Recommendation Error:", err);
-    addMessage("bot", "Sorry, I couldn't generate a recommendation right now.");
+    console.error("Recommend failed:", err);
+    addMessage("bot", "Something went wrong with the recommendation.");
   }
 }
 
-async function analyzeIngredients(userId) {
-  try {
-    const prefsRes = await fetch(`http://localhost:5501/api/preferences/${userId}`);
-    const allergens = await prefsRes.json();
 
-    const scanRes = await fetch(`http://localhost:5501/api/scan-history/${userId}/latest`);
-    const lastScan = await scanRes.json();
-    const ingredients = Array.isArray(lastScan.ingredients)
-      ? lastScan.ingredients.join(", ")
-      : lastScan.ingredients;
 
-    const systemPrompt = `
-You are an allergen expert. A user has scanned a food product.
-Their allergies are: ${allergens.join(", ") || "none"}.
+function formatBotMessage(text) {
 
-Your task:
-- Analyze the ingredient list below
-- Warn if any ingredients may contain or be related to the user's allergens
-- Be cautious and prioritize safety
 
-Ingredients: ${ingredients}
-`;
-
-    const payload = {
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: "Are there any allergen risks here?" }
-      ],
-      temperature: 0.7,
-      max_tokens: 400
-    };
-
-    const res = await fetch(`${endpoint}/openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "api-key": apiKey
-      },
-      body: JSON.stringify(payload)
-    });
-
-    const data = await res.json();
-    return data.choices?.[0]?.message?.content || "I couldn't analyze the ingredients.";
-  } catch (err) {
-    console.error("Ingredient NLP Error:", err);
-    return "Sorry, I couldn’t analyze the ingredients right now.";
+  //check for known products
+  if (text.includes("**Product:**")) {
+    return `
+      <div class="product-card">
+        ${text
+          .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+          .replace(/\n/g, "<br>")}
+      </div>`;
   }
-}
 
+  
+  return text
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+    .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-blue-600 underline">$1</a>') // **bold**
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")                       // *italic*
+    .replace(/\n\n/g, "<br><br>")                               // paragraph spacing
+    .replace(/\n/g, "<br>")                                     // single line breaks
+    .replace(/^[-•] (.*)/gm, "<li>$1</li>")                     // bullets
+    .replace(/<li>(.*?)<\/li>/g, "<ul class='list-disc ml-6 text-sm'>$&</ul>") // wrap bullets
+    .replace(/`([^`]+)`/g, "<code class='bg-gray-200 rounded px-1'>$1</code>") // inline code
+    .replace(/#+\s?(.*)/g, "$1")                                // remove markdown headings like ### text
+    .replace(/#/g, "")                                          // remove all other hash symbols
+    .trim();
+}
