@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -65,5 +65,66 @@
         <li><a href="profile.html"><i class="fas fa-user"></i> Profile</a></li>
     </ul>
 </div>
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Capture Receipt</title>
+  <link rel="stylesheet" href="/AI-Guardian/css/common.css">
+  <style>
+    video, canvas { width: 100%; max-width: 480px; border-radius: 12px; }
+    #captureBtn { margin-top: 10px; padding: 10px 20px; }
+  </style>
+</head>
+<body>
+  <h1>📸 Capture Receipt</h1>
+  <video id="video" autoplay></video>
+  <canvas id="canvas" style="display:none;"></canvas>
+  <button id="captureBtn">Capture & Upload</button>
+
+  <pre id="ocrResult"></pre>
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const captureBtn = document.getElementById('captureBtn');
+    const ocrResult = document.getElementById('ocrResult');
+
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => { video.srcObject = stream; })
+      .catch(err => console.error('Camera error:', err));
+
+    captureBtn.addEventListener('click', async () => {
+      const ctx = canvas.getContext('2d');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      canvas.toBlob(async (blob) => {
+        const formData = new FormData();
+        formData.append('document', blob, 'capture.jpg');
+
+        try {
+          const res = await fetch('https://api.mindee.net/v1/products/mindee/expense_receipts/v5/predict', {
+            method: 'POST',
+            headers: { 'Authorization': 'Token 64eb36356c646964a70ae2ef537bd463' },
+            body: formData
+          });
+
+          const result = await res.json();
+          const items = result?.document?.inference?.prediction?.line_items || [];
+          const parsed = items.map(i => `${i.description?.value} x${i.quantity?.value || 1} - $${i.total_amount?.value || 0}`).join('\n');
+          ocrResult.textContent = parsed || 'No items found.';
+        } catch (err) {
+          console.error('Upload failed:', err);
+        }
+      }, 'image/jpeg');
+    });
+  </script>
 </body>
 </html>

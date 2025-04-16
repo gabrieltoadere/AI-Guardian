@@ -206,3 +206,92 @@
       font-size: 1rem;
   }
 }
+
+
+.receipt-overview {
+  margin-top: 40px;
+  padding: 20px;
+  background: #e8f5e9;
+  border: 1px solid #c8e6c9;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* Dropdown */
+#monthSelector {
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #81c784;
+  background-color: #ffffff;
+  margin-bottom: 20px;
+}
+
+/* Entry Toggle Button */
+.receipt-toggle {
+  background-color: #c8e6c9;
+  border: none;
+  width: 100%;
+  text-align: left;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #2e7d32;
+  cursor: pointer;
+  margin-bottom: 5px;
+  transition: all 0.2s ease;
+}
+
+.receipt-toggle:hover {
+  background-color: #a5d6a7;
+}
+
+/* Detail Panel */
+.receipt-details {
+  background-color: #f1f8e9;
+  padding: 10px;
+  border-left: 4px solid #4caf50;
+  margin-bottom: 10px;
+  border-radius: 6px;
+}
+
+/* Inputs in Edit Mode */
+.receipt-details input {
+  margin: 5px;
+  padding: 5px 8px;
+  font-size: 0.95rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Action Buttons */
+.save-receipt,
+.delete-receipt {
+  margin: 5px 8px 10px 0;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.delete-receipt {
+  background-color: #e53935;
+}
+
+.save-receipt:hover {
+  background-color: #388e3c;
+}
+.delete-receipt:hover {
+  background-color: #c62828;
+}
+
+
+.hidden {
+  display: none;
+}
+
+

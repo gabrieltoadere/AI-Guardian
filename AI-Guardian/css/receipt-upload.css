@@ -45,22 +45,29 @@ h1 {
 }
 
 /* ===== Receipt Section ===== */
+/* Main Layout */
 #receiptSection {
-    background-color: white;
-    padding: 25px;
+    background: #f0fdf4;
+    border: 1px solid #a5d6a7;
     border-radius: 12px;
-    margin: 20px 0;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    border-left: 5px solid #2ecc71;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
-#receiptSection label {
-    display: block;
-    font-weight: 600;
-    color: #27ae60;
-    margin: 15px 0 8px;
-    font-size: 1.1rem;
+/* Inputs and Labels */
+#receiptSection input[type="text"],
+#receiptSection input[type="date"],
+#receiptSection input[type="number"] {
+    width: 90%;
+    padding: 8px 10px;
+    margin: 5px 0 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    display: inline-block;
 }
+
 
 #receiptContent {
     background-color: #f8f9fa;
