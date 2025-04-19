@@ -36,7 +36,7 @@
     <div class="navbar">
       <ul>
         <li>
-          <a href="main.html"><i class="fas fa-home"></i> Home</a>
+          <a href="main.html" class="active"><i class="fas fa-home"></i> Home</a>
         </li>
         <li>
           <a href="scanIndex.html"><i class="fas fa-barcode"></i> Scan</a>
@@ -56,5 +56,30 @@
     </div>
     <script src="/AI-Guardian/scripts/main.js"></script>
     <script src="/AI-Guardian/scripts/allergy-selection.js"></script>
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        const chatbot = document.getElementById("chatbotIcon");
+    
+        // Function to show tooltip
+        function showTooltip() {
+          chatbot.classList.add("show-tooltip");
+          setTimeout(() => {
+            chatbot.classList.remove("show-tooltip");
+          }, 3000); // Show for 3 seconds
+        }
+    
+        // Show once when page loads
+        showTooltip();
+    
+        // Then every 2 minutes (120000 ms)
+        setInterval(showTooltip, 10000);
+      });
+      
+    </script>
+    
+    
   </body>
+  
 </html>
+
+
