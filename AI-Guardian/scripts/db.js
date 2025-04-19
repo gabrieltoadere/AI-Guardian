@@ -5,9 +5,26 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const port = 5501;
+const {OAuth2Client} = require('google-auth-library');
+const client = new OAuth2Client("229386078489-ovi0bke1m73e26lm1397baqplj5rabgg.apps.googleusercontent.com");
+const ndoemailer = require('nodemailer');
+const crypto = require('crypto');
+
+
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname,'scripts')));
+
+
+const transporter = ndoemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user:'groceryguardian@gmail.com',
+    pass:'zspv wnsn pqlo nbbl'
+  }
+});
+
 
 const db = mysql.createConnection({
     host: 'ai-guardian.mysql.database.azure.com',
@@ -24,10 +41,116 @@ db.connect((err) => {
     } else {
         console.log("Connected to db")
     }
-    
 });
 
 
+//google login
+app.post('/auth/google', async (req, res) => {
+  const { token } = req.body;
+
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: "229386078489-ovi0bke1m73e26lm1397baqplj5rabgg.apps.googleusercontent.com"
+    });
+
+    const payload = ticket.getPayload();
+    const { name, email } = payload;
+
+    db.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
+      if (err) {
+        console.error('Select error:', err);
+        return res.status(500).json({ success: false, message: "Database query failed." });
+      }
+
+      if (results.length > 0) {
+        const existingUser = results[0];
+        return res.json({ success: true, user: existingUser });
+      } else {
+        db.query('INSERT INTO users (username, email) VALUES (?, ?)', [name, email], (err, insertResult) => {
+          if (err) {
+            console.error('Insert error:', err);
+            return res.status(500).json({ success: false, message: "Failed to create user." });
+          }
+
+
+          db.query('SELECT * FROM users WHERE email = ?', [email], (err, newResults) => {
+            if (err) {
+              console.error('Fetch after insert error:', err);
+              return res.status(500).json({ success: false, message: "User created but fetch failed." });
+            }
+
+            const user = newResults[0];
+            return res.json({ success: true, user });
+          });
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Token verification failed:", error);
+    res.status(401).json({ success: false, error: "Invalid token" });
+  }
+});
+
+app.post('/forgot-password',(req,res) => {
+  const {email} = req.body;
+
+  const token = crypto.randomBytes(32).toString('hex');
+  const expiration = new Date(Date.now() + 3600000);
+
+  db.query('UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE email = ?',
+    [token,expiration,email], (err,result) => {
+      if(err) {
+        return res.status(400).json({success: false ,message:'user not found'});
+      }
+
+      const resetLink = `http://127.0.0.1:5503/AI-Guardian/AI%20GUARDIAN%20Project/reset-password.html?token=${token}&email=${encodeURIComponent(email)}`;
+
+      const mailOptions = {
+        from: 'groceryguardian@gmail.com',
+        to: 'gabriel.toadere@icloud.com',
+        subject: 'Password reset link for Grocery Guardian',
+        html:`<p>Click the link below to reset your password:</p>
+        <a href="${resetLink}">${resetLink}</a>`
+      };
+
+      transporter.sendMail(mailOptions, (err,info) => {
+        if(err) {
+          console.error('Email error: ', err);
+          return res.status(500).json({success: false , message: 'failed to send email'});
+        }
+
+
+        res.json({success: true , message: 'Reset email sent'});
+      })
+    }
+  )
+});
+
+app.post('/reset-password',(req,res) => {
+  const { email,token,newPassword} = req.body;
+  db.query(
+    'SELECT * FROM users WHERE email =? AND reset_token = ? AND reset_token_expiry > UTC_TIMESTAMP()',
+    [email,token],(err,results) => {
+      console.log(token);
+      if(err || results.length===0) {
+        return res.status(400).json({ success: false, message: "Invalid or expired token" });
+      }
+
+      db.query(
+        'UPDATE users SET password =?, reset_token=NULL,reset_token_expiry=NULL WHERE email=?',
+        [newPassword,email],
+        (err) => {
+          if(err) {
+            return res.status(500).json({success:false,message:'Failed to update password'});
+          }
+
+          res.json({success:true,message:'Password reset successful!'});
+        }
+      )
+    }
+  )
+})
 
 
 //I ADDED A ROUTE TO HANDLE CHANGES MADE TO SAFE OR UNSAFE FOODS
@@ -223,7 +346,7 @@ app.get('/api/scan-history/:userId/latest', (req, res) => {
   });
   
 
-app.use(express.static(path.join(__dirname,'scripts')));
+
 
 
 // FUNCTION FOR CREATING ACCOUNT AND SETTING PASSWORD

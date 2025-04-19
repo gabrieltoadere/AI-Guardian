@@ -7,18 +7,18 @@ async function displayAllergens(){
     
 
     const allergens =JSON.parse(user.allergens);
-    if(allergens) {
+    if(allergens===null) {
+        const li = document.createElement('li');
+        li.textContent = 'No allergens'; 
+        allergensList.appendChild(li);
+    }
+    else if(allergens.length > 0) {
             allergens.forEach(allergen => {
             const li = document.createElement('li');
             li.textContent = allergen; 
             allergensList.appendChild(li);
         });
-    } else {
-        const li = document.createElement('li');
-        li.textContent = 'No allergens'; 
-        allergensList.appendChild(li);
     }
-    
 }
 function makeNewList()
 {
