@@ -1,0 +1,22 @@
+@baseUrl = https://alternativefood.search.windows.net
+   @apiKey = tLN8U0fQaYmfzqeNFGQFhdsaMtcofBPCJcsbRiwBNxAzSeD08DeP
+   ### List existing indexes by name
+   GET  {{baseUrl}}/indexes?api-version=2024-07-01&$select=name  HTTP/1.1
+   Content-Type: application/json
+   api-key: {{apiKey}}
+
+          ### Search for documents
+     POST {{baseUrl}}/indexes/foodsearch/docs/search?api-version=2024-07-01 HTTP/1.1
+     Content-Type: application/json
+     api-key: {{apiKey}}
+
+     {
+       "search": "find me a product similar to pizza without allergins to cheese",
+       "queryType": "simple",
+       "select": "foodName, brandName, ingredients, allergens, barcode",
+       "top": 10,
+       "count": true
+     }
+     
+     
+   
