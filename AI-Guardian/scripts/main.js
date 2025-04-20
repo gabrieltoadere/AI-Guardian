@@ -7,7 +7,7 @@ async function displayAllergens(){
     
 
     const allergens =JSON.parse(user.allergens);
-    if(allergens===null) {
+    if(allergens===null || allergens.length === 0) {
         const li = document.createElement('li');
         li.textContent = 'No allergens'; 
         allergensList.appendChild(li);
