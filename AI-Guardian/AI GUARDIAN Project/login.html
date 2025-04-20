@@ -11,6 +11,9 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script type="module" src="/AI-Guardian/scripts/login.js"></script>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
   </head>
 
   <body>
@@ -42,7 +45,7 @@
           <input type="password" id="password" name="password" required />
         </div>
 
-        <a href="#" class="forgot-password">Forgot your password?</a>
+        <a href="forgot-pass(email).html" class="forgot-password">Forgot your password?</a>
         <!-- Forgot password link -->
 
         <button type="submit" class="login-btn">Sign In</button>
@@ -58,14 +61,18 @@
         <h2>OR</h2>
       <div>
       <!-- Social Media Login Buttons -->
-      <button class="social-btn google">
-        <img
-          src="/AI-Guardian/img's/google-logo.png"
-          alt="Google Logo"
-          class="icon"
-        />
-        Sign In With Google
-      </button>
+      <div id="g_id_onload"
+          data-client_id="229386078489-ovi0bke1m73e26lm1397baqplj5rabgg.apps.googleusercontent.com"
+          data-callback="handleCredentialResponse">
+      </div>
+
+      <div class="g_id_signin" 
+          data-type="standard" 
+          data-shape="rectangular" 
+          data-theme="outline" 
+          data-text="sign_in_with"
+          data-size="large">
+      </div>
 
       <button class="social-btn apple">
         <img
@@ -99,9 +106,34 @@
 
    
 
-    <script type="module" src="/AI-Guardian/scripts/login.js"></script>
     <!-- Linking JavaScript file -->
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
     
+    <script>
+      function handleCredentialResponse(response) {
+        const token = response.credential;
+      
+        // Send the token to the backend
+        fetch('http://localhost:5501/auth/google', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ token })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            localStorage.setItem('currentUser',JSON.stringify(data.user));
+            // Redirect to home page on success
+            window.location.href = "main.html";
+          } else {
+            alert("Google sign-in failed.");
+          }
+        })
+        .catch(err => {
+          console.error("Error:", err);
+        });
+      }
+    </script>
   </body>
 </html>
