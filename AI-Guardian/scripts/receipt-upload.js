@@ -92,7 +92,7 @@ function displayReceipt(data) {
         const div = document.createElement("div");
         div.innerHTML = `
             <input type="text" value="${item.name}" data-index="${index}" placeholder="Item name">
-            €<input type="number" value="${item.price}" step="0.01" data-index="${index}">
+            <input type="number" value="${item.price}" step="0.01" data-index="${index}">€
         `;
         productList.appendChild(div);
     });
