@@ -8,6 +8,9 @@ const totalValueDisplay = document.getElementById('totalValueDisplay');
 const addItemButton = document.getElementById('addItemButton');
 const confirmItemsButton = document.getElementById('confirmItemsButton');
 
+//this is just an example of unsafe food for user
+const unsafeFoodList = ['Fox Candy', 'ACE Vitamin','PRINGLES BBQ'];
+
 let extractedItems = [];
 
 fileInput.addEventListener('change', handleReceiptUpload);
@@ -56,6 +59,8 @@ async function handleReceiptUpload(event) {
             price: item.total_amount || 0
         }));
 
+        checkAllergensFromItems(extractedItems);
+
         const receiptData = { vendor, date, total, items: extractedItems, text: extractedText };
 
         displayReceipt(receiptData);
@@ -65,6 +70,34 @@ async function handleReceiptUpload(event) {
     } catch (error) {
         console.error("OCR error:", error);
         alert("Error extracting receipt text.");
+    }
+}
+
+
+function checkAllergensFromItems(items) {
+    let unsafeFoodInside = [];
+
+    for (const item of items) {
+        const itemName = item.name.toLowerCase();
+        for (const unsafeFood of unsafeFoodList) {
+            if (itemName.includes(unsafeFood.toLowerCase())) {
+                unsafeFoodInside.push(unsafeFood);
+                break; 
+            }
+        }
+    }
+
+    const noticeEl = document.getElementById('allergenNotice');
+    noticeEl.style.display = 'block';
+    noticeEl.classList.remove('safe', 'warning');
+    noticeEl.textContent = '';
+
+    if (unsafeFoodInside.length === 0) {
+        noticeEl.textContent = 'All the products you purchased are safe.';
+        noticeEl.classList.add('safe');
+    } else {
+        noticeEl.textContent = '⚠️ Warning! This receipt contains unsafe products: ' + unsafeFoodInside.join(', ');
+        noticeEl.classList.add('warning');
     }
 }
 
