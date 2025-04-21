@@ -82,6 +82,7 @@
         }
 
         #questions input {
+            box-sizing: border-box;
             width: 100%;
             padding: 12px 15px;
             margin-bottom: 15px;
@@ -92,6 +93,7 @@
         }
 
         #questions input:focus {
+            box-sizing: border-box;
             outline: none;
             border-color: #27ae60;
             box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.2);
@@ -145,17 +147,19 @@
 
 
         <div id="confirmSection">
-            <button id="saftFoodButton" onclick="showQuestions()">Mark this safe food</button>
-            <button id="unsafeFoodButton" onclick="saveFood()">Mark this unsafe food</button>
-        <p id="notice"></p>	
-        <div id="questions" class="hidden">
-            <p>How many of this product did you purchase?</p>
-            <input type="number" placeholder="type number">
-            <p>Food Name:</p>
-            <input type="text" id="foodNameInput">
-            <button id="confirmButton" onclick="saveFood()">save</button>
-        </div>
-        <p id="saveNotice"></p>
+            <button id="saftFoodButton" onclick="saveSafeFood(); showQuestions()">Mark this safe food</button>
+            <button id="unsafeFoodButton" onclick="saveUnsafeFood()">Mark this unsafe food</button>
+            <p id="saveNotice"></p>
+            <div id="questions" class="hidden">
+                <p>If you purchased this item, how many did you buy?</p>
+                <input type="number" placeholder="type number">
+                <p>Product Name:</p>
+                <input type="text" id="foodNameInput">
+                <p>Product Price:</p>
+                <input type="text" id="foodPriceInput">
+                <button id="confirmButton" onclick="purchaseTracking()">Submit</button>
+                <p id="trackNotice"></p>
+            </div>
         </div>
     </div>
 
@@ -311,18 +315,30 @@
         }
 
 
-
-    //after user clicks it, it will ask user to type number of this product they just bought. 
-    // And user can type product name if the original one is wrong.
 	function showQuestions() {
 		document.getElementById('questions').classList.remove('hidden');
 		document.getElementById('foodNameInput').value = foodName;
 	}
 
-    //this is for the confirm button. 
-    //after user clicks it, product info, like name, allergen, sugar, so on should be sent to database. 
-	function saveFood(){
-		document.getElementById('saveNotice').innerHTML = "This product is saved";
+    function saveSafeFood() {
+        document.getElementById('saveNotice').textContent = 'This product is saved.'
+
+        //mark this product as save food. And then send food info to dababase
+        //later, when users upload receipts, if name on the receipt matches with the products' name, then we can know if it's safe or not.
+    }
+
+    function saveUnsafeFood() {
+        document.getElementById('saveNotice').textContent = 'This product is saved.'
+
+        //mark this food as unsave food. And then send food info to dababase
+        //later, when users upload receipts, if name on the receipt matches with the products' name, then we can know if it's safe or not.
+    }
+
+	function purchaseTracking(){
+        document.getElementById('trackNotice').textContent = 'Your purchase has been added to your history.'
+        
+		//save food info (especially prices and sugar consumption) to database
+        //this will be used in the monthly overview page
 	}
 
     </script>
