@@ -111,6 +111,10 @@
             background: linear-gradient(135deg, #e74c3c, #c0392b);
         }
 
+        #stopScanButton {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
         #camera {
             width: 600px;      
             height: 600px;      
@@ -129,6 +133,10 @@
         <button id="scanButton" onclick="startScanning()">
             <i class="fas fa-barcode"></i>
             Start Scanning
+        </button>
+        <button id="stopScanButton" onclick="stopScanner()" class="hidden">
+            <i class="fas fa-barcode"></i>
+            Stop Scanning 
         </button>
     </div>
 
@@ -176,6 +184,7 @@
 
         function startScanning() {
             document.getElementById('camera').classList.remove('hidden');
+            document.getElementById('stopScanButton').classList.remove('hidden');
 
             if (!isCameraInitialized) {
                 initializeScanner();
@@ -183,18 +192,31 @@
             }
 
             scanTimeout = setTimeout(() => {
-                console.warn("No barcode detected within 14 seconds. Stopping scanner.");
+                console.warn("No barcode detected within 15 seconds. Stopping scanner.");
                 stopScanner();
-                alert("No barcode detected within 14 seconds. Please try again.");
-            }, 14000);
+                alert("No barcode detected within 15 seconds. Please try again.");
+            }, 15000);
         }
 
         function stopScanner() {
-            Quagga.stop();
+            const video = document.querySelector('video');
+            if (video && video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+            }
+
+            if (window.Quagga) {
+                Quagga.stop();
+            }
+
             document.getElementById('camera').classList.add('hidden');
+            document.getElementById('stopScanButton').classList.add('hidden');
+
             clearTimeout(scanTimeout);
             isCameraInitialized = false;
         }
+
+
 
 
         function initializeScanner() {
@@ -239,6 +261,15 @@
                 }
                 console.log("Initialization successful");
                 Quagga.start();
+
+                
+                setTimeout(() => {
+                    const overlays = document.querySelectorAll('canvas, video');
+                    overlays.forEach(el => {
+                        el.style.pointerEvents = 'none';
+                        el.style.zIndex = '1';
+                    });
+                }, 500);
             });
 
             Quagga.onDetected(function(result) {
@@ -321,22 +352,22 @@
 	}
 
     function saveSafeFood() {
-        document.getElementById('saveNotice').textContent = 'This product is saved.'
+        document.getElementById('saveNotice').textContent = 'This product is marked safe.';
 
         //mark this product as save food. And then send food info to dababase
         //later, when users upload receipts, if name on the receipt matches with the products' name, then we can know if it's safe or not.
     }
 
     function saveUnsafeFood() {
-        document.getElementById('saveNotice').textContent = 'This product is saved.'
+        document.getElementById('saveNotice').textContent = 'This product is marked unsafe.';
 
         //mark this food as unsave food. And then send food info to dababase
         //later, when users upload receipts, if name on the receipt matches with the products' name, then we can know if it's safe or not.
     }
 
 	function purchaseTracking(){
-        document.getElementById('trackNotice').textContent = 'Your purchase has been added to your history.'
-        
+        document.getElementById('trackNotice').textContent = 'Thanks! Your purchase was recorded.';
+
 		//save food info (especially prices and sugar consumption) to database
         //this will be used in the monthly overview page
 	}
