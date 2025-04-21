@@ -24,7 +24,7 @@ function initializeScanner() {
             constraints: {
                 width: { min: 1280 },
                 height: { min: 720 },
-                facingMode: "environment",
+                facingMode: "user",
                 aspectRatio: { min: 1, max: 2 }
             }
         },

@@ -12,9 +12,7 @@
             margin: 0 auto;
             padding: 20px;
         }
-        .hidden {
-            display: none;
-        }
+        .hidden { display: none; }
         button {
             padding: 10px 15px;
             background-color: #4CAF50;
@@ -24,31 +22,8 @@
             cursor: pointer;
             margin: 5px;
         }
-        button:hover {
-            background-color: #45a049;
-        }
-        #productImage {
-            max-width: 200px;
-            margin-top: 10px;
-        }
-        #interactive {
-            width: 100%;
-            height: 300px;
-            position: relative;
-            margin: 10px 0;
-        }
-        #interactive.viewport {
-            position: relative;
-        }
-        #interactive.viewport > canvas, #interactive.viewport > video {
-            max-width: 100%;
-            width: 100%;
-        }
-        canvas.drawing, canvas.drawingBuffer {
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
+        button:hover { background-color: #45a049; }
+        #productImage { max-width: 200px; margin-top: 10px; }
         .back-button {
             display: inline-block;
             margin-top: 20px;
@@ -120,7 +95,9 @@
         }
     </style>
 </head>
+
 <body>
+<<<<<<< HEAD
     <h1>Barcode Scanner</h1>
 
     <div class="button-group">
@@ -158,9 +135,13 @@
         <p id="saveNotice"></p>
         </div>
     </div>
+=======
+<h1>Barcode Scanner</h1>
+>>>>>>> ab435bd1de0cc1b971f9473b0f6e09b5124cf09d
 
-    <a href="scanIndex.html" class="back-button">Back to Main</a>
+<button id="scanButton">Start Scanning</button>
 
+<<<<<<< HEAD
     <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
     <script>
         //the following code is for scanning barcode
@@ -328,5 +309,185 @@
 
 
     </script>
+=======
+<div id="camera" class="hidden" style="width:100%;height:300px;background:#ccc;"></div>
+
+<div id="result" class="hidden">
+    <h2>Product Information</h2>
+    <p><strong>Product Name:</strong> <span id="productName">-</span></p>
+    <p><strong>Ingredients:</strong> <span id="ingredients">-</span></p>
+    <p><strong>Potential Allergens:</strong> <span id="potentialAllergens">-</span></p>
+    <p><strong>Nutrient Levels:</strong> <span id="nutrientLevels">-</span></p>
+    <p><strong>Sugar:</strong> <span id="sugarLevel">-</span></p>
+    <img id="productImage" src="" alt="Product Image" class="hidden">
+
+    <button id="stopButton">Stop Scanning</button>
+</div>
+
+<a href="scanIndex.html" class="back-button">Back to Main</a>
+
+<script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
+
+<script>
+let lastDetectedCode = null;
+let lastDetectionTime = 0;
+let isCameraInitialized = false;
+
+document.getElementById('scanButton').addEventListener('click', startScanning);
+document.getElementById('stopButton').addEventListener('click', stopScanning);
+
+function startScanning() {
+    document.getElementById('camera').classList.remove('hidden');
+    document.getElementById('result').classList.add('hidden');
+
+    if (!isCameraInitialized) {
+        initializeScanner('environment'); // try back camera first
+    } else {
+        Quagga.start();
+    }
+}
+
+function initializeScanner(facingMode) {
+    Quagga.init({
+        inputStream: {
+            type: "LiveStream",
+            target: document.querySelector("#camera"),
+            constraints: {
+                width: { min: 640 },
+                height: { min: 480 },
+                facingMode: facingMode
+            }
+        },
+        decoder: {
+            readers: ["ean_reader", "ean_8_reader", "upc_reader", "code_128_reader"]
+        },
+        locate: true
+    }, function (err) {
+        if (err) {
+            console.error("Error initializing scanner:", err);
+            if (facingMode === 'environment') {
+                console.warn("Retrying with front camera...");
+                initializeScanner('user'); // fallback to front cam
+            } else {
+                alert('Camera initialization failed. Please check permissions or try a different device.');
+            }
+            return;
+        }
+
+        Quagga.start();
+        isCameraInitialized = true;
+    });
+
+    Quagga.onDetected(processBarcode);
+}
+
+
+let detectionCounts = {};
+
+function processBarcode(result) {
+    let code = result.codeResult.code;
+    const now = Date.now();
+
+    // Optional Confidence check
+    const confidence = result.codeResult.decodedCodes.filter(c => c.error !== undefined)
+                      .map(c => c.error)
+                      .reduce((a, b) => a + b, 0);
+
+    console.log("Raw Code:", code, " Error Sum:", confidence);
+
+    if(confidence > 10){ 
+        // Low quality scan - ignore
+        console.log("Ignoring low confidence scan");
+        return;
+    }
+
+    code = code.trim().replace(/\s/g, '').replace(/[^0-9]/g, '');
+
+    if(code.length < 13){
+        code = code.padStart(13, '0');
+    }
+
+    console.log("Cleaned Barcode:", code);
+
+    // Debounce - prevent spam scan
+    if (now - lastDetectionTime < 2000) { 
+        return;
+    }
+
+    // Count how many times the same code appears
+    detectionCounts[code] = (detectionCounts[code] || 0) + 1;
+
+    console.log(`Detection Count for ${code}:`, detectionCounts[code]);
+
+    if(detectionCounts[code] < 3){
+        // Wait until seen 3 times
+        return;
+    }
+
+    // Reset for next scan
+    detectionCounts = {};
+    lastDetectedCode = code;
+    lastDetectionTime = now;
+
+    fetchProductInfo(code);
+}
+
+
+
+async function fetchProductInfo(barcode) {
+    const url = `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`;
+    try {
+        const res = await fetch(url);
+        const data = await res.json();
+
+        document.getElementById('result').classList.remove('hidden');
+
+        if (data.status === 1) {
+            const product = data.product;
+            document.getElementById('productName').textContent = product.product_name || 'Unknown';
+            document.getElementById('ingredients').textContent = product.ingredients_text || 'No data';
+            document.getElementById('potentialAllergens').textContent = product.allergens || 'No data';
+            document.getElementById('sugarLevel').textContent = (product.nutriments.sugars || '-') + " " + (product.nutriments.sugars_unit || '');
+            document.getElementById('nutrientLevels').textContent = product.nutrient_levels ? 
+                Object.entries(product.nutrient_levels).map(([k, v]) => `${k}: ${v}`).join(', ') : 'No data';
+
+            if (product.image_front_small_url) {
+                document.getElementById('productImage').src = product.image_front_small_url;
+                document.getElementById('productImage').classList.remove('hidden');
+            } else {
+                document.getElementById('productImage').classList.add('hidden');
+            }
+        } else {
+            document.getElementById('productName').textContent = 'Product not found';
+            document.getElementById('ingredients').textContent = '-';
+            document.getElementById('potentialAllergens').textContent = '-';
+            document.getElementById('sugarLevel').textContent = '-';
+            document.getElementById('nutrientLevels').textContent = '-';
+            document.getElementById('productImage').classList.add('hidden');
+        }
+
+        stopScanning();
+
+    } catch (error) {
+        console.error('Fetch error:', error);
+        alert('Failed to fetch product info.');
+    }
+}
+
+function stopScanning() {
+    Quagga.stop();
+
+    // Remove all video/canvas from #camera
+    const cameraDiv = document.getElementById('camera');
+    cameraDiv.innerHTML = ''; 
+
+    document.getElementById('camera').classList.add('hidden');
+
+    isCameraInitialized = false;  // Allow re-initialization next time
+}
+
+</script>
+
+>>>>>>> ab435bd1de0cc1b971f9473b0f6e09b5124cf09d
 </body>
 </html>
