@@ -116,9 +116,9 @@
             const warningElement = document.getElementById('warning');
             
             //I assume the first line of the extract text is the product name. It usually is. 
-            const foodName = extractedText.split("\n")[0];
+            //const foodName = extractedText.split("\n")[0];
             document.getElementById('extractedText').textContent = extractedText;
-            document.getElementById('result2').classList.remove('hidden');
+            //document.getElementById('result').classList.remove('hidden');
 
             //if product text contains allergen, we give alarm.
             //notice: I just hard code 'milk' here. It should be changed to user's allergen preference list.
