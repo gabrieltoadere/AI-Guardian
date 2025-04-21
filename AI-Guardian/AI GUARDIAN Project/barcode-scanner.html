@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <title>Barcode Scanner</title>
     <style>
         body {
@@ -57,180 +58,275 @@
             padding: 10px 15px;
             border-radius: 4px;
         }
+
+        /* ===== Confirmation Section ===== */
+        #confirmSection {
+            background-color: #f1f8e9;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+        }
+
+        #questions {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        #questions p {
+            text-align: left;
+            margin: 10px 0 5px;
+            font-weight: 500;
+            color: #2d3436;
+        }
+
+        #questions input {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border: 1px solid #c8e6c9;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        #questions input:focus {
+            outline: none;
+            border-color: #27ae60;
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.2);
+        }
+
+        #saveNotice {
+            color: #27ae60;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 1.1rem;
+        }
+
+        #unsafeFoodButton {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        #camera {
+            width: 600px;      
+            height: 600px;      
+            max-width: 100%;
+            margin: 20px auto;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
     <h1>Barcode Scanner</h1>
-    
-    <!-- Initial View -->
-    <button id="scanButton">Start Scanning</button>
-    <div id="camera" class="hidden">
-        <div id="interactive" class="viewport"></div>
-        <button id="stopButton">Stop Scanning</button>
+
+    <div class="button-group">
+        <button id="scanButton" onclick="startScanning()">
+            <i class="fas fa-barcode"></i>
+            Start Scanning
+        </button>
     </div>
-    
-    <!-- After Scan View (initially hidden) -->
+
+    <div id="camera" class="hidden"></div>
+
     <div id="result" class="hidden">
-        <h2>Product Information</h2>
-        <p><strong>Product Name:</strong> <span id="productName">-</span></p>
-        <p><strong>Ingredients:</strong> <span id="ingredients">-</span></p>
-        <p><strong>Potential Allergens:</strong> <span id="potentialAllergens">-</span></p>
-        <p><strong>Nutrient Levels:</strong> <span id="nutrientLevels">-</span></p>
-        <p><strong>Sugar:</strong> <span id="sugarLevel">-</span></p>
-        <img id="productImage" src="" alt="Product Image" class="hidden">
-        
-        <button id="addQuantityButton">Add Quantity</button>
-        <div id="quantityInput" class="hidden">
+        <div>
+            <h2>Product Information</h2>
+            <p><strong>Product Name:</strong> <span id="productName">-</span></p>
+            <p><strong>Ingredients:</strong> <span id="ingredients">-</span></p>
+            <p><strong>Potential Allergens:</strong> <span id="potentialAllergens">-</span></p>
+            <p><strong>Nutrient Levels:</strong> <span id="nutrientLevels">-</span></p>
+            <p><Strong>Sugar:</Strong> <span id="sugarLevel">-</span></p>
+            <img id="productImage" src="" alt="Product Image" class="hidden">
+        </div>
+
+
+        <div id="confirmSection">
+            <button id="saftFoodButton" onclick="showQuestions()">Mark this safe food</button>
+            <button id="unsafeFoodButton" onclick="saveFood()">Mark this unsafe food</button>
+        <p id="notice"></p>	
+        <div id="questions" class="hidden">
             <p>How many of this product did you purchase?</p>
-            <input type="number" id="quantity" placeholder="Enter quantity" min="1">
-            <button id="confirmButton">Save</button>
+            <input type="number" placeholder="type number">
+            <p>Food Name:</p>
+            <input type="text" id="foodNameInput">
+            <button id="confirmButton" onclick="saveFood()">save</button>
         </div>
         <p id="saveNotice"></p>
+        </div>
     </div>
 
     <a href="scanIndex.html" class="back-button">Back to Main</a>
 
     <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const scanButton = document.getElementById('scanButton');
-            const stopButton = document.getElementById('stopButton');
-            const cameraDiv = document.getElementById('camera');
-            const resultDiv = document.getElementById('result');
-            const addQuantityButton = document.getElementById('addQuantityButton');
-            const quantityInput = document.getElementById('quantityInput');
-            const interactive = document.getElementById('interactive');
-            
-            // Show only the scan button initially
-            scanButton.addEventListener('click', function() {
-                scanButton.classList.add('hidden');
-                cameraDiv.classList.remove('hidden');
-                initScanner();
-            });
-            
-            // Stop scanning button
-            stopButton.addEventListener('click', function() {
+        //the following code is for scanning barcode
+        let scanTimeout = null;
+        let lastDetectedCode = null;
+        let lastDetectionTime = 0;
+        let isCameraInitialized = false;
+		let foodName = null;
+
+        function startScanning() {
+            document.getElementById('camera').classList.remove('hidden');
+
+            if (!isCameraInitialized) {
+                initializeScanner();
+                isCameraInitialized = true;
+            }
+
+            scanTimeout = setTimeout(() => {
+                console.warn("No barcode detected within 14 seconds. Stopping scanner.");
                 stopScanner();
-                cameraDiv.classList.add('hidden');
-                scanButton.classList.remove('hidden');
-            });
-            
-            // Show quantity input when "Add Quantity" is clicked
-            addQuantityButton.addEventListener('click', function() {
-                quantityInput.classList.remove('hidden');
-            });
-            
-            // Save button functionality
-            document.getElementById('confirmButton').addEventListener('click', function() {
-                const quantity = document.getElementById('quantity').value;
-                if (quantity && quantity > 0) {
-                    document.getElementById('saveNotice').textContent = `Saved ${quantity} items!`;
-                    // Here you would typically save to database or storage
-                } else {
-                    alert('Please enter a valid quantity');
-                }
-            });
-            
-            // Barcode scanner initialization
-            function initScanner() {
-                Quagga.init({
-                    inputStream: {
-                        name: "Live",
-                        type: "LiveStream",
-                        target: interactive,
-                        constraints: {
-                            width: 480,
-                            height: 320,
-                            facingMode: "environment" // or "user" for front camera
-                        },
-                    },
-                    decoder: {
-                        readers: [
-                            "ean_reader",
-                            "ean_8_reader",
-                            "code_128_reader",
-                            "code_39_reader",
-                            "code_39_vin_reader",
-                            "codabar_reader",
-                            "upc_reader",
-                            "upc_e_reader"
-                        ]
-                    },
-                }, function(err) {
-                    if (err) {
-                        console.error(err);
-                        alert("Error initializing barcode scanner: " + err);
-                        return;
+                alert("No barcode detected within 14 seconds. Please try again.");
+            }, 14000);
+        }
+
+        function stopScanner() {
+            Quagga.stop();
+            document.getElementById('camera').classList.add('hidden');
+            clearTimeout(scanTimeout);
+            isCameraInitialized = false;
+        }
+
+
+        function initializeScanner() {
+            const quaggaConf = {
+                inputStream: {
+                    target: document.querySelector("#camera"),
+                    type: "LiveStream",
+                    constraints: {
+                        width: { ideal: 1920 },   
+                        height: { ideal: 1080 },
+                        facingMode: "environment",
+                        aspectRatio: { min: 1, max: 2 }
                     }
-                    console.log("Initialization finished. Ready to start");
-                    Quagga.start();
-                });
-                
-                Quagga.onDetected(function(result) {
-                    stopScanner();
-                    cameraDiv.classList.add('hidden');
-                    resultDiv.classList.remove('hidden');
-                    
-                    const code = result.codeResult.code;
-                    console.log("Barcode detected: ", code);
-                    
-                    // Here you would typically look up the product in your database
-                    // For now we'll simulate product data based on the barcode
-                    simulateProductLookup(code);
-                });
-            }
-            
-            function stopScanner() {
-                Quagga.stop();
-                console.log("Scanner stopped");
-            }
-            
-            function simulateProductLookup(barcode) {
-                // This is a simulation - replace with your actual product lookup
-                let productData = {
-                    name: "Unknown Product",
-                    ingredients: "Not available",
-                    allergens: "Not specified",
-                    nutrients: "No data",
-                    sugar: "Unknown",
-                    image: ""
-                };
-                
-                // Some example products for demonstration
-                if (barcode === "123456789012") {
-                    productData = {
-                        name: "Organic Apples",
-                        ingredients: "Organic apples",
-                        allergens: "None",
-                        nutrients: "High in fiber",
-                        sugar: "19g per apple",
-                        image: "https://example.com/apple.jpg"
-                    };
-                } else if (barcode === "987654321098") {
-                    productData = {
-                        name: "Whole Grain Bread",
-                        ingredients: "Whole wheat flour, water, yeast, salt",
-                        allergens: "Wheat",
-                        nutrients: "Good source of fiber",
-                        sugar: "2g per slice",
-                        image: "https://example.com/bread.jpg"
-                    };
+                },
+                decoder: {
+                    readers: [
+                        'code_128_reader',
+                        'ean_reader',
+                        'ean_8_reader',
+                        'upc_reader',
+                        'upc_e_reader',
+                        'code_39_reader',
+                        'code_39_vin_reader',
+                        'codabar_reader',
+                        'i2of5_reader',
+                        '2of5_reader',
+                        'code_93_reader'
+                    ]
+                },
+                locator: {
+                    patchSize: "medium",
+                    halfSample: true
+                },
+                locate: true,
+                numOfWorkers: 4
+            };
+
+            Quagga.init(quaggaConf, function(err) {
+                if (err) {
+                    console.error("Initialization failed: ", err);
+                    return;
                 }
-                
-                // Update the UI with product data
-                document.getElementById('productName').textContent = productData.name;
-                document.getElementById('ingredients').textContent = productData.ingredients;
-                document.getElementById('potentialAllergens').textContent = productData.allergens;
-                document.getElementById('nutrientLevels').textContent = productData.nutrients;
-                document.getElementById('sugarLevel').textContent = productData.sugar;
-                
-                if (productData.image) {
-                    const img = document.getElementById('productImage');
-                    img.src = productData.image;
-                    img.classList.remove('hidden');
+                console.log("Initialization successful");
+                Quagga.start();
+            });
+
+            Quagga.onDetected(function(result) {
+                const currentCode = result.codeResult.code;
+                const currentTime = Date.now();
+
+                if (currentCode === lastDetectedCode && (currentTime - lastDetectionTime) < 5000) {
+                    return;
                 }
+
+                console.log("Detected barcode: ", currentCode);
+                stopScanner(); 
+                fetchProductInfo(currentCode);
+                document.getElementById('result').classList.remove('hidden');
+                lastDetectedCode = currentCode;
+                lastDetectionTime = currentTime;
+            });
+        }
+
+        async function fetchProductInfo(barcodeFromScanner = null) {
+            const barcode = barcodeFromScanner;
+            if (!barcode) {
+                alert('Please enter a barcode.');
+                return;
             }
-        });
+
+            const url = `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.status === 1) {
+                    const product = data.product;
+
+                    const productName = product.product_name ||
+					product.generic_name_en || 
+					product.product_name_en ||
+					product.product_name_it ||
+                    product.generic_name || 
+                    product.abbreviated_product_name || 
+                    product.brands || 
+                    'Unknown Product';
+
+					foodName = productName;	
+
+                    const ingredients = product.ingredients_text_en || product.ingredients_text || product.ingredients_hierarchy || product.ingredients_original_tags || 'No ingredients listed';
+					const potentialAllergens = product.allergens || 'No data';
+                    const sugarLevel = product.nutriments.sugars +" " + product.nutriments.sugars_unit || product.nutriments.sugars_100g +" " + product.nutriments.sugars_unit || product.nutriments.sugars_value +" " + product.nutriments.sugars_unit || 'No data';
+	
+                    document.getElementById('productName').textContent = productName;
+                    document.getElementById('ingredients').textContent = ingredients;
+					document.getElementById('potentialAllergens').textContent = potentialAllergens;
+                    document.getElementById('sugarLevel').textContent = sugarLevel;
+
+					const nutrientLevels = product.nutrient_levels || {};
+					const nutrientText = Object.entries(nutrientLevels).map(([key, value]) => `${key}: ${value}`).join(", "); 					 
+					document.getElementById('nutrientLevels').textContent = nutrientText || "No data";
+
+			
+					document.getElementById('productImage').classList.remove('hidden');
+                    const imageUrl = product.image_front_small_url || product.selected_images.front.small.it || "https://cdn-icons-png.flaticon.com/512/1178/1178479.png";
+					document.getElementById('productImage').src = imageUrl;            
+
+					document.getElementById('camera').classList.add('hidden');
+				} else {
+                    document.getElementById('productName').textContent = 'Product not found';
+                    document.getElementById('ingredients').textContent = '-';
+                    document.getElementById('productImage').classList.add('hidden');
+                }
+            } catch (error) {
+                console.error('Error fetching product info:', error);
+                alert('Failed to fetch product information. Please try again.');
+            }
+        }
+
+
+
+    //this function is for the mark this safe food button. 
+    //after user clicks it, it will ask user to type number of this product they just bought. And user can type product name if the original one is wrong.
+	function showQuestions() {
+		document.getElementById('questions').classList.remove('hidden');
+		document.getElementById('foodNameInput').value = foodName;
+	}
+
+    //this is for the confirm button. 
+    //after user clicks it, product info, like name, allergen, sugar, so on should be sent to database. 
+
+	function saveFood(){
+		document.getElementById('saveNotice').innerHTML = "This product is saved";
+	}
+
+
     </script>
 </body>
 </html>

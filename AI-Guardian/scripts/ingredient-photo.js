@@ -9,22 +9,55 @@ imageInput.addEventListener('change', handleImageUpload);
 safeFoodButton.addEventListener('click', showQuestions);
 confirmButton.addEventListener('click', saveFood);
 
-async function handleImageUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
+// async function handleImageUpload(event) {
+//     const file = event.target.files[0];
+//     if (!file) return;
 
-    try {
-        const compressedBlob = await new Promise(resolve => {
-            compressImage(file, resolve);
-        });
+//     try {
+//         const compressedBlob = await new Promise(resolve => {
+//             compressImage(file, resolve);
+//         });
 
-        const extractedText = await runOCR(compressedBlob);
-        await checkAllergens(extractedText);
-    } catch (error) {
-        console.error("failed:", error);
-        alert(`failed: ${error.message}`);
-    }
-}
+//         const extractedText = await runOCR(compressedBlob);
+//         await checkAllergens(extractedText);
+//     } catch (error) {
+//         console.error("failed:", error);
+//         alert(`failed: ${error.message}`);
+//     }
+// }
+
+        //photo scanning 
+        async function handleImageUpload(event, mode) {
+            const inputElement = event.target;
+            if (!inputElement.files?.length) {
+                alert('Please choose a file');
+                return;
+            }
+
+            try {
+                //compress photos
+                const file = inputElement.files[0];
+                const compressedBlob = await new Promise(resolve => {
+                compressImage(file, resolve);
+                });
+
+                //OCR Space scanning photos
+                const extractedText = await runOCR(compressedBlob);
+
+                //I didn't change this code after I deleted the initial receipt upload button, for some reason. Just keep it. 
+                if (mode === 'allergyCheck') {
+                await checkAllergens(extractedText);
+                } else if (mode === 'productMatch') {
+                await matchProducts(extractedText);
+                }
+            } catch (error) {
+                console.error("failed:", error);
+                alert(`failed: ${error.message}`);
+            }
+        }
+
+
+
 
 function compressImage(file, callback) {
     const reader = new FileReader();
