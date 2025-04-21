@@ -124,6 +124,27 @@
             border-radius: 8px;
             overflow: hidden;
         }
+
+        #allergenNotice {
+            margin-top: 15px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: none; 
+        }
+
+        #allergenNotice.safe {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+
+        #allergenNotice.warning {
+            background-color: #fdecea;
+            color: #c62828;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
@@ -153,6 +174,8 @@
             <img id="productImage" src="" alt="Product Image" class="hidden">
         </div>
 
+        <p id="allergenNotice" class=""></p>
+
 
         <div id="confirmSection">
             <button id="saftFoodButton" onclick="saveSafeFood(); showQuestions()">Mark this safe food</button>
@@ -181,6 +204,8 @@
         let lastDetectionTime = 0;
         let isCameraInitialized = false;
 		let foodName = null;
+        //please extract the real allergen list from database
+        const allergenList = ['sugar', 'milk', 'acidificanti'];
 
         function startScanning() {
             document.getElementById('camera').classList.remove('hidden');
@@ -315,14 +340,16 @@
 
 					foodName = productName;	
 
-                    const ingredients = product.ingredients_text_en || product.ingredients_text || product.ingredients_hierarchy || product.ingredients_original_tags || 'No ingredients listed';
-					const potentialAllergens = product.allergens || 'No data';
+                    const ingredients = product.ingredients_text_en || product.ingredients_text_with_allergens || product.ingredients_text || product.ingredients_hierarchy || product.ingredients_original_tags || 'No ingredients listed';
+					const potentialAllergens = product.allergens || product.allergens_from_ingredients || product.allergens_from_user || 'No data';
                     const sugarLevel = product.nutriments.sugars +" " + product.nutriments.sugars_unit || product.nutriments.sugars_100g +" " + product.nutriments.sugars_unit || product.nutriments.sugars_value +" " + product.nutriments.sugars_unit || 'No data';
 	
                     document.getElementById('productName').textContent = productName;
                     document.getElementById('ingredients').textContent = ingredients;
 					document.getElementById('potentialAllergens').textContent = potentialAllergens;
                     document.getElementById('sugarLevel').textContent = sugarLevel;
+
+                    checkForAllergens(ingredients,allergenList);
 
 					const nutrientLevels = product.nutrient_levels || {};
 					const nutrientText = Object.entries(nutrientLevels).map(([key, value]) => `${key}: ${value}`).join(", "); 					 
@@ -344,6 +371,32 @@
                 alert('Failed to fetch product information. Please try again.');
             }
         }
+
+        function checkForAllergens(ingredientsText, allergens) {
+            const lowerText = ingredientsText.toLowerCase();
+            let allergensInside = "";
+
+            for (const allergen of allergens) {
+                if (lowerText.includes(allergen.toLowerCase())) {
+                    allergensInside += allergen + " ";
+                }
+            }
+
+            const noticeEl = document.getElementById('allergenNotice');
+            noticeEl.style.display = 'block';
+            
+            noticeEl.classList.remove('safe', 'warning');
+            noticeEl.textContent = '';
+            
+            if (allergensInside === "") {
+                noticeEl.textContent = '✅ This product is safe for you.';
+                noticeEl.classList.add('safe');
+            } else {
+                noticeEl.textContent = '⚠️ Be aware! This product contains allergens: ' + allergensInside;
+                noticeEl.classList.add('warning');
+            }
+        }
+
 
 
 	function showQuestions() {
