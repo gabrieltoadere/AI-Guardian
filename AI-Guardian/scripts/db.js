@@ -275,10 +275,10 @@ app.post('/barcodeScan',(req,res) => {
   const { scannedProduct } = req.body;
 
   const query = `INSERT INTO scan_history
-   (user_id, product_name, ingredients,potential_allergens,sugar_level,status,scan_date)
-   VALUES (?,?,?,?,?,?,NOW())`;
+   (user_id, product_name, ingredients,potential_allergens,sugar_level,status,scan_date,quantity,price)
+   VALUES (?,?,?,?,?,?,NOW(),?,?)`;
 
-   db.query(query, [ scannedProduct.userId,scannedProduct.name , scannedProduct.ingredients,scannedProduct.potential_allergens,scannedProduct.sugar_level,scannedProduct.status] ,(err,results) => {
+   db.query(query, [ scannedProduct.userId,scannedProduct.name , scannedProduct.ingredients,scannedProduct.potential_allergens,scannedProduct.sugar_level,scannedProduct.status,scannedProduct.quantity,scannedProduct.price] ,(err,results) => {
       if(err) {
         console.error('error storing scan', err);
       }

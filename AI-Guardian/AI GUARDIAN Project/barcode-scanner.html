@@ -183,11 +183,11 @@
             <p id="saveNotice"></p>
             <div id="questions" class="hidden">
                 <p>If you purchased this item, how many did you buy?</p>
-                <input type="number" placeholder="type number">
+                <input id="quantity" type="number" placeholder="type number">
                 <p>Product Name:</p>
                 <input type="text" id="foodNameInput">
                 <p>Product Price:</p>
-                <input type="text" id="foodPriceInput">
+                <input id="price" type="text" id="foodPriceInput">
                 <button id="confirmButton">Submit</button>
                 <p id="trackNotice"></p>
             </div>
@@ -206,14 +206,17 @@
 		let foodName = null;
 
 
-        //please extract the real allergen list from database
-        const allergenList = ['sugar', 'milk', 'acidificanti'];
+        
 
         
         //local user information
         const user = JSON.parse(localStorage.getItem('currentUser'));
         const userId = user.id;
 
+
+
+        //please extract the real allergen list from database
+        const allergenList = user.allergens;
 
         //info for scanned product
         let scannedProduct = {
@@ -222,7 +225,9 @@
             potential_allergens:null,
             sugar_level:null,
             status:'',
-            userId:userId
+            userId:userId,
+            quantity:1,
+            price:null
         };
 
 
@@ -454,6 +459,8 @@
 
     document.getElementById('confirmButton').addEventListener("click",async () => {
         document.getElementById('trackNotice').textContent = 'Thanks! Your purchase was recorded.';
+        scannedProduct.price = document.getElementById('price').value;
+        scannedProduct.quantity = document.getAnimations('quantity').value;
         console.log(scannedProduct);
         const response  = await fetch('http://localhost:5501/barcodeScan', {
             method: 'POST',

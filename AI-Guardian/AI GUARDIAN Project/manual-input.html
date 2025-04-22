@@ -155,12 +155,12 @@
         <p id="saveNotice"></p>
         <div id="questions" class="hidden">
             <p>If you purchased this item, how many did you buy?</p>
-            <input type="number" placeholder="type number" id="foodNumberInput">
+            <input type="number" placeholder="type number" id="quantity">
             <p>Product Name:</p>
             <input type="text" id="foodNameInput">
             <p>Product Price:</p>
             <input type="text" id="foodPriceInput">
-            <button id="confirmButton" onclick="purchaseTracking()">Submit</button>
+            <button id="confirmButton">Submit</button>
             <p id="trackNotice"></p>
         </div>
     </div>
@@ -171,9 +171,24 @@
   <a href="scanIndex.html" class="back-button">Back to Main</a>
 
   <script>
-    //following is just an example
-    const allergens = ['milk', 'sugar'];
 
+    const user = JSON.parse(localStorage.getItem('currentUser'));
+    const userId = user.id;
+    //following is just an example
+    const allergens = user.allergens;
+
+    let scannedProduct = {
+      name:null,
+      ingredients:null,
+      potential_allergens:null,
+      sugar_level:null,
+      status:'',
+      userId:userId,
+      quantity:1,
+      price:null
+    };
+
+    
     async function fetchProductInfo() {
       const barcode = document.getElementById('barcode').value.trim();
       if (!barcode) {
@@ -182,7 +197,7 @@
       }
 
       document.getElementById('questions').classList.add('hidden');
-      document.getElementById('foodNumberInput').value = '';
+      document.getElementById('quantity').value = '';
       document.getElementById('foodNameInput').value = '';
       document.getElementById('foodPriceInput').value = '';
       document.getElementById('trackNotice').textContent = '';
@@ -210,6 +225,12 @@
               const ingredients = product.ingredients_text_en || product.ingredients_text || product.ingredients_hierarchy || product.ingredients_original_tags || 'No ingredients listed';
               const potentialAllergens = product.allergens || 'No data';
               const sugarLevel = product.nutriments.sugars +" " + product.nutriments.sugars_unit || product.nutriments.sugars_100g +" " + product.nutriments.sugars_unit || product.nutriments.sugars_value +" " + product.nutriments.sugars_unit || 'No data';
+
+
+              scannedProduct.name=productName;
+              scannedProduct.ingredients=ingredients;
+              scannedProduct.potential_allergens=potentialAllergens;
+              scannedProduct.sugar_level=sugarLevel;
 
               document.getElementById('productName').textContent = productName;
               document.getElementById('ingredients').textContent = ingredients;
@@ -275,24 +296,36 @@
 
     function saveSafeFood() {
         document.getElementById('saveNotice').textContent = 'This product is marked safe.';
+        scannedProduct.status='safe';
 
         //mark this product as save food. And then send food info to dababase
         //later, when users upload receipts, if name on the receipt matches with the products' name, then we can know if it's safe or not.
     }
 
-    function saveUnsafeFood() {
+    async function saveUnsafeFood() {
         document.getElementById('saveNotice').textContent = 'This product is marked unsafe.';
-
+        scannedProduct.status='unsafe';
+        console.log(scannedProduct);
+        const response  = await fetch('http://localhost:5501/barcodeScan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ scannedProduct }),
+        });
         //mark this food as unsave food. And then send food info to dababase
         //later, when users upload receipts, if name on the receipt matches with the products' name, then we can know if it's safe or not.
     }
 
-	  function purchaseTracking(){
+    document.getElementById('confirmButton').addEventListener("click",async () => {
         document.getElementById('trackNotice').textContent = 'Thanks! Your purchase was recorded.';
-
-		//save food info (especially prices and sugar consumption) to database
-        //this will be used in the monthly overview page
-	  }
+        scannedProduct.price = parseFloat(document.getElementById('foodPriceInput').value);
+        scannedProduct.quantity = parseInt(document.getElementById('quantity').value) ;
+        console.log(scannedProduct);
+        const response  = await fetch('http://localhost:5501/barcodeScan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ scannedProduct }),
+        });
+    })
   </script>
 </body>
 </html>
