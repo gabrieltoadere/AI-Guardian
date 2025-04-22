@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phone Login</title>
     <link rel="stylesheet" href="/AI-Guardian/css/login.css">
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script type="module" src="/AI-Guardian/scripts/login.js"></script>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
 </head>
 <body>
     <div class="login-container">
@@ -45,38 +54,74 @@
             />
             Create An Account
           </button>
-          
-          <!-- Login button -->
-          <h2>OR</h2>
+         
+
+
+
+        <!-- Login button -->
+        <h2>OR</h2>
         <div>
+
+
         <!-- Social Media Login Buttons -->
-        <button class="social-btn google">
-          <img
-            src="/AI-Guardian/img's/google-logo.png"
-            alt="Google Logo"
-            class="icon"
-          />
-          Sign In With Google
-        </button>
+        <!-- Google Sign-In Section -->
+  <div style="text-align: center; margin: 20px 0;">
+    <!-- Optional title -->
+    <p style="font-weight: bold; font-size: 16px;"></p>
   
-        <button class="social-btn apple">
-          <img
-            src="/AI-Guardian/img's/apple-logo.png"
-            alt="Apple Logo"
-            class="icon"
-          />
-          Sign In With Apple
-        </button>
+    <!-- Google One Tap setup -->
+    <div id="g_id_onload"
+        data-client_id="229386078489-ovi0bke1m73e26lm1397baqplj5rabgg.apps.googleusercontent.com"
+        data-context="signin"
+        data-ux_mode="popup"
+        data-callback="handleCredentialResponse"
+        data-auto_prompt="false">
+    </div>
+  
+    <!-- Google Sign-In button -->
+    <div class="g_id_signin"
+        data-type="standard"
+        data-shape="pill"
+        data-theme="filled_blue"
+        data-text="continue_with"
+        data-size="large"
+        data-logo_alignment="left">
+    </div>
+  </div>
   
   
-        <button class="social-btn email">
-          <img
-            src="/AI-Guardian/img's/email-logo.jpg"
-            alt="Email Logo"
-            class="icon"
-          />
-          Sign In With Email
-        </button>
+  
+    <!-- Apple Sign-In Button -->
+  <div style="text-align: center; margin: 20px 0;">
+    <button onclick="handleAppleSignIn()" 
+            style="background-color: gray; color: white; border: none; border-radius: 50px;
+                   padding: 12px 24px; font-size: 16px; font-weight: bold; cursor: pointer;
+                   display: flex; align-items: center; justify-content: center; gap: 10px;
+                   width: 420px; max-width: 100%; margin: 0 auto;">
+      <img src="/AI-Guardian/img's/apple-logo.png" alt="Apple Logo" style="height: 20px; width: 20px;" />
+      Sign in with Apple
+    </button>
+  </div>
+  
+  <script>
+    function handleAppleSignIn() {
+      window.location.href = "apple-login.html"; // Or your Apple auth logic
+    }
+  </script>
+  
+  
+  <!-- Email Sign-In Button -->
+  <div style="text-align: center; margin: 20px 0;">
+    <button onclick="window.location.href='email.login.html'" 
+            style="background-color: #2e7d32; color: white; border: none; border-radius: 50px;
+                   padding: 12px 24px; font-size: 16px; font-weight: bold; cursor: pointer;
+                   display: flex; align-items: center; justify-content: center; gap: 10px;
+                   width: 420px; max-width: 100%; margin: 0 auto;">
+      <img src="/AI-Guardian/img's/email-logo.jpg" alt="Email Logo" style="height: 20px; width: 20px;" />
+      Sign in with Email
+    </button>
+  </div>
+  
           </div>
         </div>
         <div style="text-align: center; margin-top: 20px;">

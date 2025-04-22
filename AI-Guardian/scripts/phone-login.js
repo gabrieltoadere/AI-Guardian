@@ -22,21 +22,21 @@ document.querySelector(".login-btn").addEventListener("click", async () => {
     }
 });
 
-document.querySelector(".google").addEventListener("click", function () {
-    window.location.href = "google-login.html";
-});
+// document.querySelector(".google").addEventListener("click", function () {
+//     window.location.href = "google-login.html";
+// });
 
-document.querySelector(".apple").addEventListener("click", function () {
-    window.location.href = "apple-login.html";
-});
+// document.querySelector(".apple").addEventListener("click", function () {
+//     window.location.href = "apple-login.html";
+// });
 
 // document.querySelector(".phone").addEventListener("click", function () {
 //     window.location.href = "phone-login.html";
 // });
 
-document.querySelector(".email").addEventListener("click", function () {
-    window.location.href = "email.login.html";
-});
+// document.querySelector(".email").addEventListener("click", function () {
+//     window.location.href = "email.login.html";
+// });
 
 document.querySelector(".createAccount").addEventListener("click", function () {
     window.location.href = "createAccount.html";
