@@ -508,22 +508,6 @@ setTimeout(() => {
   });
   
 
-  document.getElementById("clearChatButton").addEventListener("click", () => {
-    const chatBox = document.getElementById("chat-box");
-    chatBox.innerHTML = ''; // Clear all messages
-  
-    // Add typing indicator back
-    const typing = document.createElement("div");
-    typing.id = "typingIndicator";
-    typing.className = "hidden flex items-center text-sm text-gray-500 animate-fade-in";
-    typing.innerHTML = `🤖 Grocery Guardian is typing<span class="dots ml-1"><span>.</span><span>.</span><span>.</span></span>`;
-    chatBox.appendChild(typing);
-  
-    chatHistory = []; // Reset chat history
-    showToast("✅ Chat cleared.");
-  });
-  
-
 
 
   function showToast(message = "✅ Copied to clipboard!") {
