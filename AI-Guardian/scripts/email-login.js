@@ -34,9 +34,9 @@ document.querySelector(".phone").addEventListener("click", function () {
     window.location.href = "phone-login.html";
 });
 
-document.querySelector(".email").addEventListener("click", function () {
-    window.location.href = "email.login.html";
-});
+// document.querySelector(".email").addEventListener("click", function () {
+//     window.location.href = "email.login.html";
+// });
 
 document.querySelector(".createAccount").addEventListener("click", function () {
     window.location.href = "createAccount.html";

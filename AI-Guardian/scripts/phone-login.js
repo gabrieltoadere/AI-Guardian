@@ -30,9 +30,9 @@ document.querySelector(".apple").addEventListener("click", function () {
     window.location.href = "apple-login.html";
 });
 
-document.querySelector(".phone").addEventListener("click", function () {
-    window.location.href = "phone-login.html";
-});
+// document.querySelector(".phone").addEventListener("click", function () {
+//     window.location.href = "phone-login.html";
+// });
 
 document.querySelector(".email").addEventListener("click", function () {
     window.location.href = "email.login.html";
