@@ -7,6 +7,7 @@ function toggleOptions(optionsId, caretId) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    loadHistory();
     const chatbotIcon = document.getElementById('chatbotIcon');
     
     if (chatbotIcon) {
@@ -16,56 +17,79 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+async function loadHistory() {
+    const historyDisplay = document.getElementById('history-container');
+    const user = JSON.parse(localStorage.getItem('currentUser'));
+    const userId = user.id;
+
+    const response = await fetch('http://localhost:5501/loadHistory', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+    });
+
+    const history = await response.json();
+    console.log(history);
+    if(history.length > 0) {
+        historyDisplay.innerHTML='';
+        history.forEach(scan => {
+            const readableDate = new Date(scan.scan_date).toLocaleDateString();
+            historyDisplay.innerHTML += `
+            <div class="history-item" onclick="viewProductDetails(${scan.scan_id})">
+                <div class="item-info">
+                    <span class="item-name">${scan.product_name}</span>
+                    <span class="item-date">${readableDate}</span>
+                </div>
+                <div class="item-status safe" id="status-12345">
+                    <i class="fas fa-check-circle"></i> <span id="status-${scan.scan_id}" class="status-text">${scan.status}</span>
+                </div>
+
+                <!-- The toggle button must stop the parent click -->
+               <button class="toggle-status" data-id="${scan.scan_id}">
+                    <i class="fas fa-pen"></i>
+                </button>
+            </div>`
+        });
+
+        document.querySelectorAll('.toggle-status').forEach(button => {
+            button.addEventListener('click', (event) => {
+                event.stopPropagation();
+                const scanId = button.getAttribute('data-id');
+                toggleStatus(scanId);
+            });
+        });
+    }
+} 
+
 
 function viewProductDetails(productId) {
     window.location.href = `product-details.html?id=${productId}`;
 }
 
 
-function toggleStatus(productId) {
-    const statusDiv = document.getElementById(`status-${productId}`);
-    if (!statusDiv) {
-        console.error(`Status div not found for productId ${productId}`);
-        return;
-    }
+function toggleStatus(scan_id) {
+    const statusText = document.getElementById(`status-${scan_id}`);
+    const currentStatus = statusText.textContent.trim();
 
-    const statusText = statusDiv.querySelector('.status-text');
-    const icon = statusDiv.querySelector('i');
-    let newStatus;
+    let updatedStatus = currentStatus === 'safe' ? 'unsafe' : 'safe';
 
-    if (statusDiv.classList.contains('safe')) {
-        statusDiv.classList.remove('safe');
-        statusDiv.classList.add('unsafe');
-        icon.className = 'fas fa-exclamation-triangle';
-        statusText.textContent = 'Unsafe';
-        newStatus = 'unsafe';
-    } else {
-        statusDiv.classList.remove('unsafe');
-        statusDiv.classList.add('safe');
-        icon.className = 'fas fa-check-circle';
-        statusText.textContent = 'Safe';
-        newStatus = 'safe';
-    }
-
-    // Send update to backend
-    fetch('http://localhost:5501/api/update-status', {
-
+    fetch('http://localhost:5501/update-status', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            productId,
-            status: newStatus
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ scan_id, updatedStatus })
     })
     .then(res => res.json())
-    .then(data => console.log('Status saved:', data))
+    .then(data => {
+        console.log('Status saved:', data);
+        statusText.textContent = updatedStatus;
+
+        // Optionally update the class (safe/unsafe)
+        const statusContainer = statusText.closest('.item-status');
+        statusContainer.classList.remove('safe', 'unsafe');
+        statusContainer.classList.add(updatedStatus);
+    })
     .catch(err => console.error('Failed to update status:', err));
 }
-
-
-
 
 
 document.addEventListener('DOMContentLoaded', () => {

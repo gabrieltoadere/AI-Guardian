@@ -678,9 +678,15 @@ Analyze the ingredients for allergen risks.
 async function getTopSafeProducts(userId) {
   try {
     const [history, allergens] = await Promise.all([
-      fetch(`http://localhost:5501/api/scanHistory/${userId}`).then(r => r.json()),
-      fetch(`http://localhost:5501/api/preferences/${userId}`).then(r => r.json())
+      fetch('http://localhost:5501/loadHistory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId}),
+      }).then(response => response.json()),
+      fetch(`http://localhost:5501/api/preferences/${userId}`).then(response => response.json())
     ]);
+    console.log(history);
+    console.log(allergens);
     const safe = history.filter(item =>
       !allergens.some(a => item.ingredients?.some(ing => ing.toLowerCase().includes(a.toLowerCase())))
     );
@@ -702,10 +708,10 @@ async function recommendSafeProducts(userId) {
     }
     const allergens = await fetch(`http://localhost:5501/api/preferences/${userId}`).then(r => r.json());
     const prompt = `
-You are Grocery Guardian, an allergen-aware assistant.
-User allergies: ${allergens.join(", ") || "none"}
-Recommend safe foods avoiding allergens.
-`;
+        You are Grocery Guardian, an allergen-aware assistant.
+        User allergies: ${allergens.join(", ") || "none"}
+        Recommend safe foods avoiding allergens.
+        `;
     const payload = {
       messages: [
         { role: "system", content: prompt },

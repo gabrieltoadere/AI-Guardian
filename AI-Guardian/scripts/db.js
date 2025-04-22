@@ -155,21 +155,17 @@ app.post('/reset-password',(req,res) => {
 
 //I ADDED A ROUTE TO HANDLE CHANGES MADE TO SAFE OR UNSAFE FOODS
 // Assuming we're using Express and have a db connection set up
-app.post('/api/update-status', (req, res) => {
-    const { productId, status } = req.body;
+app.post('/update-status', (req, res) => {
+    const { scan_id, updatedStatus } = req.body;
 
-    if (!productId || !status) {
-        return res.status(400).json({ message: 'Missing productId or status' });
-    }
+    const query = 'UPDATE scan_history SET status=? WHERE scan_id=?';
 
-    const query = 'UPDATE purchase_history SET status = ? WHERE product_id = ?';
-    db.query(query, [status, productId], (err, result) => {
-        if (err) {
-            console.error('Error updating status:', err);
-            return res.status(500).json({ message: 'Database error' });
+    db.query(query,[updatedStatus,scan_id],(err,results) => {
+        if(err) {
+          console.err(err);
         }
-        return res.json({ message: 'Status updated successfully' });
-    });
+        res.json(results);
+    })
 });
 
 
@@ -216,7 +212,7 @@ app.post('/update-allergens', async (req, res) => {
 
 
 // Save user name
-app.post('/api/user', (req, res) => {
+  app.post('/api/user', (req, res) => {
     const { userId, name } = req.body;
     db.query('UPDATE users SET name = ? WHERE id = ?', [name, userId], (err) => {
       if (err) return res.status(500).send(err);
@@ -275,8 +271,33 @@ app.get('/api/preferences/:userId', (req, res) => {
 });
 
 
+app.post('/barcodeScan',(req,res) => {
+  const { scannedProduct } = req.body;
 
+  const query = `INSERT INTO scan_history
+   (user_id, product_name, ingredients,potential_allergens,sugar_level,status,scan_date)
+   VALUES (?,?,?,?,?,?,NOW())`;
 
+   db.query(query, [ scannedProduct.userId,scannedProduct.name , scannedProduct.ingredients,scannedProduct.potential_allergens,scannedProduct.sugar_level,scannedProduct.status] ,(err,results) => {
+      if(err) {
+        console.error('error storing scan', err);
+      }
+      console.log(results);
+  });
+});
+
+app.post('/loadHistory',(req,res) => {
+  const { userId } = req.body;
+
+  const query = 'SELECT * FROM scan_history WHERE user_id=?';
+
+  db.query(query, [ userId ],(err,results) => {
+    if(err) {
+      console.err('error getting scan history',err);
+    }
+    res.json(results);
+  });
+})
 
 // Save scan history
 app.post('/api/scan-history', (req, res) => {
@@ -310,7 +331,7 @@ app.get('/api/scan-history/:userId', (req, res) => {
             console.error('Error fetching scan history:', err);
             return res.status(500).json({ error: 'Failed to fetch history' });
         }
-        res.json(results);
+        return res.json(results);
     });
 });
 
@@ -430,40 +451,40 @@ app.post('/login/phone', (req, res) => {
   
       if (results.length === 0)
         return res.status(401).json({ success: false, message: 'Invalid phone or password' });
-  
+
       const user = results[0];
-  
+
       const match = (user.password===password);
       if (!match) {
         return res.status(401).json({ success: false, message: 'Invalid username or password' });
       }
-  
+
       // Create a token
       // const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
-  
+
       return res.json({ success: true,user});
     });
   });
 
+
   app.post('/login/email', (req, res) => {
     const { email, password } = req.body;
-  
+
     if (!email || !password)
       return res.status(400).json({ success: false, message: 'Missing credentials' });
-  
+
     db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
       if (err) return res.status(500).json({ success: false, message: 'Database error' });
-  
+
       if (results.length === 0)
         return res.status(401).json({ success: false, message: 'Invalid email or password' });
-  
+
       const user = results[0];
-  
+
       const match = (user.password===password);
       if (!match) {
         return res.status(401).json({ success: false, message: 'Invalid email or password' });
       }
-  
       // Create a token
       // const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
   

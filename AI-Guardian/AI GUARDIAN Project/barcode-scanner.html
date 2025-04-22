@@ -188,7 +188,7 @@
                 <input type="text" id="foodNameInput">
                 <p>Product Price:</p>
                 <input type="text" id="foodPriceInput">
-                <button id="confirmButton" onclick="purchaseTracking()">Submit</button>
+                <button id="confirmButton">Submit</button>
                 <p id="trackNotice"></p>
             </div>
         </div>
@@ -204,8 +204,27 @@
         let lastDetectionTime = 0;
         let isCameraInitialized = false;
 		let foodName = null;
+
+
         //please extract the real allergen list from database
         const allergenList = ['sugar', 'milk', 'acidificanti'];
+
+        
+        //local user information
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+        const userId = user.id;
+
+
+        //info for scanned product
+        let scannedProduct = {
+            name:null,
+            ingredients:null,
+            potential_allergens:null,
+            sugar_level:null,
+            status:'',
+            userId:userId
+        };
+
 
         function startScanning() {
             document.getElementById('camera').classList.remove('hidden');
@@ -349,6 +368,13 @@
 					document.getElementById('potentialAllergens').textContent = potentialAllergens;
                     document.getElementById('sugarLevel').textContent = sugarLevel;
 
+
+                    scannedProduct.name=productName;
+                    scannedProduct.ingredients = ingredients;
+                    scannedProduct.potential_allergens = potentialAllergens;
+                    scannedProduct.sugar_level = sugarLevel;
+                    scannedProduct.status = null;
+
                     checkForAllergens(ingredients,allergenList);
 
 					const nutrientLevels = product.nutrient_levels || {};
@@ -406,25 +432,35 @@
 
     function saveSafeFood() {
         document.getElementById('saveNotice').textContent = 'This product is marked safe.';
+        scannedProduct.status='safe';
 
         //mark this product as save food. And then send food info to dababase
         //later, when users upload receipts, if name on the receipt matches with the products' name, then we can know if it's safe or not.
     }
 
-    function saveUnsafeFood() {
+    async function saveUnsafeFood() {
         document.getElementById('saveNotice').textContent = 'This product is marked unsafe.';
+        scannedProduct.status='unsafe';
+        console.log(scannedProduct);
+        const response  = await fetch('http://localhost:5501/barcodeScan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ scannedProduct }),
+        });
 
         //mark this food as unsave food. And then send food info to dababase
         //later, when users upload receipts, if name on the receipt matches with the products' name, then we can know if it's safe or not.
     }
 
-	function purchaseTracking(){
+    document.getElementById('confirmButton').addEventListener("click",async () => {
         document.getElementById('trackNotice').textContent = 'Thanks! Your purchase was recorded.';
-
-		//save food info (especially prices and sugar consumption) to database
-        //this will be used in the monthly overview page
-	}
-
+        console.log(scannedProduct);
+        const response  = await fetch('http://localhost:5501/barcodeScan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ scannedProduct }),
+        });
+    })
     </script>
 </body>
 </html>
