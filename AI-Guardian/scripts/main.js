@@ -12,6 +12,7 @@ async function displayAllergens(){
         li.textContent = 'No allergens'; 
         allergensList.appendChild(li);
     }
+    
     else if(allergens.length > 0) {
             allergens.forEach(allergen => {
             const li = document.createElement('li');
