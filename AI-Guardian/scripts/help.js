@@ -416,7 +416,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const imageInput = document.getElementById("imageInput");
   const cameraBtn = document.getElementById("liveCameraButton");
   const toggle = document.getElementById("darkModeToggle");
-  const userId = localStorage.getItem("userId") || "1";
+  const user = JSON.parse(localStorage.getItem('currentUser'));
+  const userId = user.id;
   loadContextChips(userId);
 
   form.addEventListener("submit", async (e) => {
@@ -614,7 +615,7 @@ async function getTopSafeProducts(userId) {
       fetch(`http://localhost:5501/api/preferences/${userId}`).then(response => response.json())
     ]);
     console.log(history);
-    console.log(allergens);
+    console.log(allergens, "line 617");
     const safe = history.filter(item =>
       !allergens.some(a => item.ingredients?.some(ing => ing.toLowerCase().includes(a.toLowerCase())))
     );
