@@ -354,9 +354,19 @@ function showToast(message) {
 
 
 async function getAzureReply(userInput) {
+  const user = JSON.parse(localStorage.getItem('currentUser'));
+  const userId = user?.id || "1";
+
+  let preferences = [];
+  try {
+    preferences = await fetch(`http://localhost:5501/api/preferences/${userId}`).then(res => res.json());
+  } catch (err) {
+    console.warn("Failed to fetch preferences, defaulting to none.");
+  }
+
   const systemPrompt = `
 You are Grocery Guardian, a smart and safety-conscious grocery assistant.
-User preferences: Allergies: peanuts, gluten | Diet: vegetarian
+User preferences: Allergies: ${preferences.length ? preferences.join(", ") : "none"} | Diet: vegetarian
 Be natural, helpful, and prioritize allergen safety.
 `;
 
@@ -380,6 +390,7 @@ Be natural, helpful, and prioritize allergen safety.
     return "Sorry, I couldn't respond right now.";
   }
 }
+
 
 
 
@@ -610,18 +621,31 @@ async function getTopSafeProducts(userId) {
       fetch('http://localhost:5501/loadHistory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId}),
+        body: JSON.stringify({ userId }),
       }).then(response => response.json()),
       fetch(`http://localhost:5501/api/preferences/${userId}`).then(response => response.json())
     ]);
+
     console.log(history);
-    console.log(allergens, "line 617");
-    const safe = history.filter(item =>
-      !allergens.some(a => item.ingredients?.some(ing => ing.toLowerCase().includes(a.toLowerCase())))
-    );
+    console.log(allergens);
+
+    const safe = history.filter(item => {
+      if (!Array.isArray(item.ingredients)) return false;
+      return !allergens.some(a =>
+        item.ingredients.some(ing => typeof ing === 'string' && ing.toLowerCase().includes(a.toLowerCase()))
+      );
+    });
+
     const counts = {};
-    safe.forEach(item => counts[item.product_name] = (counts[item.product_name] || 0) + 1);
-    return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name]) => name);
+    safe.forEach(item => {
+      counts[item.product_name] = (counts[item.product_name] || 0) + 1;
+    });
+
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([name]) => name);
+
   } catch (err) {
     console.error("Safe product lookup failed:", err);
     return [];
