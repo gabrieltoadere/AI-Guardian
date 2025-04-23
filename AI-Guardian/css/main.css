@@ -206,3 +206,45 @@ h1::after {
     font-size: 1.5rem;
   }
 }
+
+
+
+
+.recent-scans {
+  width: 100%;
+  background: #ffffff;
+  padding: 16px;
+  margin-top: -12px;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.recent-scans h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--primary-dark);
+}
+
+.recent-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recent-list li {
+  background-color: #f9f9f9;
+  border-left: 6px solid #ccc;
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.recent-list li.safe { border-color: #4caf50; color: #2e7d32; }
+.recent-list li.unsafe { border-color: #f44336; color: #c62828; }

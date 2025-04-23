@@ -18,6 +18,14 @@
     <div class="main-container">
       <h1>Grocery Guardian</h1>
 
+      <!-- 🌱 Personalized Greeting -->
+<div class="mt-6 w-full text-left">
+<h2 class="text-lg font-semibold mb-1">Hi <span id="greetingName">there</span> 👋</h2>
+<p class="text-sm text-gray-600">Let’s keep your grocery journey safe and smart today!</p>
+</div>
+
+
+
       <!-- Allergy List with Horizontal Scroll -->
       <div class="allergyDisplay">
         <ul class="allergyList" id="allergens-list">
@@ -33,6 +41,37 @@
           Add New Item +
         </button>
       </div>
+
+ 
+<!-- Recent Scans Preview -->
+<div class="recent-scans">
+  <h2>Recent Scans</h2>
+  <ul id="recentScansList" class="recent-list"></ul>
+</div>
+
+
+<!-- 💡 Rotating Safety Tip Box -->
+<div class="w-full mt-6">
+  <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded text-sm text-gray-800" id="tip-box">
+    <strong>Tip:</strong> Always check ingredient labels, even for familiar brands!
+  </div>
+</div>
+
+
+
+<!-- 🔎 Smart Ingredient Search -->
+<div class="w-full mt-6">
+  <label for="ingredientSearch" class="block text-sm font-medium text-gray-700 mb-1">Search Ingredient:</label>
+  <div class="flex gap-2">
+    <input type="text" id="ingredientSearch" placeholder="e.g. Soy Lecithin" class="flex-1 px-4 py-2 border rounded-md text-sm">
+    <button onclick="searchIngredient()" class="bg-green-600 text-white px-4 py-2 rounded-md text-sm">Search</button>
+  </div>
+  <p id="ingredientResult" class="mt-2 text-sm text-gray-600"></p>
+</div>
+
+
+
+
 
     <div class="navbar">
       <ul>
