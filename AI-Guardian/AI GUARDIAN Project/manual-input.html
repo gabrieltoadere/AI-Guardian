@@ -165,7 +165,11 @@
         </div>
     </div>
 
-
+    <div id="alternatives" class="hidden">
+      <h3>Allergy-Friendly Alternatives</h3>
+      <small style="color: gray;">*Some products may appear in foreign languages if English data is unavailable.</small>
+      <div id="alternativeList"></div>
+    </div>
   </div>
 
   <a href="scanIndex.html" class="back-button">Back to Main</a>
@@ -175,8 +179,15 @@
     const user = JSON.parse(localStorage.getItem('currentUser'));
     const userId = user.id;
     //following is just an example
-    const allergens = user.allergens;
+    let allergens = user.allergens;
+      try {
+        allergens = JSON.parse(allergens); // safely parse the real array
+      } catch {
+        // fallback if it's not stringified
+        allergens = allergens.split(',').map(a => a.trim().toLowerCase());
+      }
 
+    
     let scannedProduct = {
       name:null,
       ingredients:null,
@@ -222,7 +233,16 @@
 
               foodName = productName;	
 
-              const ingredients = product.ingredients_text_en || product.ingredients_text || product.ingredients_hierarchy || product.ingredients_original_tags || 'No ingredients listed';
+              let ingredients =
+                  product.ingredients_text_en ||
+                  product.ingredients_text ||
+                  (Array.isArray(product.ingredients_hierarchy)
+                    ? product.ingredients_hierarchy.join(", ").replace(/en:/g, "")
+                    : "") ||
+                  (Array.isArray(product.ingredients_tags)
+                    ? product.ingredients_tags.join(", ").replace(/en:/g, "")
+                    : "") ||
+                  'No ingredients listed';              
               const potentialAllergens = product.allergens || 'No data';
               const sugarLevel = product.nutriments.sugars +" " + product.nutriments.sugars_unit || product.nutriments.sugars_100g +" " + product.nutriments.sugars_unit || product.nutriments.sugars_value +" " + product.nutriments.sugars_unit || 'No data';
 
@@ -263,30 +283,113 @@
   }
 
 
-  async function checkAllergens(ingredients) {
-        const lowerText = ingredients.toLowerCase();
-        let allergensInside = "";
+      function escapeRegExp(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape special regex chars
+      }
 
-        for (const allergen of allergens) {
-            if (lowerText.includes(allergen.toLowerCase())){
-                allergensInside += allergen + " ";
+
+      const allergenSynonyms = {
+        milk: ['milk', 'skimmed milk', 'milk powder', 'milk solids', 'whey', 'casein', 'lactose', 'milk fat', 'whey permeate'],
+        soy: ['soy', 'soya', 'soy lecithin'],
+        eggs: ['egg', 'eggs', 'albumin', 'egg yolk', 'egg white'],
+        gluten: ['gluten', 'wheat', 'barley', 'rye', 'spelt']
+      };
+
+      async function checkAllergens(ingredients) {
+        const lowerText = ingredients.toLowerCase().replace(/[\n\r\t]/g, ' ');
+        let allergensInside = [];
+
+          allergens.forEach(allergen => {
+            const terms = allergenSynonyms[allergen.toLowerCase()] || [allergen];
+            const found = terms.some(term => {
+              const regex = new RegExp(`\\b${escapeRegExp(term.toLowerCase())}\\b`, 'i');
+              return regex.test(lowerText);
+            });
+            if (found) {
+              allergensInside.push(allergen);
             }
-        }
+          });
 
-        const noticeEl = document.getElementById('allergenNotice');
-        noticeEl.style.display = 'block';
+          const noticeEl = document.getElementById('allergenNotice');
+          noticeEl.style.display = 'block';
 
-        noticeEl.classList.remove('safe', 'warning');
-        noticeEl.textContent = '';
+          noticeEl.classList.remove('safe', 'warning');
+          noticeEl.textContent = '';
 
-        if (allergensInside === "") {
-            noticeEl.textContent = ' This product is safe for you.';
+          console.log("Ingredients:", lowerText);
+          console.log("User allergens:", allergens);
+          console.log("Matched allergens:", allergensInside);
+
+          if (allergensInside.length === 0) {
+            console.log(allergensInside);
+            noticeEl.textContent = '✅ This product is safe for you.';
             noticeEl.classList.add('safe');
-        } else {
-            noticeEl.textContent = 'Warning! This product contains your allergens: ' + allergensInside;
+            document.getElementById('alternatives').classList.add('hidden');
+          } else {
+            noticeEl.textContent = `⚠️ Warning! This product contains your allergens: ${allergensInside.join(", ")}`;
             noticeEl.classList.add('warning');
+            fetchAlternatives(scannedProduct.name, allergens);
+          }
+      }
+
+
+      async function fetchAlternatives(productName, allergens) {
+        const searchQuery = encodeURIComponent(productName.split(" ").slice(0, 2).join(" "));
+        const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${searchQuery}&search_simple=1&action=process&json=1&page_size=10&lc=en`;
+
+        // Show loading message
+        displayAlternatives([], true);
+
+        try {
+          const response = await fetch(url);
+          const data = await response.json();
+
+          const filtered = data.products.filter(prod => {
+            const ingredients = (prod.ingredients_text || '').toLowerCase();
+            return !allergens.some(allergen => ingredients.includes(allergen.toLowerCase()));
+          });
+
+          displayAlternatives(filtered, false);
+        } catch (err) {
+          console.error("Error fetching alternatives:", err);
+          document.getElementById('alternativeList').innerHTML = `<p style="color:red">⚠️ Error loading alternatives.</p>`;
         }
-    }
+      }
+
+
+      function displayAlternatives(products, loading = false) {
+        const container = document.getElementById('alternatives');
+        const list = document.getElementById('alternativeList');
+        list.innerHTML = '';
+
+        if (loading) {
+          list.innerHTML = '<p>🔄 Loading safe alternatives...</p>';
+          container.classList.remove('hidden');
+          return;
+        }
+
+        if (products.length === 0) {
+          list.innerHTML = '<p>No safe alternatives found 😕</p>';
+        } else {
+          products.forEach(prod => {
+            const div = document.createElement('div');
+            div.className = 'alternative';
+
+            div.innerHTML = `
+              <strong>${prod.product_name_en || prod.product_name || 'Unnamed Product'}</strong><br>
+              <img src="${prod.image_front_thumb_url || 'https://cdn-icons-png.flaticon.com/512/1178/1178479.png'}" alt="Product Image" style="max-height: 100px;"><br>
+              <small>${
+                prod.ingredients_text_en?.slice(0, 100) ||
+                prod.ingredients_text?.slice(0, 100) ||
+                'No ingredient info available'
+              }</small>`;
+            list.appendChild(div);
+          });
+        }
+
+        container.classList.remove('hidden');
+      }
+
 
 
     function showQuestions() {

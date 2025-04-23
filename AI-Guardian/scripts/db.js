@@ -9,6 +9,8 @@ const {OAuth2Client} = require('google-auth-library');
 const client = new OAuth2Client("229386078489-ovi0bke1m73e26lm1397baqplj5rabgg.apps.googleusercontent.com");
 const ndoemailer = require('nodemailer');
 const crypto = require('crypto');
+const fetch = require('node-fetch');
+
 
 
 
@@ -166,6 +168,22 @@ app.post('/update-status', (req, res) => {
         }
         res.json(results);
     })
+});
+
+
+//fetch product
+app.get('/api/alternatives', async (req, res) => {
+  const searchQuery = req.query.q;
+  const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(searchQuery)}&search_simple=1&action=process&json=1&page_size=10&lc=en`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error('Proxy error fetching alternatives:', err);
+    res.status(500).json({ error: 'Failed to fetch alternatives' });
+  }
 });
 
 
