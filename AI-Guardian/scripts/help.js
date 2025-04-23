@@ -406,9 +406,6 @@ Be natural, helpful, and prioritize allergen safety.
     if (data.length > 0) {
       context.innerHTML += `<div class="context-chip">⚠️ Allergies: ${data.join(", ")}</div>`;
     }
-
-    // Optional: add fixed diet info if you want
-    context.innerHTML += `<div class="context-chip">🥦 Diet: vegetarian</div>`;
   } catch (err) {
     console.error("Failed to load context chips:", err);
   }
