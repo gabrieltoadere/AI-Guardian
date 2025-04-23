@@ -522,62 +522,6 @@ setTimeout(() => {
     }, 2000);
   }
 
-  
-
-
-  // cameraBtn.addEventListener("click", async () => {
-  //   const modal = document.getElementById("cameraModal");
-  //   const video = document.getElementById("videoStream");
-  //   modal.classList.remove("hidden");
-  //   try {
-  //     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-  //     video.srcObject = stream;
-  //     video.setAttribute("autoplay", true);
-  //     video.setAttribute("playsinline", true);
-  //     video.play();
-  //   } catch (err) {
-  //     alert("Camera access blocked.");
-  //     modal.classList.add("hidden");
-  //   }
-  // });
-
-  // document.getElementById("closeCamera").addEventListener("click", stopCamera);
-
-  // document.getElementById("captureButton").addEventListener("click", async () => {
-  //   const video = document.getElementById("videoStream");
-  //   const canvas = document.createElement("canvas");
-  //   canvas.width = video.videoWidth;
-  //   canvas.height = video.videoHeight;
-  //   canvas.getContext("2d").drawImage(video, 0, 0);
-  //   stopCamera();
-  //   const blob = await new Promise(res => canvas.toBlob(res, "image/jpeg"));
-  //   addMessage("user", "📸 Captured image...");
-  //   showTyping();
-  //   const text = await extractTextFromImage(blob);
-  //   if (text) {
-  //     chatHistory.push({ role: "user", content: `Image text: ${text}` });
-  //     const result = await analyzeIngredientsFromText(userId, text);
-  //     addMessage("bot", result);
-  //     chatHistory.push({ role: "assistant", content: result });
-  //   } else {
-  //     addMessage("bot", "No readable text found.");
-  //   }
-  //   hideTyping();
-  // });
-
-  // function stopCamera() {
-  //   const modal = document.getElementById("cameraModal");
-  //   const video = document.getElementById("videoStream");
-  //   const stream = video.srcObject;
-  //   if (stream) {
-  //     stream.getTracks().forEach(track => track.stop());
-  //     video.srcObject = null;
-  //   }
-  //   modal.classList.add("hidden");
-  // }
-
-
-
 
 
   if (toggle) {
