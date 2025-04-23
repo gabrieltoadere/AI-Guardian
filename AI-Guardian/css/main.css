@@ -248,3 +248,22 @@ h1::after {
 
 .recent-list li.safe { border-color: #4caf50; color: #2e7d32; }
 .recent-list li.unsafe { border-color: #f44336; color: #c62828; }
+
+
+
+.scan-summary-card {
+  width: 100%;
+  background-color: #f0fdf4;
+  border-left: 6px solid #4caf50;
+  padding: 16px;
+  border-radius: var(--border-radius-md);
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+  font-size: 0.95rem;
+}
+
+.scan-summary-card ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  list-style-type: disc;
+}

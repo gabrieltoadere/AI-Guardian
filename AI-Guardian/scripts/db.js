@@ -492,6 +492,71 @@ app.post('/login/phone', (req, res) => {
     });
   });
 
+  app.get('/api/monthly-scan-summary/:userId', (req, res) => {
+    const { userId } = req.params;
+    const currentMonth = new Date().toISOString().slice(0, 7); // "YYYY-MM"
+  
+    const query = `
+      SELECT status, COUNT(*) as count 
+      FROM scan_history 
+      WHERE user_id = ? AND DATE_FORMAT(scan_date, '%Y-%m') = ? 
+      GROUP BY status
+    `;
+  
+    db.query(query, [userId, currentMonth], (err, results) => {
+      if (err) {
+        console.error("Monthly scan summary error:", err);
+        return res.status(500).json({ error: "Database query failed" });
+      }
+  
+      let summary = { safe: 0, unsafe: 0 };
+      results.forEach(r => {
+        if (r.status === 'safe') summary.safe = r.count;
+        if (r.status === 'unsafe') summary.unsafe = r.count;
+      });
+  
+      res.json(summary);
+    });
+  });
+
+
+  app.post('/update-history-status', async (req, res) => {
+    const { userId } = req.body;
+  
+    const getPrefs = `SELECT allergens FROM users WHERE id = ?`;
+    const getHistory = `SELECT scan_id, ingredients FROM scan_history WHERE user_id = ?`;
+  
+    db.query(getPrefs, [userId], (err, prefResults) => {
+      if (err) return res.status(500).json({ error: "Failed to get allergens" });
+  
+      const allergens = JSON.parse(prefResults[0]?.allergens || "[]");
+  
+      db.query(getHistory, [userId], (err, historyResults) => {
+        if (err) return res.status(500).json({ error: "Failed to get history" });
+  
+        const updates = historyResults.map(row => {
+          const ingredients = row.ingredients || "";
+          const isUnsafe = allergens.some(a => ingredients.toLowerCase().includes(a.toLowerCase()));
+          return new Promise((resolve, reject) => {
+            db.query(
+              `UPDATE scan_history SET status = ? WHERE scan_id = ?`,
+              [isUnsafe ? "unsafe" : "safe", row.scan_id],
+              (err) => err ? reject(err) : resolve()
+            );
+          });
+        });
+  
+        Promise.all(updates)
+          .then(() => res.json({ message: "Scan history updated" }))
+          .catch(error => res.status(500).json({ error: "Error updating scan statuses" }));
+      });
+    });
+  });
+  
+  
+  
+  
+
 
 
   
