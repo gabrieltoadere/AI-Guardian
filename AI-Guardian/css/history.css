@@ -139,9 +139,23 @@ h1, h2, h3 {
   font-size: 0.95rem;
 }
 
+/* New styles for status coloring */
 .item-status.safe {
-  color: var(--success-color);
+  color: white;
+  background-color: #4caf50;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
 }
+
+.item-status.unsafe {
+  color: white;
+  background-color: #f44336;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
 
 .item-status.warning {
   color: var(--warning-color);
@@ -189,4 +203,49 @@ h1, h2, h3 {
   .chatbot-icon i {
     font-size: 1.5rem;
   }
+}
+
+
+
+
+.delete-scan {
+  background: none;
+  border: none;
+  color: #e74c3c;
+  font-size: 1.1rem;
+  cursor: pointer;
+  margin-left: 12px;
+  transition: color 0.2s ease;
+}
+
+.delete-scan:hover {
+  color: #c0392b;
+}
+
+
+
+
+.toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #4caf50;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  z-index: 1000;
+  transition: opacity 0.4s ease;
+}
+
+.toast.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
 }

@@ -579,3 +579,17 @@ app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 })
 
+
+
+
+app.post('/delete-scan', (req, res) => {
+  const { scan_id } = req.body;
+  const query = 'DELETE FROM scan_history WHERE scan_id = ?';
+  db.query(query, [scan_id], (err, result) => {
+      if (err) {
+          console.error('Error deleting scan:', err);
+          return res.status(500).json({ error: 'Failed to delete scan' });
+      }
+      res.json({ success: true, message: 'Scan deleted successfully' });
+  });
+});

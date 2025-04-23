@@ -40,14 +40,18 @@ async function loadHistory() {
                     <span class="item-name">${scan.product_name}</span>
                     <span class="item-date">${readableDate}</span>
                 </div>
-                <div class="item-status safe" id="status-12345">
-                    <i class="fas fa-check-circle"></i> <span id="status-${scan.scan_id}" class="status-text">${scan.status}</span>
+                <div class="item-status ${scan.status}" id="status-${scan.scan_id}">
+
+                    <i class="fas ${scan.status === 'safe' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> 
+        <span class="status-text">${scan.status}</span>
                 </div>
 
-                <!-- The toggle button must stop the parent click -->
-               <button class="toggle-status" data-id="${scan.scan_id}">
-                    <i class="fas fa-pen"></i>
-                </button>
+                <button class="toggle-status" data-id="${scan.scan_id}" onclick="event.stopPropagation(); toggleStatus(${scan.scan_id});">
+        <i class="fas fa-pen"></i>
+    </button>
+    <button class="delete-scan" data-id="${scan.scan_id}" onclick="event.stopPropagation(); deleteScan(${scan.scan_id});">
+        <i class="fas fa-trash"></i>
+    </button>
             </div>`
         });
 
@@ -67,11 +71,28 @@ function viewProductDetails(productId) {
 }
 
 
-function toggleStatus(scan_id) {
-    const statusText = document.getElementById(`status-${scan_id}`);
-    const currentStatus = statusText.textContent.trim();
 
-    let updatedStatus = currentStatus === 'safe' ? 'unsafe' : 'safe';
+function showToast(message = "Successfully deleted!") {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.remove('hidden');
+    toast.classList.add('show');
+  
+    setTimeout(() => {
+      toast.classList.remove('show');
+      toast.classList.add('hidden');
+    }, 3500); // Show for 2 seconds
+  }
+  
+
+
+function toggleStatus(scan_id) {
+    const statusContainer = document.getElementById(`status-${scan_id}`);
+    const statusText = statusContainer.querySelector('.status-text');
+    const icon = statusContainer.querySelector('i');
+
+    const currentStatus = statusText.textContent.trim();
+    const updatedStatus = currentStatus === 'safe' ? 'unsafe' : 'safe';
 
     fetch('http://localhost:5501/update-status', {
         method: 'POST',
@@ -82,14 +103,42 @@ function toggleStatus(scan_id) {
     .then(data => {
         console.log('Status saved:', data);
         statusText.textContent = updatedStatus;
-
-        // Optionally update the class (safe/unsafe)
-        const statusContainer = statusText.closest('.item-status');
         statusContainer.classList.remove('safe', 'unsafe');
         statusContainer.classList.add(updatedStatus);
+        icon.className = updatedStatus === 'safe' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle';
     })
     .catch(err => console.error('Failed to update status:', err));
 }
+
+function deleteScan(scanId) {
+    if (!confirm("Are you sure you want to delete this scan?")) return;
+  
+    fetch('http://localhost:5501/delete-scan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scan_id: scanId })
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          console.log("Scan deleted:", data);
+          loadHistory(); // ✅ Refresh the list without reloading the page
+          showToast("Deleted successfully!");
+        } else {
+          alert("Failed to delete scan.");
+        }
+      })
+      .catch(err => {
+        console.error("Failed to delete scan:", err);
+      });
+  }
+  
+
+
+
+
+
+
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -101,4 +150,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+
+
+
 
