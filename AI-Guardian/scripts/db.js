@@ -316,6 +316,20 @@ app.post('/api/scan-history', (req, res) => {
     });
 });
 
+
+app.post('/getScan',(req,res) => {
+  const { productId } = req.body;
+
+  const query = 'SELECT * FROM scan_history WHERE scan_id=?';
+
+  db.query(query,[productId], (err,results)=> {
+    if(err) {
+      console.error('error fetching scan' ,err);
+    }
+    res.json(results);
+  }) 
+})
+
 // Get scan history
 app.get('/api/scan-history/:userId', (req, res) => {
     const { userId } = req.params;

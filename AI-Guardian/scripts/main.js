@@ -1,26 +1,24 @@
 let listActive = false;
 
-async function displayAllergens() {
-  const allergensList = document.getElementById('allergens-list');
-  const user = JSON.parse(localStorage.getItem('currentUser'));
+async function displayAllergens(){
+    const allergensList = document.getElementById('allergens-list')
+    const user = JSON.parse(localStorage.getItem('currentUser'));
+    console.log('user:',user);
+    
 
-  const allergens = JSON.parse(user?.allergens || "[]");
-  allergensList.innerHTML = "";
-
-  if (!allergens.length) {
-    allergensList.innerHTML = "<li>No allergens</li>";
-  } else {
-    allergens.forEach(a => {
-      const li = document.createElement('li');
-      li.textContent = a;
-      allergensList.appendChild(li);
-    });
-  }
-
-  if (user?.id) {
-    await loadMonthlyScanSummary(user.id);
-    await loadRecentScans(user.id);
-  }
+    const allergens =JSON.parse(user.allergens);
+    if(allergens===null || allergens.length === 0) {
+        const li = document.createElement('li');
+        li.textContent = 'No allergens'; 
+        allergensList.appendChild(li);
+    }
+    else if(allergens.length > 0) {
+            allergens.forEach(allergen => {
+            const li = document.createElement('li');
+            li.textContent = allergen; 
+            allergensList.appendChild(li);
+        });
+    }
 }
 
 function makeNewList() {

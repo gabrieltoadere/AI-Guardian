@@ -25,7 +25,7 @@
         
         <!-- Product Info -->
         <div class="product-info">
-            <img id="productImage" src="https://via.placeholder.com/200" alt="Product Image" class="product-image">
+            <img id="productImage" alt="Product Image" class="product-image">
             
             <div class="info-section">
                 <h3>Ingredients:</h3>
@@ -35,86 +35,71 @@
             </div>
         </div>
         
-        <!-- Alternatives Section -->
-        <div id="alternativesSection" class="alternatives-section">
+        <!-- Alternatives Section   <div id="alternativesSection" class="alternatives-section">
             <h3>Safe Alternatives:</h3>
             <div id="alternativeProducts" class="alternatives-grid">
-                <!-- Will be filled by JavaScript -->
+                 Will be filled by JavaScript 
             </div>
-        </div>
+        </div>    -->
+        
     </div>
 
     <script>
         // This would be populated from your database based on the product ID
         // Here's just example data
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const productId = urlParams.get('id');
             
-            // Example product data - in real app you would fetch this
-            const product = {
-                id: productId,
-                name: "Peanut Butter Cookies",
-                status: "unsafe",
-                image: "https://via.placeholder.com/200?text=Peanut+Butter+Cookies",
-                ingredients: [
-                    "Wheat Flour",
-                    "Peanuts",
-                    "Sugar",
-                    "Butter",
-                    "Eggs",
-                    "Salt"
-                ],
-                alternatives: [
-                    {
-                        name: "Sunflower Seed Cookies",
-                        image: "https://via.placeholder.com/150?text=Sunflower+Cookies"
-                    },
-                    {
-                        name: "Oatmeal Raisin Cookies",
-                        image: "https://via.placeholder.com/150?text=Oatmeal+Cookies"
-                    }
-                ]
-            };
-            
-            // Update the page with product data
-            document.getElementById('productTitle').textContent = product.name;
-            document.getElementById('productImage').src = product.image;
-            
-            // Set status
-            const statusElement = document.getElementById('productStatus');
-            if (product.status === "unsafe") {
-                statusElement.innerHTML = `
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h2>BE AWARE!</h2>
-                    <p>Contains allergens based on your preferences</p>
-                `;
-                statusElement.className = "product-status unsafe";
-            }
-            
-            // Add ingredients
-            const ingredientsList = document.getElementById('ingredientsList');
-            product.ingredients.forEach(ingredient => {
-                const li = document.createElement('li');
-                li.textContent = ingredient;
-                ingredientsList.appendChild(li);
+
+            console.log("Product ID:", productId); // Debug line
+            const response = await fetch('http://localhost:5501/getScan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId }),
             });
-            
-            // Add alternatives if unsafe
-            if (product.status === "unsafe" && product.alternatives.length > 0) {
-                const alternativesGrid = document.getElementById('alternativeProducts');
-                product.alternatives.forEach(alt => {
-                    const altItem = document.createElement('div');
-                    altItem.className = "alternative-item";
-                    altItem.innerHTML = `
-                        <img src="${alt.image}" alt="${alt.name}">
-                        <p>${alt.name}</p>
-                    `;
-                    alternativesGrid.appendChild(altItem);
+
+
+            const data = await response.json();
+
+
+           if (data.length > 0) {
+                const productData = data[0]; // Extract the first row from results
+
+                const product = {
+                    id: productId,
+                    name: productData.name,
+                    status: productData.status,
+                    image: productData.image,         // Make sure your table has this
+                    ingredients: productData.ingredients.split(',') // Assuming it's a comma-separated string
+                };
+
+                // Update the page with product data
+                document.getElementById('productTitle').textContent = product.name;
+
+                // Fill ingredients
+                const ingredientsList = document.getElementById('ingredientsList');
+                ingredientsList.innerHTML = '';
+                product.ingredients.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = item.trim();
+                    ingredientsList.appendChild(li);
                 });
-            } else {
-                document.getElementById('alternativesSection').classList.add('hidden');
-            }
+
+                // Set status
+                const statusElement = document.getElementById('productStatus');
+                if (product.status === "unsafe") {
+                    statusElement.innerHTML = `
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h2>BE AWARE!</h2>
+                        <p>Contains allergens based on your preferences</p>
+                    `;
+                    statusElement.className = "product-status unsafe";
+                }
+
+                } else {
+                    console.error("No product found with that ID.");
+                }
         });
     </script>
 </body>
