@@ -321,7 +321,7 @@
         ]
       };
 
-      
+
       async function checkAllergens(ingredients) {
         const lowerText = ingredients.toLowerCase().replace(/[\n\r\t]/g, ' ');
         let allergensInside = [];
@@ -362,18 +362,26 @@
 
       async function fetchAlternatives(productName, allergens) {
         const searchQuery = encodeURIComponent(productName.split(" ").slice(0, 2).join(" "));
-        const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${searchQuery}&search_simple=1&action=process&json=1&page_size=10&lc=en`;
+        const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${searchQuery}&search_simple=1&action=process&json=1&page_size=50&lc=en`;
 
-        // Show loading message
-        displayAlternatives([], true);
+        displayAlternatives([], true); // show loading
 
         try {
           const response = await fetch(url);
           const data = await response.json();
 
           const filtered = data.products.filter(prod => {
-            const ingredients = (prod.ingredients_text || '').toLowerCase();
-            return !allergens.some(allergen => ingredients.includes(allergen.toLowerCase()));
+            const ingredients = prod.ingredients_text_en || '';
+            const productName = prod.product_name_en || '';
+
+            // Product must have English ingredients and name,
+            // and must not include user's allergens
+            const isEnglish = ingredients && productName;
+            const isSafe = !allergens.some(allergen => 
+              (prod.ingredients_text || '').toLowerCase().includes(allergen.toLowerCase())
+            );
+
+            return isEnglish && isSafe;
           });
 
           displayAlternatives(filtered, false);
@@ -405,11 +413,8 @@
             div.innerHTML = `
               <strong>${prod.product_name_en || prod.product_name || 'Unnamed Product'}</strong><br>
               <img src="${prod.image_front_thumb_url || 'https://cdn-icons-png.flaticon.com/512/1178/1178479.png'}" alt="Product Image" style="max-height: 100px;"><br>
-              <small>${
-                prod.ingredients_text_en?.slice(0, 100) ||
-                prod.ingredients_text?.slice(0, 100) ||
-                'No ingredient info available'
-              }</small>`;
+              <small>${prod.ingredients_text_en?.slice(0, 100) || 'No English ingredient info available'}</small>
+            `;
             list.appendChild(div);
           });
         }

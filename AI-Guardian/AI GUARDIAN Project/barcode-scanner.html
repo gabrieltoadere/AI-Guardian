@@ -391,7 +391,7 @@
                     scannedProduct.sugar_level = sugarLevel;
                     scannedProduct.status = null;
 
-                    checkForAllergens(ingredients,allergenList);
+                    checkAllergens(ingredients);
 
 					const nutrientLevels = product.nutrient_levels || {};
 					const nutrientText = Object.entries(nutrientLevels).map(([key, value]) => `${key}: ${value}`).join(", "); 					 
@@ -577,7 +577,7 @@
     document.getElementById('confirmButton').addEventListener("click",async () => {
         document.getElementById('trackNotice').textContent = 'Thanks! Your purchase was recorded.';
         scannedProduct.price = document.getElementById('price').value;
-        scannedProduct.quantity =parseInt(document.getAnimations('quantity').value) ;
+        scannedProduct.quantity =parseInt(document.getElementById('quantity').value) ;
         console.log(scannedProduct);
         const response  = await fetch('http://localhost:5501/barcodeScan', {
             method: 'POST',
