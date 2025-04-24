@@ -138,9 +138,11 @@ document.addEventListener('DOMContentLoaded', () => {
         monthlySummary.innerHTML = '<h3>Monthly Summary</h3>';
 
         const topItems = Object.entries(data.items)
-            .sort((a, b) => b[1].count - a[1].count)
-            .slice(0, 5)
-            .map(([name, info]) => `${name} (x${info.count}, €${info.total.toFixed(2)})`);
+    .filter(([_, info]) => info.total > 0) // ✅ Exclude items with total €0.00
+    .sort((a, b) => b[1].count - a[1].count)
+    .slice(0, 5)
+    .map(([name, info]) => `${name} (x${info.count}, €${info.total.toFixed(2)})`);
+
 
         monthlySummary.innerHTML += `
             <p><strong>Total Spent:</strong> €${data.total.toFixed(2)}</p>
