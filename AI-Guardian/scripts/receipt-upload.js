@@ -183,9 +183,33 @@ function confirmItems() {
         total: calculateTotal()
     };
 
-    const receipts = JSON.parse(localStorage.getItem('receipts')) || [];
-    receipts.push(receipt);
-    localStorage.setItem('receipts', JSON.stringify(receipts));
+    const user = JSON.parse(localStorage.getItem('currentUser'));
+
+fetch('http://localhost:5501/saveReceipt', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        userId: user.id,
+        vendor,
+        date,
+        items: extractedItems,
+        total: calculateTotal()
+    })
+})
+.then(response => response.json())
+.then(data => {
+    console.log('Receipt saved:', data);
+    if (confirm("Receipt saved! Do you wish to view your receipts?")) {
+        window.location.href = "overview.html";
+    } else {
+        alert("You can view your saved receipts anytime from the Overview page.");
+    }
+})
+.catch(error => {
+    console.error('Error saving receipt:', error);
+    alert("Failed to save receipt. Try again.");
+});
+
 
     if (confirm("Receipt saved! Do you wish to view your receipts?")) {
         window.location.href = "overview.html";
@@ -206,4 +230,3 @@ function saveReceiptToLocalStorage(receipt) {
     localStorage.setItem('latestReceipt', JSON.stringify(receipt));
 }
 
-//receipts will be saved locally for now
