@@ -87,9 +87,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         receiptList.innerHTML = '<h3>Receipts</h3>';
 
         if (receipts.length === 0) {
-            receiptList.innerHTML += `<p>No receipts yet for this month 📭</p>`;
+            receiptList.innerHTML += `
+                <div class="empty-state">
+                    <img src="/AI-Guardian/assets/empty-box.png" alt="No Receipts" style="width:150px; margin-top: 10px;">
+                    <p>No receipts yet for this month 📭</p>
+                </div>
+            `;
             return;
         }
+        
 
         receipts.forEach((r, index) => {
             const div = document.createElement('div');
@@ -240,8 +246,37 @@ document.addEventListener('DOMContentLoaded', async () => {
             },
             options: {
                 responsive: true,
-                scales: { y: { beginAtZero: true } }
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#555'
+                        },
+                        grid: {
+                            color: '#eee'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#555'
+                        },
+                        grid: {
+                            color: '#eee'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#4caf50',
+                            font: {
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                }
             }
+            
         });
 
         // Safe/Unsafe Scans Chart

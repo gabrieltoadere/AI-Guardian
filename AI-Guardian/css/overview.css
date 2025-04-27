@@ -348,3 +348,27 @@
 
 
 
+.empty-state {
+  text-align: center;
+  color: #888;
+  margin-top: 20px;
+}
+.empty-state img {
+  opacity: 0.6;
+}
+
+
+
+.receipt-entry {
+  background-color: #f9f9f9;
+  margin-bottom: 12px;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: all 0.3s;
+}
+
+.receipt-entry:hover {
+  background-color: #f1f1f1;
+  transform: translateY(-2px);
+}
