@@ -4,11 +4,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     let sugarChart = null;
 
     const monthSelector = document.getElementById('monthSelectorDropdown');
-
     const receiptList = document.getElementById('receiptList');
     const monthlySummary = document.getElementById('monthlySummary');
     const monthlyChartCanvas = document.getElementById('monthlyChart');
     const loadingSpinner = document.getElementById('loadingSpinner');
+
     loadingSpinner.style.display = "block";
 
     const user = JSON.parse(localStorage.getItem('currentUser'));
@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     let receipts = [];
+    let scans = [];
     let scanData = {};
     let sugarData = {};
 
@@ -27,6 +28,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const scanRes = await fetch(`http://localhost:5501/api/monthly-scan-data/${user.id}`);
         scanData = await scanRes.json();
+
+        const scansRes = await fetch(`http://localhost:5501/api/full-scan-history/${user.id}`);
+        scans = await scansRes.json();
+
 
         const sugarRes = await fetch(`http://localhost:5501/api/sugar-summary/${user.id}`);
         sugarData = await sugarRes.json();
@@ -60,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         monthlyData[month].receipts.push({ ...r, items });
     });
 
-    // Populate months
+    // Populate dropdown
     Object.keys(monthlyData).sort().forEach(month => {
         const option = document.createElement('option');
         option.value = month;
@@ -74,14 +79,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     monthSelector.addEventListener('change', () => {
         const selected = monthSelector.value;
         if (!selected || !monthlyData[selected]) return;
-    
+
         const data = monthlyData[selected];
         renderReceipts(data.receipts);
-        renderSummary(data);
-        renderSugarChart(data.receipts);
+        renderSummary(selected, data);
         renderAllergenAlerts(data.receipts);
     });
-    
 
     function renderReceipts(receipts) {
         receiptList.innerHTML = '<h3>Receipts</h3>';
@@ -95,7 +98,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             `;
             return;
         }
-        
 
         receipts.forEach((r, index) => {
             const div = document.createElement('div');
@@ -126,74 +128,39 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function renderSummary(selectedMonth, data) {
         monthlySummary.innerHTML = '<h3>Monthly Summary</h3>';
-
+    
+        const selectedMonthScans = scans.filter(scan => scan.date.slice(0,7) === selectedMonth);
+        const safeScans = selectedMonthScans.filter(scan => scan.status === 'safe').length;
+        const unsafeScans = selectedMonthScans.filter(scan => scan.status === 'unsafe').length;
+        const totalSugar = selectedMonthScans.reduce((sum, scan) => {
+            const sugar = parseFloat(scan.sugar_level);
+            return sum + (isNaN(sugar) ? 0 : sugar);
+        }, 0);
+    
         const topItems = Object.entries(data.items)
             .filter(([_, info]) => info.total > 0)
             .sort((a, b) => b[1].count - a[1].count)
             .slice(0, 5)
             .map(([name, info]) => `${name} (x${info.count}, €${info.total.toFixed(2)})`);
-
+    
         monthlySummary.innerHTML += `
             <p><strong>Total Spent:</strong> €${data.total.toFixed(2)}</p>
             <p><strong>Top Items:</strong> ${topItems.join(', ') || 'No valid items'}</p>
-            <p><strong>Safe Scans:</strong> ${scanData[selectedMonth]?.safe || 0}</p>
-            <p><strong>Unsafe Scans:</strong> ${scanData[selectedMonth]?.unsafe || 0}</p>
-            <p><strong>Total Sugar Consumed:</strong> ${sugarData[selectedMonth] ? sugarData[selectedMonth].toFixed(2) + "g" : "0g"}</p>
+            <p><strong>Safe Scans:</strong> ${safeScans}</p>
+            <p><strong>Unsafe Scans:</strong> ${unsafeScans}</p>
+            <p><strong>Total Sugar Consumed:</strong> ${totalSugar.toFixed(2)}g</p>
         `;
-
+    
         drawCharts();
     }
-
-    function renderSugarChart(receipts) {
-        const ctx = document.getElementById('sugarChartTab').getContext('2d');
     
-        const dates = [];
-        const sugarLevels = [];
-    
-        receipts.forEach(receipt => {
-            receipt.items.forEach(item => {
-                if (item.sugar_level) {
-                    dates.push(receipt.date);
-                    const sugar = parseFloat(item.sugar_level.split(' ')[0]);
-                    if (!isNaN(sugar)) {
-                        sugarLevels.push(sugar);
-                    }
-                }
-            });
-        });
-    
-        if (chartInstance) {
-            chartInstance.destroy();
-        }
-    
-        chartInstance = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: dates,
-                datasets: [{
-                    label: 'Sugar (g)',
-                    data: sugarLevels,
-                    borderColor: '#ff6384',
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    fill: true,
-                    tension: 0.4,
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: true }
-                }
-            }
-        });
-    }
 
     function renderAllergenAlerts(receipts) {
-        const allergenAlertsTab = document.getElementById('allergenAlertsTab');
+        const allergenAlertsTab = document.getElementById('tabContentAllergens');
         allergenAlertsTab.innerHTML = '<h3>Allergen Alerts</h3>';
-    
+
         const unsafeItems = [];
-    
+
         receipts.forEach(receipt => {
             if (receipt.items && receipt.items.length > 0) {
                 receipt.items.forEach(item => {
@@ -206,7 +173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
             }
         });
-    
+
         if (unsafeItems.length === 0) {
             allergenAlertsTab.innerHTML += `<p style="color: green;">✅ No allergen alerts found for this month.</p>`;
         } else {
@@ -219,8 +186,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             allergenAlertsTab.appendChild(ul);
         }
     }
-    
-    
 
     function drawCharts() {
         const months = Object.keys(monthlyData).sort();
@@ -233,7 +198,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (scanChart) scanChart.destroy();
         if (sugarChart) sugarChart.destroy();
 
-        // Total Spend Chart
         chartInstance = new Chart(monthlyChartCanvas, {
             type: 'bar',
             data: {
@@ -247,39 +211,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             options: {
                 responsive: true,
                 scales: {
-                    y: { 
-                        beginAtZero: true,
-                        ticks: {
-                            color: '#555'
-                        },
-                        grid: {
-                            color: '#eee'
-                        }
-                    },
-                    x: {
-                        ticks: {
-                            color: '#555'
-                        },
-                        grid: {
-                            color: '#eee'
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        labels: {
-                            color: '#4caf50',
-                            font: {
-                                weight: 'bold'
-                            }
-                        }
-                    }
+                    y: { beginAtZero: true }
                 }
             }
-            
         });
 
-        // Safe/Unsafe Scans Chart
         const scanCanvas = document.createElement('canvas');
         scanCanvas.id = "scanChart";
         document.getElementById('monthlySummary').appendChild(scanCanvas);
@@ -296,7 +232,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             options: { responsive: true, scales: { y: { beginAtZero: true } } }
         });
 
-        // Sugar Consumption Chart
         const sugarCanvas = document.createElement('canvas');
         sugarCanvas.id = "sugarChart";
         document.getElementById('monthlySummary').appendChild(sugarCanvas);
@@ -319,10 +254,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-
-
-
-
+// Tab switching
 document.getElementById('tabBtnPurchases').addEventListener('click', () => {
     document.getElementById('tabContentPurchases').classList.remove('hidden');
     document.getElementById('tabContentAllergens').classList.add('hidden');

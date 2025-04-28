@@ -645,48 +645,54 @@ app.post('/updateReceipt', (req, res) => {
 
 
 // API: Get monthly scan breakdown (safe/unsafe count)
+// New route to get monthly scan data
 app.get('/api/monthly-scan-data/:userId', (req, res) => {
   const { userId } = req.params;
+
   const query = `
     SELECT 
-      DATE_FORMAT(scan_date, '%Y-%m') AS month,
-      status,
-      COUNT(*) AS count
-    FROM scan_history
+      DATE_FORMAT(scan_date, '%Y-%m') as month, 
+      status, 
+      COUNT(*) as count
+    FROM scan_history 
     WHERE user_id = ?
     GROUP BY month, status
+    ORDER BY month ASC
   `;
 
   db.query(query, [userId], (err, results) => {
     if (err) {
-      console.error('Error fetching monthly scan data:', err);
-      return res.status(500).json({ error: 'Failed to fetch data' });
+      console.error("Monthly scan data error:", err);
+      return res.status(500).json({ error: "Failed to fetch scan data" });
     }
 
-    const summary = {};
+    const monthlyData = {};
+
     results.forEach(row => {
-      if (!summary[row.month]) {
-        summary[row.month] = { safe: 0, unsafe: 0 };
+      if (!monthlyData[row.month]) {
+        monthlyData[row.month] = { safe: 0, unsafe: 0 };
       }
-      if (row.status === 'safe') summary[row.month].safe = row.count;
-      if (row.status === 'unsafe') summary[row.month].unsafe = row.count;
+      if (row.status === 'safe') monthlyData[row.month].safe = row.count;
+      if (row.status === 'unsafe') monthlyData[row.month].unsafe = row.count;
     });
 
-    res.json(summary);
+    res.json(monthlyData);
   });
 });
+
 
 // API: Get monthly sugar consumption
 app.get('/api/sugar-summary/:userId', (req, res) => {
   const { userId } = req.params;
   const query = `
-    SELECT 
-      DATE_FORMAT(scan_date, '%Y-%m') AS month,
-      SUM(CAST(sugar_level AS DECIMAL(10,2))) AS total_sugar
-    FROM scan_history
-    WHERE user_id = ?
-    GROUP BY month
-  `;
+  SELECT 
+    DATE_FORMAT(scan_date, '%Y-%m') AS month,
+    SUM(CASE WHEN sugar_level REGEXP '^[0-9]+(\\.[0-9]+)?$' THEN CAST(sugar_level AS DECIMAL(10,2)) ELSE 0 END) AS total_sugar
+  FROM scan_history
+  WHERE user_id = ?
+  GROUP BY month
+`;
+
 
   db.query(query, [userId], (err, results) => {
     if (err) {
@@ -703,6 +709,41 @@ app.get('/api/sugar-summary/:userId', (req, res) => {
   });
 });
 
+
+
+// Get receipts by user ID
+app.get('/getReceipts/:userId', (req, res) => {
+  const { userId } = req.params;
+
+  const query = 'SELECT * FROM receipt_history WHERE user_id = ? ORDER BY date DESC';
+
+  db.query(query, [userId], (err, results) => {
+      if (err) {
+          console.error('Failed to fetch receipts:', err);
+          return res.status(500).json({ error: 'Database error fetching receipts' });
+      }
+      res.json(results);
+  });
+});
+
+
+app.get('/api/full-scan-history/:userId', (req, res) => {
+  const { userId } = req.params;
+
+  const query = `
+    SELECT product_name, sugar_level, status, scan_date as date
+    FROM scan_history
+    WHERE user_id = ?
+  `;
+
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error('Error fetching full scan history:', err);
+      return res.status(500).json({ error: 'Failed to fetch full scan history' });
+    }
+    res.json(results);
+  });
+});
 
 
 
