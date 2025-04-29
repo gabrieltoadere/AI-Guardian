@@ -10,30 +10,216 @@
     <h1>Photo of Ingredients</h1>
     
     <p>If barcode doesn't work, you can take a picture of ingredient list.</p>
-    <input type="file" id="imageInput" accept="image/*">
+    <input type="file" id="imageInput" accept="image/*" onchange="handleUpload(event, 'allergyCheck')" style="display:none;">
     <label for="imageInput" class="upload-button">Choose Ingredient Photo</label>
 
-    <div id="result" class="hidden">
+    <div id="result2" class="hidden">
        <h4>Extracted Text：</h4>
        <pre id="extractedText"></pre>
-       <p id="warning"></p> 
-    </div>
+       <p id="allergenNotice" class=""></p> 
 
-    <div id="confirmSection">
-        <button id="saftFoodButton">Mark this safe food</button>
-        <button id="unsafeFoodButton">Mark this unsafe food</button>
-        <div id="questions" class="hidden">
-            <p>How many of this product did you purchase?</p>
-            <input type="number" placeholder="type number">
-            <p>Food Name:</p>
-            <input type="text" id="foodNameInput">
-            <button id="confirmButton">Save</button>
-        </div>
+       <div id="confirmSection">
+        <button id="saftFoodButton" onclick="saveSafeFood(); showQuestions()">Mark this safe food</button>
+        <button id="unsafeFoodButton" onclick="saveUnsafeFood()">Mark this unsafe food</button>
         <p id="saveNotice"></p>
+        <div id="questions" class="hidden">
+            <p>If you purchased this item, how many did you buy?</p>
+            <input type="number" placeholder="type number" id="foodNumberInput">
+            <p>Product Name:</p>
+            <input type="text" id="foodNameInput">
+            <p>Product Price:</p>
+            <input type="text" id="foodPriceInput">
+            <button id="confirmButton" onclick="purchaseTracking()">Submit</button>
+            <p id="trackNotice"></p>
+        </div>
     </div>
+    </div>
+    
 
     <a href="scanIndex.html" class="back-button">Back to Main</a>
 
-    <script src="scripts/ingredient-photo.js"></script>
+    <script>
+        let foodName = 'Please type product name';
+        //please extract user's allergens from database. following is just an example 
+        const allergens = ['milk', 'sugar'];
+
+        //photo scanning 
+        async function handleUpload(event, mode) {
+            const inputElement = event.target;
+            if (!inputElement.files?.length) {
+                alert('Please choose a file');
+                return;
+            }
+
+            document.getElementById('allergenNotice').textContent = '';
+            document.getElementById('saveNotice').textContent = '';
+            document.getElementById('foodNumberInput').value = '';
+            document.getElementById('foodNameInput').value = '';
+            document.getElementById('foodPriceInput').value = '';
+            document.getElementById('trackNotice').textContent = '';
+            document.getElementById('questions').classList.add('hidden');
+
+            try {
+                //compress photos
+                const file = inputElement.files[0];
+                const compressedBlob = await new Promise(resolve => {
+                compressImage(file, resolve);
+                });
+
+                //OCR Space scanning photos
+                const extractedText = await runOCR(compressedBlob);
+
+                //I didn't change this code after I deleted the initial receipt upload button, for some reason. Just keep it. 
+                if (mode === 'allergyCheck') {
+                await checkAllergens(extractedText);
+                } else if (mode === 'productMatch') {
+                await matchProducts(extractedText);
+                }
+            } catch (error) {
+                console.error("failed:", error);
+                alert(`failed: ${error.message}`);
+            }
+        }
+
+        //following code is to compress photo, because OCR Space only provides 1mb limit in free version
+        function compressImage(file, callback) {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    const MAX_WIDTH = 800;
+                    const MAX_HEIGHT = 800;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob(
+                        (blob) => {
+                            if (blob.size > 1024 * 1024) {
+                                canvas.toBlob(
+                                    (blob) => callback(blob),
+                                    'image/webp',
+                                    0.7
+                                );
+                            } else {
+                                callback(blob);
+                            }
+                        },
+                        'image/webp',
+                        0.8
+                    );
+                };
+            };
+        }
+
+
+        //OCR scanning 
+        async function runOCR(compressedBlob) {
+            const formData = new FormData();
+            formData.append('file', compressedBlob, 'image.webp');
+            formData.append('language', 'eng');
+            formData.append('OCREngine', '2');
+            formData.append('isOverlayRequired', 'false');
+
+            //for unknown reason, sometimes apiKey suddenly doesn't work, so I just register a new one. There are other OCR api but I don't want to put my payment into it
+            const apiKey = 'K84788786688957';
+            const apiUrl = `https://api.ocr.space/parse/image`;
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'apikey': apiKey },
+                body: formData,
+            });
+            const result = await response.json();
+
+            if (result.IsErroredOnProcessing) {
+                throw new Error(result.ErrorMessage);
+            }
+
+            //this is the extracted text
+            return result.ParsedResults[0].ParsedText; 
+        }
+
+
+
+        //after we get text from product photo, we can find if it contains allergens. If it does, we give an alarm.
+        async function checkAllergens(extractedText) {
+            //I assume the first line of the extract text is the product name. It usually is. 
+            foodName = extractedText.split("\n")[0];
+            document.getElementById('extractedText').textContent = extractedText;
+            document.getElementById('result2').classList.remove('hidden');
+
+            const lowerText = extractedText.toLowerCase();
+            let allergensInside = "";
+
+            for (const allergen of allergens) {
+                if (lowerText.includes(allergen.toLowerCase())){
+                    allergensInside += allergen + " ";
+                }
+            }
+
+            const noticeEl = document.getElementById('allergenNotice');
+            noticeEl.style.display = 'block';
+
+            noticeEl.classList.remove('safe', 'warning');
+            noticeEl.textContent = '';
+
+            if (allergensInside === "") {
+                noticeEl.textContent = ' This product is safe for you.';
+                noticeEl.classList.add('safe');
+            } else {
+                noticeEl.textContent = 'Warning! This product contains your allergens: ' + allergensInside;
+                noticeEl.classList.add('warning');
+            }
+        }
+
+
+        function showQuestions() {
+            document.getElementById('questions').classList.remove('hidden');
+            document.getElementById('foodNameInput').value = foodName;
+        }
+
+        function saveSafeFood() {
+            document.getElementById('saveNotice').textContent = 'This product is marked safe.';
+
+            //mark this product as save food. And then send food info to dababase
+            //later, when users upload receipts, if name on the receipt matches with the products' name, then we can know if it's safe or not.
+        }
+
+        function saveUnsafeFood() {
+            document.getElementById('saveNotice').textContent = 'This product is marked unsafe.';
+
+            //mark this food as unsave food. And then send food info to dababase
+            //later, when users upload receipts, if name on the receipt matches with the products' name, then we can know if it's safe or not.
+        }
+
+        function purchaseTracking(){
+            document.getElementById('trackNotice').textContent = 'Thanks! Your purchase was recorded.';
+
+            //save food info (especially prices and sugar consumption) to database
+            //this will be used in the monthly overview page
+        }
+    </script>
 </body>
 </html>

@@ -233,3 +233,21 @@ h1::after {
   50% { transform: translateY(-8px); }
   100% { transform: translateY(0px); }
 }
+/* Tooltip visibility on hover OR with class */
+.chatbot-icon.show-tooltip::after,
+.chatbot-icon.show-tooltip::before,
+.chatbot-icon:hover::after,
+.chatbot-icon:hover::before {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Mobile specific support */
+@media (hover: none) and (pointer: coarse) {
+  .chatbot-icon.show-tooltip::after,
+  .chatbot-icon.show-tooltip::before {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+

@@ -11,8 +11,10 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script type="module" src="/AI-Guardian/scripts/login.js"></script>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
   </head>
-
   <body>
     <!-- Login Container -->
     <div class="login-container">
@@ -42,7 +44,7 @@
           <input type="password" id="password" name="password" required />
         </div>
 
-        <a href="#" class="forgot-password">Forgot your password?</a>
+        <a href="forgot-pass(email).html" class="forgot-password">Forgot your password?</a>
         <!-- Forgot password link -->
 
         <button type="submit" class="login-btn">Sign In</button>
@@ -58,50 +60,107 @@
         <h2>OR</h2>
       <div>
       <!-- Social Media Login Buttons -->
-      <button class="social-btn google">
-        <img
-          src="/AI-Guardian/img's/google-logo.png"
-          alt="Google Logo"
-          class="icon"
-        />
-        Sign In With Google
-      </button>
+      <!-- Google Sign-In Section -->
+<div style="text-align: center; margin: 20px 0;">
+  <!-- Optional title -->
+  <p style="font-weight: bold; font-size: 16px;"></p>
 
-      <button class="social-btn apple">
-        <img
-          src="/AI-Guardian/img's/apple-logo.png"
-          alt="Apple Logo"
-          class="icon"
-        />
-        Sign In With Apple
-      </button>
+  <!-- Google One Tap setup -->
+  <div id="g_id_onload"
+      data-client_id="229386078489-ovi0bke1m73e26lm1397baqplj5rabgg.apps.googleusercontent.com"
+      data-context="signin"
+      data-ux_mode="popup"
+      data-callback="handleCredentialResponse"
+      data-auto_prompt="false">
+  </div>
 
-      <button class="social-btn phone">
-        <img
-          src="/AI-Guardian/img's/phone-logo.png"
-          alt="Phone Logo"
-          class="icon"
-        />
-        Sign In With Phone
-      </button>
+  <!-- Google Sign-In button -->
+  <div class="g_id_signin"
+      data-type="standard"
+      data-shape="rectangular"
+      data-theme="filled_blue"
+      data-text="continue_with"
+      data-size="large"
+      data-logo_alignment="left">
+  </div>
+</div>
 
-      <button class="social-btn email">
-        <img
-          src="/AI-Guardian/img's/email-logo.jpg"
-          alt="Email Logo"
-          class="icon"
-        />
-        Sign In With Email
-      </button>
-        </div>
-      </div>
-    </div>
+
+
+  <!-- Apple Sign-In Button -->
+<div style="text-align: center; margin: 20px 0;">
+  <button onclick="handleAppleSignIn()" 
+          style="background-color: gray; color: white; border: none; border-radius: 8px;
+                 padding: 12px 24px; font-size: 16px; font-weight: bold; cursor: pointer;
+                 display: flex; align-items: center; justify-content: center; gap: 10px;
+                 width: 420px; max-width: 100%; margin: 0 auto;">
+    <img src="/AI-Guardian/img's/apple-logo.png" alt="Apple Logo" style="height: 20px; width: 20px;" />
+    Sign in with Apple
+  </button>
+</div>
+
+<script>
+  function handleAppleSignIn() {
+    window.location.href = "apple-login.html"; // Or your Apple auth logic
+  }
+</script>
+
+
+
+<!-- Phone Sign-In Button -->
+<div style="text-align: center; margin: 20px 0;">
+  <button onclick="window.location.href='phone-login.html'" 
+          style="background-color: #db4437; color: white; border: none; border-radius: 8px;
+                 padding: 12px 24px; font-size: 16px; font-weight: bold; cursor: pointer;
+                 display: flex; align-items: center; justify-content: center; gap: 10px;
+                 width: 420px; max-width: 100%; margin: 0 auto;">
+    <img src="/AI-Guardian/img's/phone-logo.png" alt="Phone Logo" style="height: 20px; width: 20px;" />
+    Sign in with Phone
+  </button>
+</div>
+
+<!-- Email Sign-In Button -->
+<div style="text-align: center; margin: 20px 0;">
+  <button onclick="window.location.href='email.login.html'" 
+          style="background-color: #2e7d32; color: white; border: none; border-radius: 8px;
+                 padding: 12px 24px; font-size: 16px; font-weight: bold; cursor: pointer;
+                 display: flex; align-items: center; justify-content: center; gap: 10px;
+                 width: 420px; max-width: 100%; margin: 0 auto;">
+    <img src="/AI-Guardian/img's/email-logo.jpg" alt="Email Logo" style="height: 20px; width: 20px;" />
+    Sign in with Email
+  </button>
+</div>
 
    
 
-    <script type="module" src="/AI-Guardian/scripts/login.js"></script>
     <!-- Linking JavaScript file -->
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
     
+    <script>
+      function handleCredentialResponse(response) {
+        const token = response.credential;
+      
+        // Send the token to the backend
+        fetch('http://localhost:5501/auth/google', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ token })
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            localStorage.setItem('currentUser',JSON.stringify(data.user));
+            // Redirect to home page on success
+            window.location.href = "main.html";
+          } else {
+            alert("Google sign-in failed.");
+          }
+        })
+        .catch(err => {
+          console.error("Error:", err);
+        });
+      }
+    </script>
   </body>
 </html>

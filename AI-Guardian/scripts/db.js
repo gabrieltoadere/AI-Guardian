@@ -5,9 +5,28 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const port = 5501;
+const {OAuth2Client} = require('google-auth-library');
+const client = new OAuth2Client("229386078489-ovi0bke1m73e26lm1397baqplj5rabgg.apps.googleusercontent.com");
+const ndoemailer = require('nodemailer');
+const crypto = require('crypto');
+const fetch = require('node-fetch');
+
+
+
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname,'scripts')));
+
+
+const transporter = ndoemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user:'groceryguardian@gmail.com',
+    pass:'zspv wnsn pqlo nbbl'
+  }
+});
+
 
 const db = mysql.createConnection({
     host: 'ai-guardian.mysql.database.azure.com',
@@ -24,29 +43,147 @@ db.connect((err) => {
     } else {
         console.log("Connected to db")
     }
-    
 });
 
 
+//google login
+app.post('/auth/google', async (req, res) => {
+  const { token } = req.body;
+
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: token,
+      audience: "229386078489-ovi0bke1m73e26lm1397baqplj5rabgg.apps.googleusercontent.com"
+    });
+
+    const payload = ticket.getPayload();
+    const { name, email } = payload;
+
+    db.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
+      if (err) {
+        console.error('Select error:', err);
+        return res.status(500).json({ success: false, message: "Database query failed." });
+      }
+
+      if (results.length > 0) {
+        const existingUser = results[0];
+        return res.json({ success: true, user: existingUser });
+      } else {
+        db.query('INSERT INTO users (username, email) VALUES (?, ?)', [name, email], (err, insertResult) => {
+          if (err) {
+            console.error('Insert error:', err);
+            return res.status(500).json({ success: false, message: "Failed to create user." });
+          }
+
+
+          db.query('SELECT * FROM users WHERE email = ?', [email], (err, newResults) => {
+            if (err) {
+              console.error('Fetch after insert error:', err);
+              return res.status(500).json({ success: false, message: "User created but fetch failed." });
+            }
+
+            const user = newResults[0];
+            return res.json({ success: true, user });
+          });
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Token verification failed:", error);
+    res.status(401).json({ success: false, error: "Invalid token" });
+  }
+});
+
+app.post('/forgot-password',(req,res) => {
+  const {email} = req.body;
+
+  const token = crypto.randomBytes(32).toString('hex');
+  const expiration = new Date(Date.now() + 3600000);
+
+  db.query('UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE email = ?',
+    [token,expiration,email], (err,result) => {
+      if(err) {
+        return res.status(400).json({success: false ,message:'user not found'});
+      }
+
+      const resetLink = `http://127.0.0.1:5503/AI-Guardian/AI%20GUARDIAN%20Project/reset-password.html?token=${token}&email=${encodeURIComponent(email)}`;
+
+      const mailOptions = {
+        from: 'groceryguardian@gmail.com',
+        to: 'gabriel.toadere@icloud.com',
+        subject: 'Password reset link for Grocery Guardian',
+        html:`<p>Click the link below to reset your password:</p>
+        <a href="${resetLink}">${resetLink}</a>`
+      };
+
+      transporter.sendMail(mailOptions, (err,info) => {
+        if(err) {
+          console.error('Email error: ', err);
+          return res.status(500).json({success: false , message: 'failed to send email'});
+        }
+
+
+        res.json({success: true , message: 'Reset email sent'});
+      })
+    }
+  )
+});
+
+app.post('/reset-password',(req,res) => {
+  const { email,token,newPassword} = req.body;
+  db.query(
+    'SELECT * FROM users WHERE email =? AND reset_token = ? AND reset_token_expiry > UTC_TIMESTAMP()',
+    [email,token],(err,results) => {
+      console.log(token);
+      if(err || results.length===0) {
+        return res.status(400).json({ success: false, message: "Invalid or expired token" });
+      }
+
+      db.query(
+        'UPDATE users SET password =?, reset_token=NULL,reset_token_expiry=NULL WHERE email=?',
+        [newPassword,email],
+        (err) => {
+          if(err) {
+            return res.status(500).json({success:false,message:'Failed to update password'});
+          }
+
+          res.json({success:true,message:'Password reset successful!'});
+        }
+      )
+    }
+  )
+})
 
 
 //I ADDED A ROUTE TO HANDLE CHANGES MADE TO SAFE OR UNSAFE FOODS
 // Assuming we're using Express and have a db connection set up
-app.post('/api/update-status', (req, res) => {
-    const { productId, status } = req.body;
+app.post('/update-status', (req, res) => {
+    const { scan_id, updatedStatus } = req.body;
 
-    if (!productId || !status) {
-        return res.status(400).json({ message: 'Missing productId or status' });
-    }
+    const query = 'UPDATE scan_history SET status=? WHERE scan_id=?';
 
-    const query = 'UPDATE purchase_history SET status = ? WHERE product_id = ?';
-    db.query(query, [status, productId], (err, result) => {
-        if (err) {
-            console.error('Error updating status:', err);
-            return res.status(500).json({ message: 'Database error' });
+    db.query(query,[updatedStatus,scan_id],(err,results) => {
+        if(err) {
+          console.err(err);
         }
-        return res.json({ message: 'Status updated successfully' });
-    });
+        res.json(results);
+    })
+});
+
+
+//fetch product
+app.get('/api/alternatives', async (req, res) => {
+  const searchQuery = req.query.q;
+  const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(searchQuery)}&search_simple=1&action=process&json=1&page_size=10&lc=en`;
+
+  try {
+    const response = await fetch(url);
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error('Proxy error fetching alternatives:', err);
+    res.status(500).json({ error: 'Failed to fetch alternatives' });
+  }
 });
 
 
@@ -93,7 +230,7 @@ app.post('/update-allergens', async (req, res) => {
 
 
 // Save user name
-app.post('/api/user', (req, res) => {
+  app.post('/api/user', (req, res) => {
     const { userId, name } = req.body;
     db.query('UPDATE users SET name = ? WHERE id = ?', [name, userId], (err) => {
       if (err) return res.status(500).send(err);
@@ -152,8 +289,33 @@ app.get('/api/preferences/:userId', (req, res) => {
 });
 
 
+app.post('/barcodeScan',(req,res) => {
+  const { scannedProduct } = req.body;
 
+  const query = `INSERT INTO scan_history
+   (user_id, product_name, ingredients,potential_allergens,sugar_level,status,scan_date,quantity,price)
+   VALUES (?,?,?,?,?,?,NOW(),?,?)`;
 
+   db.query(query, [ scannedProduct.userId,scannedProduct.name , scannedProduct.ingredients,scannedProduct.potential_allergens,scannedProduct.sugar_level,scannedProduct.status,scannedProduct.quantity,scannedProduct.price] ,(err,results) => {
+      if(err) {
+        console.error('error storing scan', err);
+      }
+      console.log(results);
+  });
+});
+
+app.post('/loadHistory',(req,res) => {
+  const { userId } = req.body;
+
+  const query = 'SELECT * FROM scan_history WHERE user_id=?';
+
+  db.query(query, [ userId ],(err,results) => {
+    if(err) {
+      console.err('error getting scan history',err);
+    }
+    res.json(results);
+  });
+})
 
 // Save scan history
 app.post('/api/scan-history', (req, res) => {
@@ -172,6 +334,20 @@ app.post('/api/scan-history', (req, res) => {
     });
 });
 
+
+app.post('/getScan',(req,res) => {
+  const { productId } = req.body;
+
+  const query = 'SELECT * FROM scan_history WHERE scan_id=?';
+
+  db.query(query,[productId], (err,results)=> {
+    if(err) {
+      console.error('error fetching scan' ,err);
+    }
+    res.json(results);
+  }) 
+})
+
 // Get scan history
 app.get('/api/scan-history/:userId', (req, res) => {
     const { userId } = req.params;
@@ -187,7 +363,7 @@ app.get('/api/scan-history/:userId', (req, res) => {
             console.error('Error fetching scan history:', err);
             return res.status(500).json({ error: 'Failed to fetch history' });
         }
-        res.json(results);
+        return res.json(results);
     });
 });
 
@@ -223,7 +399,7 @@ app.get('/api/scan-history/:userId/latest', (req, res) => {
   });
   
 
-app.use(express.static(path.join(__dirname,'scripts')));
+
 
 
 // FUNCTION FOR CREATING ACCOUNT AND SETTING PASSWORD
@@ -307,40 +483,40 @@ app.post('/login/phone', (req, res) => {
   
       if (results.length === 0)
         return res.status(401).json({ success: false, message: 'Invalid phone or password' });
-  
+
       const user = results[0];
-  
+
       const match = (user.password===password);
       if (!match) {
         return res.status(401).json({ success: false, message: 'Invalid username or password' });
       }
-  
+
       // Create a token
       // const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
-  
+
       return res.json({ success: true,user});
     });
   });
 
+
   app.post('/login/email', (req, res) => {
     const { email, password } = req.body;
-  
+
     if (!email || !password)
       return res.status(400).json({ success: false, message: 'Missing credentials' });
-  
+
     db.query('SELECT * FROM users WHERE email = ?', [email], async (err, results) => {
       if (err) return res.status(500).json({ success: false, message: 'Database error' });
-  
+
       if (results.length === 0)
         return res.status(401).json({ success: false, message: 'Invalid email or password' });
-  
+
       const user = results[0];
-  
+
       const match = (user.password===password);
       if (!match) {
         return res.status(401).json({ success: false, message: 'Invalid email or password' });
       }
-  
       // Create a token
       // const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
   
@@ -348,11 +524,235 @@ app.post('/login/phone', (req, res) => {
     });
   });
 
+  app.get('/api/monthly-scan-summary/:userId', (req, res) => {
+    const { userId } = req.params;
+    const currentMonth = new Date().toISOString().slice(0, 7); // "YYYY-MM"
+  
+    const query = `
+      SELECT status, COUNT(*) as count 
+      FROM scan_history 
+      WHERE user_id = ? AND DATE_FORMAT(scan_date, '%Y-%m') = ? 
+      GROUP BY status
+    `;
+  
+    db.query(query, [userId, currentMonth], (err, results) => {
+      if (err) {
+        console.error("Monthly scan summary error:", err);
+        return res.status(500).json({ error: "Database query failed" });
+      }
+  
+      let summary = { safe: 0, unsafe: 0 };
+      results.forEach(r => {
+        if (r.status === 'safe') summary.safe = r.count;
+        if (r.status === 'unsafe') summary.unsafe = r.count;
+      });
+  
+      res.json(summary);
+    });
+  });
 
+
+  app.post('/update-history-status', async (req, res) => {
+    const { userId } = req.body;
+  
+    const getPrefs = `SELECT allergens FROM users WHERE id = ?`;
+    const getHistory = `SELECT scan_id, ingredients FROM scan_history WHERE user_id = ?`;
+  
+    db.query(getPrefs, [userId], (err, prefResults) => {
+      if (err) return res.status(500).json({ error: "Failed to get allergens" });
+  
+      const allergens = JSON.parse(prefResults[0]?.allergens || "[]");
+  
+      db.query(getHistory, [userId], (err, historyResults) => {
+        if (err) return res.status(500).json({ error: "Failed to get history" });
+  
+        const updates = historyResults.map(row => {
+          const ingredients = row.ingredients || "";
+          const isUnsafe = allergens.some(a => ingredients.toLowerCase().includes(a.toLowerCase()));
+          return new Promise((resolve, reject) => {
+            db.query(
+              `UPDATE scan_history SET status = ? WHERE scan_id = ?`,
+              [isUnsafe ? "unsafe" : "safe", row.scan_id],
+              (err) => err ? reject(err) : resolve()
+            );
+          });
+        });
+  
+        Promise.all(updates)
+          .then(() => res.json({ message: "Scan history updated" }))
+          .catch(error => res.status(500).json({ error: "Error updating scan statuses" }));
+      });
+    });
+  });
+  
 
   
+app.post('/delete-scan', (req, res) => {
+  const { scan_id } = req.body;
+  const query = 'DELETE FROM scan_history WHERE scan_id = ?';
+  db.query(query, [scan_id], (err, result) => {
+    if (err) {
+          console.error('Error deleting scan:', err);
+          return res.status(500).json({ error: 'Failed to delete scan' });
+      }
+      res.json({ success: true, message: 'Scan deleted successfully' });
+    });
+});
+
+
+
+
+//saving receipt data to the database
+app.post('/saveReceipt', (req, res) => {
+  const { userId, vendor, date, items, total } = req.body;
+
+  const query = `
+    INSERT INTO receipt_history (user_id, vendor, date, items, total)
+    VALUES (?, ?, ?, ?, ?)
+  `;
+
+  db.query(query, [userId, vendor, date, JSON.stringify(items), total], (err, results) => {
+    if (err) {
+      console.error("Error saving receipt:", err);
+      return res.status(500).json({ error: "Failed to save receipt" });
+    }
+    res.json({ message: "Receipt saved successfully" });
+  });
+});
+
+
+
+app.post('/updateReceipt', (req, res) => {
+  const { receiptId, vendor, date } = req.body;
+
+  const query = 'UPDATE receipts SET vendor = ?, date = ? WHERE receipt_id = ?';
+
+  db.query(query, [vendor, date, receiptId], (err, result) => {
+      if (err) {
+          console.error('Failed to update receipt:', err);
+          return res.status(500).json({ success: false });
+      }
+      res.json({ success: true });
+  });
+});
+
+
+
+
+
+
+
+
+
+// API: Get monthly scan breakdown (safe/unsafe count)
+// New route to get monthly scan data
+app.get('/api/monthly-scan-data/:userId', (req, res) => {
+  const { userId } = req.params;
+
+  const query = `
+    SELECT 
+      DATE_FORMAT(scan_date, '%Y-%m') as month, 
+      status, 
+      COUNT(*) as count
+    FROM scan_history 
+    WHERE user_id = ?
+    GROUP BY month, status
+    ORDER BY month ASC
+  `;
+
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error("Monthly scan data error:", err);
+      return res.status(500).json({ error: "Failed to fetch scan data" });
+    }
+
+    const monthlyData = {};
+
+    results.forEach(row => {
+      if (!monthlyData[row.month]) {
+        monthlyData[row.month] = { safe: 0, unsafe: 0 };
+      }
+      if (row.status === 'safe') monthlyData[row.month].safe = row.count;
+      if (row.status === 'unsafe') monthlyData[row.month].unsafe = row.count;
+    });
+
+    res.json(monthlyData);
+  });
+});
+
+
+// API: Get monthly sugar consumption
+app.get('/api/sugar-summary/:userId', (req, res) => {
+  const { userId } = req.params;
+  const query = `
+  SELECT 
+    DATE_FORMAT(scan_date, '%Y-%m') AS month,
+    SUM(CASE WHEN sugar_level REGEXP '^[0-9]+(\\.[0-9]+)?$' THEN CAST(sugar_level AS DECIMAL(10,2)) ELSE 0 END) AS total_sugar
+  FROM scan_history
+  WHERE user_id = ?
+  GROUP BY month
+`;
+
+
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error('Error fetching sugar summary:', err);
+      return res.status(500).json({ error: 'Failed to fetch sugar data' });
+    }
+
+    const sugarData = {};
+    results.forEach(row => {
+      sugarData[row.month] = parseFloat(row.total_sugar) || 0;
+    });
+
+    res.json(sugarData);
+  });
+});
+
+
+
+// Get receipts by user ID
+app.get('/getReceipts/:userId', (req, res) => {
+  const { userId } = req.params;
+
+  const query = 'SELECT * FROM receipt_history WHERE user_id = ? ORDER BY date DESC';
+
+  db.query(query, [userId], (err, results) => {
+      if (err) {
+          console.error('Failed to fetch receipts:', err);
+          return res.status(500).json({ error: 'Database error fetching receipts' });
+      }
+      res.json(results);
+  });
+});
+
+
+app.get('/api/full-scan-history/:userId', (req, res) => {
+  const { userId } = req.params;
+
+  const query = `
+    SELECT product_name, sugar_level, status, scan_date as date
+    FROM scan_history
+    WHERE user_id = ?
+  `;
+
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error('Error fetching full scan history:', err);
+      return res.status(500).json({ error: 'Failed to fetch full scan history' });
+    }
+    res.json(results);
+  });
+});
+
+
+
+
+
+
+
+
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 })
-

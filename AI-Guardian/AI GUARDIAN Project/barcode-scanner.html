@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <title>Barcode Scanner</title>
     <style>
         body {
@@ -57,180 +58,533 @@
             padding: 10px 15px;
             border-radius: 4px;
         }
+
+        /* ===== Confirmation Section ===== */
+        #confirmSection {
+            background-color: #f1f8e9;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 25px 0;
+        }
+
+        #questions {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        #questions p {
+            text-align: left;
+            margin: 10px 0 5px;
+            font-weight: 500;
+            color: #2d3436;
+        }
+
+        #questions input {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border: 1px solid #c8e6c9;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        #questions input:focus {
+            box-sizing: border-box;
+            outline: none;
+            border-color: #27ae60;
+            box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.2);
+        }
+
+        #saveNotice {
+            color: #27ae60;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 1.1rem;
+        }
+
+        #unsafeFoodButton {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        #stopScanButton {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        #camera {
+            width: 600px;      
+            height: 600px;      
+            max-width: 100%;
+            margin: 20px auto;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        #allergenNotice {
+            margin-top: 15px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            display: none; 
+        }
+
+        #allergenNotice.safe {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+
+        #allergenNotice.warning {
+            background-color: #fdecea;
+            color: #c62828;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
     <h1>Barcode Scanner</h1>
-    
-    <!-- Initial View -->
-    <button id="scanButton">Start Scanning</button>
-    <div id="camera" class="hidden">
-        <div id="interactive" class="viewport"></div>
-        <button id="stopButton">Stop Scanning</button>
+
+    <div class="button-group">
+        <button id="scanButton" onclick="startScanning()">
+            <i class="fas fa-barcode"></i>
+            Start Scanning
+        </button>
+        <button id="stopScanButton" onclick="stopScanner()" class="hidden">
+            <i class="fas fa-barcode"></i>
+            Stop Scanning 
+        </button>
     </div>
-    
-    <!-- After Scan View (initially hidden) -->
+
+    <div id="camera" class="hidden"></div>
+
     <div id="result" class="hidden">
-        <h2>Product Information</h2>
-        <p><strong>Product Name:</strong> <span id="productName">-</span></p>
-        <p><strong>Ingredients:</strong> <span id="ingredients">-</span></p>
-        <p><strong>Potential Allergens:</strong> <span id="potentialAllergens">-</span></p>
-        <p><strong>Nutrient Levels:</strong> <span id="nutrientLevels">-</span></p>
-        <p><strong>Sugar:</strong> <span id="sugarLevel">-</span></p>
-        <img id="productImage" src="" alt="Product Image" class="hidden">
-        
-        <button id="addQuantityButton">Add Quantity</button>
-        <div id="quantityInput" class="hidden">
-            <p>How many of this product did you purchase?</p>
-            <input type="number" id="quantity" placeholder="Enter quantity" min="1">
-            <button id="confirmButton">Save</button>
+        <div>
+            <h2>Product Information</h2>
+            <p><strong>Product Name:</strong> <span id="productName">-</span></p>
+            <p><strong>Ingredients:</strong> <span id="ingredients">-</span></p>
+            <p><strong>Potential Allergens:</strong> <span id="potentialAllergens">-</span></p>
+            <p><strong>Nutrient Levels:</strong> <span id="nutrientLevels">-</span></p>
+            <p><Strong>Sugar:</Strong> <span id="sugarLevel">-</span></p>
+            <img id="productImage" src="" alt="Product Image" class="hidden">
         </div>
-        <p id="saveNotice"></p>
+
+        <p id="allergenNotice" class=""></p>
+
+
+        <div id="confirmSection">
+            <button id="saftFoodButton" onclick="saveSafeFood(); showQuestions()">Mark this safe food</button>
+            <button id="unsafeFoodButton" onclick="saveUnsafeFood()">Mark this unsafe food</button>
+            <p id="saveNotice"></p>
+            <div id="questions" class="hidden">
+                <p>If you purchased this item, how many did you buy?</p>
+                <input id="quantity" type="number" placeholder="type number">
+                <p>Product Name:</p>
+                <input type="text" id="foodNameInput">
+                <p>Product Price:</p>
+                <input id="price" type="text" id="foodPriceInput">
+                <button id="confirmButton">Submit</button>
+                <p id="trackNotice"></p>
+            </div>
+        </div>
+        <div id="alternatives" class="hidden">
+            <h3>Allergy-Friendly Alternatives</h3>
+            <small style="color: gray;">*Some products may appear in foreign languages if English data is unavailable.</small>
+            <div id="alternativeList"></div>
+          </div>
     </div>
 
     <a href="scanIndex.html" class="back-button">Back to Main</a>
 
     <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2/dist/quagga.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const scanButton = document.getElementById('scanButton');
-            const stopButton = document.getElementById('stopButton');
-            const cameraDiv = document.getElementById('camera');
-            const resultDiv = document.getElementById('result');
-            const addQuantityButton = document.getElementById('addQuantityButton');
-            const quantityInput = document.getElementById('quantityInput');
-            const interactive = document.getElementById('interactive');
-            
-            // Show only the scan button initially
-            scanButton.addEventListener('click', function() {
-                scanButton.classList.add('hidden');
-                cameraDiv.classList.remove('hidden');
-                initScanner();
-            });
-            
-            // Stop scanning button
-            stopButton.addEventListener('click', function() {
+        //the following code is for scanning barcode
+        let scanTimeout = null;
+        let lastDetectedCode = null;
+        let lastDetectionTime = 0;
+        let isCameraInitialized = false;
+		let foodName = null;
+
+
+        
+
+        
+        //local user information
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+        const userId = user.id;
+
+
+
+        //please extract the real allergen list from database
+        let allergens = user.allergens;
+      try {
+        allergens = JSON.parse(allergens); // safely parse the real array
+      } catch {
+        // fallback if it's not stringified
+        allergens = allergens.split(',').map(a => a.trim().toLowerCase());
+      }
+
+        //info for scanned product
+        let scannedProduct = {
+            name:null,
+            ingredients:null,
+            potential_allergens:null,
+            sugar_level:null,
+            status:'',
+            userId:userId,
+            quantity:1,
+            price:null
+        };
+
+
+        function startScanning() {
+            document.getElementById('camera').classList.remove('hidden');
+            document.getElementById('stopScanButton').classList.remove('hidden');
+
+            if (!isCameraInitialized) {
+                initializeScanner();
+                isCameraInitialized = true;
+            }
+
+            scanTimeout = setTimeout(() => {
+                console.warn("No barcode detected within 15 seconds. Stopping scanner.");
                 stopScanner();
-                cameraDiv.classList.add('hidden');
-                scanButton.classList.remove('hidden');
-            });
-            
-            // Show quantity input when "Add Quantity" is clicked
-            addQuantityButton.addEventListener('click', function() {
-                quantityInput.classList.remove('hidden');
-            });
-            
-            // Save button functionality
-            document.getElementById('confirmButton').addEventListener('click', function() {
-                const quantity = document.getElementById('quantity').value;
-                if (quantity && quantity > 0) {
-                    document.getElementById('saveNotice').textContent = `Saved ${quantity} items!`;
-                    // Here you would typically save to database or storage
-                } else {
-                    alert('Please enter a valid quantity');
-                }
-            });
-            
-            // Barcode scanner initialization
-            function initScanner() {
-                Quagga.init({
-                    inputStream: {
-                        name: "Live",
-                        type: "LiveStream",
-                        target: interactive,
-                        constraints: {
-                            width: 480,
-                            height: 320,
-                            facingMode: "environment" // or "user" for front camera
-                        },
-                    },
-                    decoder: {
-                        readers: [
-                            "ean_reader",
-                            "ean_8_reader",
-                            "code_128_reader",
-                            "code_39_reader",
-                            "code_39_vin_reader",
-                            "codabar_reader",
-                            "upc_reader",
-                            "upc_e_reader"
-                        ]
-                    },
-                }, function(err) {
-                    if (err) {
-                        console.error(err);
-                        alert("Error initializing barcode scanner: " + err);
-                        return;
-                    }
-                    console.log("Initialization finished. Ready to start");
-                    Quagga.start();
-                });
-                
-                Quagga.onDetected(function(result) {
-                    stopScanner();
-                    cameraDiv.classList.add('hidden');
-                    resultDiv.classList.remove('hidden');
-                    
-                    const code = result.codeResult.code;
-                    console.log("Barcode detected: ", code);
-                    
-                    // Here you would typically look up the product in your database
-                    // For now we'll simulate product data based on the barcode
-                    simulateProductLookup(code);
-                });
+                alert("No barcode detected within 15 seconds. Please try again.");
+            }, 15000);
+        }
+
+        function stopScanner() {
+            const video = document.querySelector('video');
+            if (video && video.srcObject) {
+                video.srcObject.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
             }
-            
-            function stopScanner() {
+
+            if (window.Quagga) {
                 Quagga.stop();
-                console.log("Scanner stopped");
             }
-            
-            function simulateProductLookup(barcode) {
-                // This is a simulation - replace with your actual product lookup
-                let productData = {
-                    name: "Unknown Product",
-                    ingredients: "Not available",
-                    allergens: "Not specified",
-                    nutrients: "No data",
-                    sugar: "Unknown",
-                    image: ""
-                };
-                
-                // Some example products for demonstration
-                if (barcode === "123456789012") {
-                    productData = {
-                        name: "Organic Apples",
-                        ingredients: "Organic apples",
-                        allergens: "None",
-                        nutrients: "High in fiber",
-                        sugar: "19g per apple",
-                        image: "https://example.com/apple.jpg"
-                    };
-                } else if (barcode === "987654321098") {
-                    productData = {
-                        name: "Whole Grain Bread",
-                        ingredients: "Whole wheat flour, water, yeast, salt",
-                        allergens: "Wheat",
-                        nutrients: "Good source of fiber",
-                        sugar: "2g per slice",
-                        image: "https://example.com/bread.jpg"
-                    };
+
+            document.getElementById('camera').classList.add('hidden');
+            document.getElementById('stopScanButton').classList.add('hidden');
+
+            clearTimeout(scanTimeout);
+            isCameraInitialized = false;
+        }
+
+
+
+
+        function initializeScanner() {
+            const quaggaConf = {
+                inputStream: {
+                    target: document.querySelector("#camera"),
+                    type: "LiveStream",
+                    constraints: {
+                        width: { ideal: 1920 },   
+                        height: { ideal: 1080 },
+                        facingMode: "environment",
+                        aspectRatio: { min: 1, max: 2 }
+                    }
+                },
+                decoder: {
+                    readers: [
+                        'code_128_reader',
+                        'ean_reader',
+                        'ean_8_reader',
+                        'upc_reader',
+                        'upc_e_reader',
+                        'code_39_reader',
+                        'code_39_vin_reader',
+                        'codabar_reader',
+                        'i2of5_reader',
+                        '2of5_reader',
+                        'code_93_reader'
+                    ]
+                },
+                locator: {
+                    patchSize: "medium",
+                    halfSample: true
+                },
+                locate: true,
+                numOfWorkers: 4
+            };
+
+            Quagga.init(quaggaConf, function(err) {
+                if (err) {
+                    console.error("Initialization failed: ", err);
+                    return;
                 }
+                console.log("Initialization successful");
+                Quagga.start();
+
                 
-                // Update the UI with product data
-                document.getElementById('productName').textContent = productData.name;
-                document.getElementById('ingredients').textContent = productData.ingredients;
-                document.getElementById('potentialAllergens').textContent = productData.allergens;
-                document.getElementById('nutrientLevels').textContent = productData.nutrients;
-                document.getElementById('sugarLevel').textContent = productData.sugar;
-                
-                if (productData.image) {
-                    const img = document.getElementById('productImage');
-                    img.src = productData.image;
-                    img.classList.remove('hidden');
+                setTimeout(() => {
+                    const overlays = document.querySelectorAll('canvas, video');
+                    overlays.forEach(el => {
+                        el.style.pointerEvents = 'none';
+                        el.style.zIndex = '1';
+                    });
+                }, 500);
+            });
+
+            Quagga.onDetected(function(result) {
+                const currentCode = result.codeResult.code;
+                const currentTime = Date.now();
+
+                if (currentCode === lastDetectedCode && (currentTime - lastDetectionTime) < 5000) {
+                    return;
                 }
+
+                console.log("Detected barcode: ", currentCode);
+                stopScanner(); 
+                fetchProductInfo(currentCode);
+                document.getElementById('result').classList.remove('hidden');
+                lastDetectedCode = currentCode;
+                lastDetectionTime = currentTime;
+            });
+        }
+
+        async function fetchProductInfo(barcodeFromScanner = null) {
+            const barcode = barcodeFromScanner;
+            if (!barcode) {
+                alert('Please enter a barcode.');
+                return;
             }
+
+            const url = `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.status === 1) {
+                    const product = data.product;
+
+                    const productName = product.product_name ||
+					product.generic_name_en || 
+					product.product_name_en ||
+					product.product_name_it ||
+                    product.generic_name || 
+                    product.abbreviated_product_name || 
+                    product.brands || 
+                    'Unknown Product';
+
+					foodName = productName;	
+
+                    const ingredients = product.ingredients_text_en || product.ingredients_text_with_allergens || product.ingredients_text || product.ingredients_hierarchy || product.ingredients_original_tags || 'No ingredients listed';
+					const potentialAllergens = product.allergens || product.allergens_from_ingredients || product.allergens_from_user || 'No data';
+                    const sugarLevel = product.nutriments.sugars +" " + product.nutriments.sugars_unit || product.nutriments.sugars_100g +" " + product.nutriments.sugars_unit || product.nutriments.sugars_value +" " + product.nutriments.sugars_unit || 'No data';
+	
+                    document.getElementById('productName').textContent = productName;
+                    document.getElementById('ingredients').textContent = ingredients;
+					document.getElementById('potentialAllergens').textContent = potentialAllergens;
+                    document.getElementById('sugarLevel').textContent = sugarLevel;
+
+
+                    scannedProduct.name=productName;
+                    scannedProduct.ingredients = ingredients;
+                    scannedProduct.potential_allergens = potentialAllergens;
+                    scannedProduct.sugar_level = sugarLevel;
+                    scannedProduct.status = null;
+
+                    checkAllergens(ingredients);
+
+					const nutrientLevels = product.nutrient_levels || {};
+					const nutrientText = Object.entries(nutrientLevels).map(([key, value]) => `${key}: ${value}`).join(", "); 					 
+					document.getElementById('nutrientLevels').textContent = nutrientText || "No data";
+
+			
+					document.getElementById('productImage').classList.remove('hidden');
+                    const imageUrl = product.image_front_small_url || product.selected_images.front.small.it || "https://cdn-icons-png.flaticon.com/512/1178/1178479.png";
+					document.getElementById('productImage').src = imageUrl;            
+
+					document.getElementById('camera').classList.add('hidden');
+				} else {
+                    document.getElementById('productName').textContent = 'Product not found';
+                    document.getElementById('ingredients').textContent = '-';
+                    document.getElementById('productImage').classList.add('hidden');
+                }
+            } catch (error) {
+                console.error('Error fetching product info:', error);
+                alert('Failed to fetch product information. Please try again.');
+            }
+        }
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape special regex chars
+        }
+
+
+        const allergenSynonyms = {
+            milk: [
+            'milk', 'skimmed milk', 'milk powder', 'milk solids',
+            'whey', 'casein', 'lactose', 'milk fat', 'whey permeate'
+            ],
+            soy: [
+            'soy', 'soya', 'soy lecithin', 'soybean', 'soya flour'
+            ],
+            eggs: [
+            'egg', 'eggs', 'albumin', 'egg yolk', 'egg white', 'dried egg', 'egg powder'
+            ],
+            gluten: [
+            'gluten', 'wheat', 'barley', 'rye', 'spelt', 'malt', 'semolina', 'farina', 'durum'
+            ],
+            peanuts: [
+            'peanut', 'peanuts', 'groundnut', 'monkey nut', 'arachis', 'goober', 'peanut oil'
+            ],
+            treenuts: [
+            'almond', 'brazil nut', 'cashew', 'hazelnut', 'macadamia',
+            'pecan', 'pistachio', 'walnut', 'chestnut', 'nutmeat', 'nut butters'
+            ],
+            shellfish: [
+            'shrimp', 'prawns', 'crab', 'lobster', 'scampi', 'langoustine', 'crustacean'
+            ],
+            fish: [
+            'fish', 'salmon', 'tuna', 'cod', 'haddock', 'anchovy',
+            'bass', 'flounder', 'trout', 'mackerel', 'snapper'
+            ],
+            sesame: [
+            'sesame', 'sesame seeds', 'tahini', 'gingelly', 'benne seed', 'til'
+            ]
+        };
+
+
+        async function checkAllergens(ingredients) {
+        const lowerText = ingredients.toLowerCase().replace(/[\n\r\t]/g, ' ');
+        let allergensInside = [];
+
+          allergens.forEach(allergen => {
+            const terms = allergenSynonyms[allergen.toLowerCase()] || [allergen];
+            const found = terms.some(term => {
+              const regex = new RegExp(`\\b${escapeRegExp(term.toLowerCase())}\\b`, 'i');
+              return regex.test(lowerText);
+            });
+            if (found) {
+              allergensInside.push(allergen);
+            }
+          });
+
+          const noticeEl = document.getElementById('allergenNotice');
+          noticeEl.style.display = 'block';
+
+          noticeEl.classList.remove('safe', 'warning');
+          noticeEl.textContent = '';
+
+          console.log("Ingredients:", lowerText);
+          console.log("User allergens:", allergens);
+          console.log("Matched allergens:", allergensInside);
+
+          if (allergensInside.length === 0) {
+            console.log(allergensInside);
+            noticeEl.textContent = '✅ This product is safe for you.';
+            noticeEl.classList.add('safe');
+            document.getElementById('alternatives').classList.add('hidden');
+          } else {
+            noticeEl.textContent = `⚠️ Warning! This product contains your allergens: ${allergensInside.join(", ")}`;
+            noticeEl.classList.add('warning');
+            fetchAlternatives(scannedProduct.name, allergens);
+          }
+      }
+
+      async function fetchAlternatives(productName, allergens) {
+        const searchQuery = encodeURIComponent(productName.split(" ").slice(0, 2).join(" "));
+        const url = `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${searchQuery}&search_simple=1&action=process&json=1&page_size=10&lc=en`;
+
+        // Show loading message
+        displayAlternatives([], true);
+
+        try {
+          const response = await fetch(url);
+          const data = await response.json();
+
+          const filtered = data.products.filter(prod => {
+            const ingredients = (prod.ingredients_text || '').toLowerCase();
+            return !allergens.some(allergen => ingredients.includes(allergen.toLowerCase()));
+          });
+
+          displayAlternatives(filtered, false);
+        } catch (err) {
+          console.error("Error fetching alternatives:", err);
+          document.getElementById('alternativeList').innerHTML = `<p style="color:red">⚠️ Error loading alternatives.</p>`;
+        }
+      }
+
+      function displayAlternatives(products, loading = false) {
+        const container = document.getElementById('alternatives');
+        const list = document.getElementById('alternativeList');
+        list.innerHTML = '';
+
+        if (loading) {
+          list.innerHTML = '<p>🔄 Loading safe alternatives...</p>';
+          container.classList.remove('hidden');
+          return;
+        }
+
+        if (products.length === 0) {
+          list.innerHTML = '<p>No safe alternatives found 😕</p>';
+        } else {
+          products.forEach(prod => {
+            const div = document.createElement('div');
+            div.className = 'alternative';
+
+            div.innerHTML = `
+              <strong>${prod.product_name_en || prod.product_name || 'Unnamed Product'}</strong><br>
+              <img src="${prod.image_front_thumb_url || 'https://cdn-icons-png.flaticon.com/512/1178/1178479.png'}" alt="Product Image" style="max-height: 100px;"><br>
+              <small>${
+                prod.ingredients_text_en?.slice(0, 100) ||
+                prod.ingredients_text?.slice(0, 100) ||
+                'No ingredient info available'
+              }</small>`;
+            list.appendChild(div);
+          });
+        }
+
+        container.classList.remove('hidden');
+      }
+
+
+
+	function showQuestions() {
+		document.getElementById('questions').classList.remove('hidden');
+		document.getElementById('foodNameInput').value = foodName;
+	}
+
+    function saveSafeFood() {
+        document.getElementById('saveNotice').textContent = 'This product is marked safe.';
+        scannedProduct.status='safe';
+
+        //mark this product as save food. And then send food info to dababase
+        //later, when users upload receipts, if name on the receipt matches with the products' name, then we can know if it's safe or not.
+    }
+
+    async function saveUnsafeFood() {
+        document.getElementById('saveNotice').textContent = 'This product is marked unsafe.';
+        scannedProduct.status='unsafe';
+        console.log(scannedProduct);
+        const response  = await fetch('http://localhost:5501/barcodeScan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ scannedProduct }),
         });
+
+        //mark this food as unsave food. And then send food info to dababase
+        //later, when users upload receipts, if name on the receipt matches with the products' name, then we can know if it's safe or not.
+    }
+
+    document.getElementById('confirmButton').addEventListener("click",async () => {
+        document.getElementById('trackNotice').textContent = 'Thanks! Your purchase was recorded.';
+        scannedProduct.price = document.getElementById('price').value;
+        scannedProduct.quantity =parseInt(document.getElementById('quantity').value) ;
+        console.log(scannedProduct);
+        const response  = await fetch('http://localhost:5501/barcodeScan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ scannedProduct }),
+        });
+    })
     </script>
 </body>
 </html>

@@ -11,6 +11,18 @@
     body {
         font-family: 'Inter', sans-serif;
     }
+
+    #allergenNotice.safe {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+        border: 1px solid #c8e6c9;
+    }
+
+    #allergenNotice.warning {
+        background-color: #fdecea;
+        color: #c62828;
+        border: 1px solid #f5c6cb;
+    } 
 </style>
 
 </head>
@@ -24,9 +36,10 @@
         <label>Your Receipt:</label>
         <pre id="receiptContent"></pre>
         <label>Products You Bought:</label>
+        <p id="allergenNotice"></p>
         <p id="matchedProducts">-</p>
 
-        <div id="productList"></div>
+        <div id="productList" class=""></div>
         <div id="totalValueDisplay"></div>
         <button id="addItemButton">Add Item</button>
         <button id="confirmItemsButton">Confirm</button>

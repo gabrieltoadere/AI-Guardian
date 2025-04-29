@@ -1,141 +1,3 @@
-// const apiKey = '64eb36356c646964a70ae2ef537bd463'; 
-// const fileInput = document.getElementById('receiptUpload');
-// const receiptContent = document.getElementById('receiptContent');
-// const matchedProducts = document.getElementById('matchedProducts');
-// const receiptSection = document.getElementById('receiptSection');
-// const addItemButton = document.getElementById('addItemButton');
-// const confirmItemsButton = document.getElementById('confirmItemsButton');
-
-// fileInput.addEventListener('change', handleReceiptUpload);
-// addItemButton.addEventListener('click', addNewItem);
-// confirmItemsButton.addEventListener('click', confirmItems);
-
-// async function handleReceiptUpload(event) {
-//     const file = event.target.files[0];
-//     if (!file) return;
-
-//     const formData = new FormData();
-//     formData.append('document', file);
-
-//     try {
-//         const response = await fetch('https://api.mindee.net/v1/products/mindee/expense_receipts/v5/predict', {
-//             method: 'POST',
-//             headers: {
-//                 'Authorization': `Token ${apiKey}`
-//             },
-//             body: formData
-//         });
-
-//         const data = await response.json();
-//         const prediction = data.document.inference.prediction;
-
-//         const date = prediction.date?.value || 'N/A';
-//         const time = prediction.time?.value || '';
-//         const purchaseDateTime = `${date} ${time}`;
-//         const supplierName = prediction.supplier_name?.value || '';
-//         const supplierAddress = prediction.supplier_address?.value || '';
-
-//         const items = prediction.line_items?.map(item => ({
-//             description: item.description,  
-//             total_amount: item.total_amount
-//         })) || [];
-
-//         renderProductList(items);
-
-//         const total = prediction.total_amount?.value ?? 'N/A';
-
-//         receiptContent.textContent =
-//             `Purchase Time: ${purchaseDateTime}\n\n` +
-//             `Supplier Name: ${supplierName}\n\n` +
-//             `Supplier Address: ${supplierAddress}\n\n` + 
-//             `Total Paid: £${total}`;
-
-//         receiptSection.classList.remove('hidden');
-
-//     } catch (error) {
-//         console.error('Error analyzing receipt:', error);
-//         receiptContent.textContent = 'Error parsing receipt.';
-//         matchedProducts.textContent = '-';
-//     }
-// }
-
-// function renderProductList(items, editableIndices = new Set()) {
-//     const container = document.getElementById('productList');
-//     container.innerHTML = ''; 
-
-//     items.forEach((item, index) => {
-//         const wrapper = document.createElement('div');
-//         wrapper.className = 'product-item';
-
-//         const inputName = document.createElement('input');
-//         inputName.type = 'text';
-//         inputName.value = item.description || '';
-
-//         const inputPrice = document.createElement('input');
-//         inputPrice.type = 'number';
-//         inputPrice.step = '0.01';
-//         inputPrice.value = item.total_amount ?? '';
-
-//         const isEditable = editableIndices.has(index);
-//         inputName.disabled = !isEditable;
-//         inputPrice.disabled = !isEditable;
-
-//         const editBtn = document.createElement('button');
-//         editBtn.textContent = 'Edit';
-//         editBtn.onclick = () => {
-//             inputName.disabled = !inputName.disabled;
-//             inputPrice.disabled = !inputPrice.disabled;
-//             editBtn.textContent = inputName.disabled ? 'Edit' : 'Done';
-//         };
-
-//         const deleteBtn = document.createElement('button');
-//         deleteBtn.textContent = 'Delete';
-//         deleteBtn.onclick = () => {
-//             items.splice(index, 1);
-//             renderProductList(items);
-//         };
-
-//         wrapper.appendChild(inputName);
-//         wrapper.appendChild(inputPrice);
-//         wrapper.appendChild(editBtn);
-//         wrapper.appendChild(deleteBtn);
-
-//         container.appendChild(wrapper);
-//     });
-
-//     window._currentItems = items;
-// }
-
-// function addNewItem() {
-//     window._currentItems.push({ description: '', total_amount: '' });
-//     const editableIndex = new Set([window._currentItems.length - 1]);
-//     renderProductList(window._currentItems, editableIndex);
-// }
-
-// function confirmItems() {
-//     const confirmed = Array.from(document.querySelectorAll('.product-item')).map(row => {
-//         const [nameInput, priceInput] = row.querySelectorAll('input');
-//         return {
-//             description: nameInput.value.trim(),
-//             total_amount: parseFloat(priceInput.value)
-//         };
-//     });
-
-//     let total = 0;
-//     confirmed.forEach(item => {
-//         if (!isNaN(item.total_amount)) {
-//             total += item.total_amount;
-//         }
-//     });
-
-//     const totalDisplay = document.getElementById('totalValueDisplay');
-//     if (totalDisplay) {
-//         totalDisplay.textContent = `Total Paid (Updated): £${total.toFixed(2)}`;
-//     }
-// }
-
-
-
 const apiKey = '64eb36356c646964a70ae2ef537bd463'; 
 const fileInput = document.getElementById('receiptUpload');
 const receiptContent = document.getElementById('receiptContent');
@@ -145,6 +7,9 @@ const productList = document.getElementById('productList');
 const totalValueDisplay = document.getElementById('totalValueDisplay');
 const addItemButton = document.getElementById('addItemButton');
 const confirmItemsButton = document.getElementById('confirmItemsButton');
+
+//this is just an example of unsafe food for user
+const unsafeFoodList = ['Fox Candy', 'ACE Vitamin','PRINGLES BBQ'];
 
 let extractedItems = [];
 
@@ -176,23 +41,63 @@ async function handleReceiptUpload(event) {
 
         const vendor = prediction.supplier_name?.value || "";
         const date = prediction.date?.value || new Date().toISOString().slice(0, 10);
-        const total = prediction.total_incl?.value || 0;
+        
+        let total = prediction.total_incl?.value;
+
+        if (total === undefined || total === 0) {
+            total = (prediction.line_items || []).reduce((sum, item) => {
+                const val = item.total_amount;
+                return sum + (typeof val === "number" ? val : 0);
+            }, 0);
+        }
+
 
         const extractedText = result.document.inference?.ocr?.raw || "No OCR data available.";
 
         extractedItems = (prediction.line_items || []).map(item => ({
-            name: item.description?.value || "",
-            price: item.total_amount?.value || 0
+            name: item.description || "",
+            price: item.total_amount || 0
         }));
+
+        checkAllergensFromItems(extractedItems);
 
         const receiptData = { vendor, date, total, items: extractedItems, text: extractedText };
 
         displayReceipt(receiptData);
+
         document.getElementById('receiptSection').classList.remove('hidden');
 
     } catch (error) {
         console.error("OCR error:", error);
         alert("Error extracting receipt text.");
+    }
+}
+
+
+function checkAllergensFromItems(items) {
+    let unsafeFoodInside = [];
+
+    for (const item of items) {
+        const itemName = item.name.toLowerCase();
+        for (const unsafeFood of unsafeFoodList) {
+            if (itemName.includes(unsafeFood.toLowerCase())) {
+                unsafeFoodInside.push(unsafeFood);
+                break; 
+            }
+        }
+    }
+
+    const noticeEl = document.getElementById('allergenNotice');
+    noticeEl.style.display = 'block';
+    noticeEl.classList.remove('safe', 'warning');
+    noticeEl.textContent = '';
+
+    if (unsafeFoodInside.length === 0) {
+        noticeEl.textContent = 'All the products you purchased are safe.';
+        noticeEl.classList.add('safe');
+    } else {
+        noticeEl.textContent = '⚠️ Warning! This receipt contains unsafe products: ' + unsafeFoodInside.join(', ');
+        noticeEl.classList.add('warning');
     }
 }
 
@@ -220,10 +125,29 @@ function displayReceipt(data) {
         const div = document.createElement("div");
         div.innerHTML = `
             <input type="text" value="${item.name}" data-index="${index}" placeholder="Item name">
-            €<input type="number" value="${item.price}" step="0.01" data-index="${index}">
+            <input type="number" value="${item.price}" step="0.01" data-index="${index}">€
         `;
         productList.appendChild(div);
     });
+
+
+    const priceInputs = productList.querySelectorAll('input[type="number"]');
+    priceInputs.forEach(input => {
+        input.addEventListener('input', () => {
+            const index = parseInt(input.dataset.index);
+            const newValue = parseFloat(input.value);
+            if (!isNaN(newValue)) {
+                extractedItems[index].price = newValue;
+                updateTotalDisplay();
+            }
+        });
+    });
+
+    function updateTotalDisplay() {
+        const newTotal = calculateTotal();
+        totalValueDisplay.innerHTML = `<strong>Total: €${newTotal.toFixed(2)}</strong>`;
+    }
+
 }
 
 
@@ -259,9 +183,33 @@ function confirmItems() {
         total: calculateTotal()
     };
 
-    const receipts = JSON.parse(localStorage.getItem('receipts')) || [];
-    receipts.push(receipt);
-    localStorage.setItem('receipts', JSON.stringify(receipts));
+    const user = JSON.parse(localStorage.getItem('currentUser'));
+
+fetch('http://localhost:5501/saveReceipt', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        userId: user.id,
+        vendor,
+        date,
+        items: extractedItems,
+        total: calculateTotal()
+    })
+})
+.then(response => response.json())
+.then(data => {
+    console.log('Receipt saved:', data);
+    if (confirm("Receipt saved! Do you wish to view your receipts?")) {
+        window.location.href = "overview.html";
+    } else {
+        alert("You can view your saved receipts anytime from the Overview page.");
+    }
+})
+.catch(error => {
+    console.error('Error saving receipt:', error);
+    alert("Failed to save receipt. Try again.");
+});
+
 
     if (confirm("Receipt saved! Do you wish to view your receipts?")) {
         window.location.href = "overview.html";
@@ -282,4 +230,3 @@ function saveReceiptToLocalStorage(receipt) {
     localStorage.setItem('latestReceipt', JSON.stringify(receipt));
 }
 
-//receipts will be saved locally for now

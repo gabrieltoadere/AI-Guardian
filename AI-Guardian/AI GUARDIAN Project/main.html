@@ -18,25 +18,56 @@
     <div class="main-container">
       <h1>Grocery Guardian</h1>
 
+      <!-- 🌱 Personalized Greeting -->
+<div class="mt-6 w-full text-left">
+<h2 class="text-lg font-semibold mb-1">Hi <span id="greetingName">there</span> 👋</h2>
+<p class="text-sm text-gray-600">Keep your grocery journey safe and smart!</p>
+</div>
+
+
+
       <!-- Allergy List with Horizontal Scroll -->
       <div class="allergyDisplay">
         <ul class="allergyList" id="allergens-list">
         </ul>
+        <!-- <a href="/AI-Guardian/AI GUARDIAN Project/allergy-selection.html"><button>+</button></a> -->
       </div>
       <!-- Buttons for Creating List and Adding Items -->
       <div class="button-container">
-        <button id="createNewList" onclick="makeNewList()">
-          Create New List
-        </button>
+      
         <button id="createNewItem" onclick="makeNewItem()">
-          Add New Item +
+          Edit Alergies
         </button>
       </div>
 
+ 
+<!-- Recent Scans Scrollable -->
+<div class="recent-scans scroll-vertical">
+  <h2>Recent Scans</h2>
+  <ul id="recentScansList" class="vertical-scan-list"></ul>
+</div>
+
+
+
+<div class="scan-summary-card">
+  <p><strong>Monthly Safety Summary:</strong></p>
+  <ul>
+    <li>✅ Safe Scans: <strong id="safeCount">0</strong></li>
+    <li>⚠️ Unsafe Scans: <strong id="unsafeCount">0</strong></li>
+  </ul>
+</div>
+
+
+<!-- 💡 Rotating Safety Tip Box -->
+<div class="w-full mt-6">
+  <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded text-sm text-gray-800" id="tip-box">
+    <strong>Tip:</strong> Always check ingredient labels, even for familiar brands!
+  </div>
+</div>
     <div class="navbar">
       <ul>
         <li>
-          <a href="main.html"><i class="fas fa-home"></i> Home</a>
+          <a href="main.html" class="active"><i class="fas fa-home"></i> Home</a>
         </li>
         <li>
           <a href="scanIndex.html"><i class="fas fa-barcode"></i> Scan</a>
@@ -56,5 +87,30 @@
     </div>
     <script src="/AI-Guardian/scripts/main.js"></script>
     <script src="/AI-Guardian/scripts/allergy-selection.js"></script>
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        const chatbot = document.getElementById("chatbotIcon");
+    
+        // Function to show tooltip
+        function showTooltip() {
+          chatbot.classList.add("show-tooltip");
+          setTimeout(() => {
+            chatbot.classList.remove("show-tooltip");
+          }, 3000); // Show for 3 seconds
+        }
+    
+        // Show once when page loads
+        showTooltip();
+    
+        // Then every 2 minutes (120000 ms)
+        setInterval(showTooltip, 10000);
+      });
+      
+    </script>
+    
+    
   </body>
+  
 </html>
+
+

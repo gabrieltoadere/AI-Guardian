@@ -354,9 +354,19 @@ function showToast(message) {
 
 
 async function getAzureReply(userInput) {
+  const user = JSON.parse(localStorage.getItem('currentUser'));
+  const userId = user?.id || "1";
+
+  let preferences = [];
+  try {
+    preferences = await fetch(`http://localhost:5501/api/preferences/${userId}`).then(res => res.json());
+  } catch (err) {
+    console.warn("Failed to fetch preferences, defaulting to none.");
+  }
+
   const systemPrompt = `
 You are Grocery Guardian, a smart and safety-conscious grocery assistant.
-User preferences: Allergies: peanuts, gluten | Diet: vegetarian
+User preferences: Allergies: ${preferences.length ? preferences.join(", ") : "none"} | Diet: vegetarian
 Be natural, helpful, and prioritize allergen safety.
 `;
 
@@ -383,6 +393,7 @@ Be natural, helpful, and prioritize allergen safety.
 
 
 
+
  //Allergen/Dietary “Memory Chips”
  async function loadContextChips(userId) {
   try {
@@ -395,9 +406,6 @@ Be natural, helpful, and prioritize allergen safety.
     if (data.length > 0) {
       context.innerHTML += `<div class="context-chip">⚠️ Allergies: ${data.join(", ")}</div>`;
     }
-
-    // Optional: add fixed diet info if you want
-    context.innerHTML += `<div class="context-chip">🥦 Diet: vegetarian</div>`;
   } catch (err) {
     console.error("Failed to load context chips:", err);
   }
@@ -416,7 +424,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const imageInput = document.getElementById("imageInput");
   const cameraBtn = document.getElementById("liveCameraButton");
   const toggle = document.getElementById("darkModeToggle");
-  const userId = localStorage.getItem("userId") || "1";
+  const user = JSON.parse(localStorage.getItem('currentUser'));
+  const userId = user.id;
   loadContextChips(userId);
 
   form.addEventListener("submit", async (e) => {
@@ -508,22 +517,6 @@ setTimeout(() => {
   });
   
 
-  document.getElementById("clearChatButton").addEventListener("click", () => {
-    const chatBox = document.getElementById("chat-box");
-    chatBox.innerHTML = ''; // Clear all messages
-  
-    // Add typing indicator back
-    const typing = document.createElement("div");
-    typing.id = "typingIndicator";
-    typing.className = "hidden flex items-center text-sm text-gray-500 animate-fade-in";
-    typing.innerHTML = `🤖 Grocery Guardian is typing<span class="dots ml-1"><span>.</span><span>.</span><span>.</span></span>`;
-    chatBox.appendChild(typing);
-  
-    chatHistory = []; // Reset chat history
-    showToast("✅ Chat cleared.");
-  });
-  
-
 
 
   function showToast(message = "✅ Copied to clipboard!") {
@@ -537,62 +530,6 @@ setTimeout(() => {
       setTimeout(() => toast.classList.add("hidden"), 300);
     }, 2000);
   }
-
-  
-
-
-  // cameraBtn.addEventListener("click", async () => {
-  //   const modal = document.getElementById("cameraModal");
-  //   const video = document.getElementById("videoStream");
-  //   modal.classList.remove("hidden");
-  //   try {
-  //     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-  //     video.srcObject = stream;
-  //     video.setAttribute("autoplay", true);
-  //     video.setAttribute("playsinline", true);
-  //     video.play();
-  //   } catch (err) {
-  //     alert("Camera access blocked.");
-  //     modal.classList.add("hidden");
-  //   }
-  // });
-
-  // document.getElementById("closeCamera").addEventListener("click", stopCamera);
-
-  // document.getElementById("captureButton").addEventListener("click", async () => {
-  //   const video = document.getElementById("videoStream");
-  //   const canvas = document.createElement("canvas");
-  //   canvas.width = video.videoWidth;
-  //   canvas.height = video.videoHeight;
-  //   canvas.getContext("2d").drawImage(video, 0, 0);
-  //   stopCamera();
-  //   const blob = await new Promise(res => canvas.toBlob(res, "image/jpeg"));
-  //   addMessage("user", "📸 Captured image...");
-  //   showTyping();
-  //   const text = await extractTextFromImage(blob);
-  //   if (text) {
-  //     chatHistory.push({ role: "user", content: `Image text: ${text}` });
-  //     const result = await analyzeIngredientsFromText(userId, text);
-  //     addMessage("bot", result);
-  //     chatHistory.push({ role: "assistant", content: result });
-  //   } else {
-  //     addMessage("bot", "No readable text found.");
-  //   }
-  //   hideTyping();
-  // });
-
-  // function stopCamera() {
-  //   const modal = document.getElementById("cameraModal");
-  //   const video = document.getElementById("videoStream");
-  //   const stream = video.srcObject;
-  //   if (stream) {
-  //     stream.getTracks().forEach(track => track.stop());
-  //     video.srcObject = null;
-  //   }
-  //   modal.classList.add("hidden");
-  // }
-
-
 
 
 
@@ -678,15 +615,34 @@ Analyze the ingredients for allergen risks.
 async function getTopSafeProducts(userId) {
   try {
     const [history, allergens] = await Promise.all([
-      fetch(`http://localhost:5501/api/scanHistory/${userId}`).then(r => r.json()),
-      fetch(`http://localhost:5501/api/preferences/${userId}`).then(r => r.json())
+      fetch('http://localhost:5501/loadHistory', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      }).then(response => response.json()),
+      fetch(`http://localhost:5501/api/preferences/${userId}`).then(response => response.json())
     ]);
-    const safe = history.filter(item =>
-      !allergens.some(a => item.ingredients?.some(ing => ing.toLowerCase().includes(a.toLowerCase())))
-    );
+
+    console.log(history);
+    console.log(allergens);
+
+    const safe = history.filter(item => {
+      if (!Array.isArray(item.ingredients)) return false;
+      return !allergens.some(a =>
+        item.ingredients.some(ing => typeof ing === 'string' && ing.toLowerCase().includes(a.toLowerCase()))
+      );
+    });
+
     const counts = {};
-    safe.forEach(item => counts[item.product_name] = (counts[item.product_name] || 0) + 1);
-    return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([name]) => name);
+    safe.forEach(item => {
+      counts[item.product_name] = (counts[item.product_name] || 0) + 1;
+    });
+
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([name]) => name);
+
   } catch (err) {
     console.error("Safe product lookup failed:", err);
     return [];
@@ -702,10 +658,10 @@ async function recommendSafeProducts(userId) {
     }
     const allergens = await fetch(`http://localhost:5501/api/preferences/${userId}`).then(r => r.json());
     const prompt = `
-You are Grocery Guardian, an allergen-aware assistant.
-User allergies: ${allergens.join(", ") || "none"}
-Recommend safe foods avoiding allergens.
-`;
+        You are Grocery Guardian, an allergen-aware assistant.
+        User allergies: ${allergens.join(", ") || "none"}
+        Recommend safe foods avoiding allergens.
+        `;
     const payload = {
       messages: [
         { role: "system", content: prompt },

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Email Login</title>
+        <link rel="stylesheet" href="/AI-Guardian/css/login.css">
+    </head>
+    <body>
+        <div class="login-container">
+            <h1>Grocery Guardian</h1>
+            <!-- Website title -->
+            <h2>Forgot Password<span class="emoji">☺</span></h2>
+            <!-- Sign-in heading with emoji -->
+            
+      
+      
+            <!-- Reject Div-->
+            <div class="reject-div" id="reject-div" style="display: none">
+              <strong>Incorrect username or password</strong>
+            </div>
+      
+            <!-- Login Form -->
+            <div id="loginForm">
+              <!--username section-->
+              <div class="input-group">
+                <label for="username">Email:</label>
+                <input type="text" id="email" name="email" required />
+              </div>
+             
+      
+              <button class="reset-link-button">Send reset link</button>
+            </div>
+          </div>
+          <script>
+            
+            document.querySelector('.reset-link-button').addEventListener("click",async  () => {
+              const email = document.getElementById('email').value;
+              console.log(email);
+              const response = await fetch('http://localhost:5501/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email:email }),
+              });
+
+              if(response.success) {
+                alert('Recovery link has been sent please check your inbox');
+              }
+            })
+          </script>
+    </body>
+</html>

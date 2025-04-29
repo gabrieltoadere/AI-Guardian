@@ -13,57 +13,11 @@
         <h1><i class="fas fa-history"></i>History</h1>
         <h2 class="subtitle">Previously Scanned Items</h2>
         
+        <div id="history-container" class="history-container">
+            <!--where the scanned items will go-->
 
-        <div class="history-item" onclick="viewProductDetails('12345')">
-            <div class="item-info">
-                <span class="item-name">Organic Almond Milk</span>
-                <span class="item-date">May 15, 2023</span>
-            </div>
-            <div class="item-status safe" id="status-12345">
-                <i class="fas fa-check-circle"></i> <span class="status-text">Safe</span>
-            </div>
-        
-            <!-- The toggle button must stop the parent click -->
-            <button class="toggle-status" onclick="event.stopPropagation(); toggleStatus('12345');">
-                <i class="fas fa-pen"></i>
-            </button>
+            
         </div>
-        
-
-            
-<div class="history-item" onclick="viewProductDetails('67890')">
-    <div class="item-info">
-        <span class="item-name">Organic Almond Milk</span>
-        <span class="item-date">May 15, 2023</span>
-    </div>
-    <div class="item-status safe" id="status-12345">
-        <i class="fas fa-check-circle"></i> <span class="status-text">Safe</span>
-    </div>
-
-    <!-- The toggle button must stop the parent click -->
-    <button class="toggle-status" onclick="event.stopPropagation(); toggleStatus('67890');">
-        <i class="fas fa-pen"></i>
-    </button>
-</div>
-
-
-
-            
-<div class="history-item" onclick="viewProductDetails('23456')">
-    <div class="item-info">
-        <span class="item-name">Organic Almond Milk</span>
-        <span class="item-date">May 15, 2023</span>
-    </div>
-    <div class="item-status safe" id="status-12345">
-        <i class="fas fa-check-circle"></i> <span class="status-text">Safe</span>
-    </div>
-
-    <!-- The toggle button must stop the parent click -->
-    <button class="toggle-status" onclick="event.stopPropagation(); toggleStatus('23456');">
-        <i class="fas fa-pen"></i>
-    </button>
-</div>
-
 
         </div>
     </div>
@@ -90,6 +44,10 @@
 <div class="chatbot-icon" id="chatbotIcon">
     <i class="fa-solid fa-robot"></i>
   </div>
+
+
+<div id="toast" class="toast hidden">Successfully deleted!</div>
+
 
 <script src="/AI-Guardian/scripts/history.js"></script>
 </body>

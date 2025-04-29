@@ -39,29 +39,38 @@
 
     <!-- Input Area -->
     <form id="chat-form"
-  class="flex flex-wrap sm:flex-nowrap items-center gap-2 px-2 py-2 bg-white border-t shadow z-40 fixed bottom-[64px] w-full sm:static max-w-full">
-
-
+  class="flex items-center justify-between gap-2 px-4 py-3 bg-white border-t shadow z-40 fixed bottom-[64px] w-full max-w-full sm:static sm:rounded-md sm:mx-auto">
+  
+  <!-- Text Input -->
   <input type="text" id="user-input"
-  class="flex-1 min-w-0 px-4 py-2 border rounded-md text-sm"
-  placeholder="Ask about allergens, safe food, etc." required />
+    class="flex-1 px-4 py-2 border rounded-md text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-300"
+    placeholder="Ask about allergens, safe food, etc." required />
 
+  <!-- Send Button -->
   <button type="submit" id="sendButton"
-  class="bg-green-600 text-white px-3 py-2 text-sm rounded-md whitespace-nowrap">Send</button>
+    class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md text-sm">
+    <i class="fas fa-paper-plane"></i>
+  </button>
 
-<button id="micButton"
-  class="text-green-800 px-3 py-2 text-xl rounded whitespace-nowrap">
-  <i class="fas fa-microphone"></i>
-</button>
-      
-      <input type="file" id="imageInput" accept="image/*" class="hidden" />
-      <button id="uploadImageButton"
-  class="text-green-800 px-3 py-2 text-xl rounded whitespace-nowrap">
-  <i class="fas fa-camera"></i>
-</button>
-      
-      <span id="micStatus" class="text-sm text-green-600 ml-2 hidden">🎙️ Listening...</span>
-    </form>
+  <!-- Mic Button -->
+  <button id="micButton"
+    class="text-green-800 text-lg hover:text-green-600 px-3 py-2 rounded-md">
+    <i class="fas fa-microphone"></i>
+  </button>
+
+  <!-- Hidden File Input -->
+  <input type="file" id="imageInput" accept="image/*" class="hidden" />
+
+  <!-- Camera Button -->
+  <button id="uploadImageButton"
+    class="text-green-800 text-lg hover:text-green-600 px-3 py-2 rounded-md">
+    <i class="fas fa-camera"></i>
+  </button>
+
+  <!-- Mic Listening Status -->
+  <span id="micStatus" class="text-sm text-green-600 ml-2 hidden">🎙️ Listening...</span>
+</form>
+
 
 
     <!-- Test Quick Reply Button -->
@@ -80,21 +89,14 @@
 
 
 
-  <!-- Bottom Navbar -->
-  <div class="navbar fixed bottom-0 left-0 right-0 bg-white shadow-md p-3 z-50">
-    <ul class="flex justify-around text-sm text-gray-700">
-      <li><a href="main.html"><i class="fas fa-home"></i> Home</a></li>
-      <li><a href="scanning.html"><i class="fas fa-barcode"></i> Scan</a></li>
-      <li><a href="history.html"><i class="fas fa-history"></i> History</a></li>
-      <li><a href="profile.html"><i class="fas fa-user"></i> Profile</a></li>
+  <div class="navbar">
+    <ul>
+        <li><a href="main.html"><i class="fas fa-home"></i> Home</a></li>
+        <li><a href="scanIndex.html"><i class="fas fa-barcode"></i> Scan</a></li>
+        <li><a href="history.html" ><i class="fas fa-history"></i> History</a></li>
+        <li><a href="profile.html" class="active"><i class="fas fa-user"></i> Profile</a></li>
     </ul>
-  </div>
-
-  <!-- Clear Chat Floating Button -->
-<button id="clearChatButton" title="Clear Chat"
-class="fixed bottom-24 right-4 bg-red-500 hover:bg-red-600 text-white p-3 rounded-full shadow-lg z-50 text-xl">
-🧹
-</button>
+</div>
 
   <!-- Azure Speech SDK -->
   <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>

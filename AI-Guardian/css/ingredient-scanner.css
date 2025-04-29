@@ -1,4 +1,6 @@
 /* ===== Base Styles ===== */
+
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f8faf8; /* Very light green background */
@@ -79,7 +81,18 @@ p {
     line-height: 1.5;
 }
 
-#warning {
+#allergenNotice.safe {
+    color: #188c37;
+    font-weight: bold;
+    padding: 12px;
+    background-color: #a0f8b7;
+    border-left: 4px solid #188c37;
+    border-radius: 4px;
+    margin-top: 20px;
+}
+
+
+#allergenNotice.warning {
     color: #e74c3c;
     font-weight: bold;
     padding: 12px;
@@ -88,6 +101,7 @@ p {
     border-radius: 4px;
     margin-top: 20px;
 }
+
 
 /* ===== Confirmation Section ===== */
 #confirmSection {
@@ -112,6 +126,7 @@ p {
 }
 
 #questions input {
+    box-sizing: border-box;
     width: 100%;
     padding: 12px 15px;
     margin-bottom: 15px;
@@ -122,6 +137,7 @@ p {
 }
 
 #questions input:focus {
+    box-sizing: border-box;
     outline: none;
     border-color: #27ae60;
     box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.2);

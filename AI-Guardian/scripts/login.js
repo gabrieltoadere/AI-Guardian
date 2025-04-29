@@ -1,7 +1,6 @@
 // login.js - Refactored to use URL-based user session passing
 
 const loginForm = document.getElementById("loginForm");
-
 document.querySelector(".login-btn").addEventListener("click", async () => {
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
@@ -27,21 +26,18 @@ document.querySelector(".login-btn").addEventListener("click", async () => {
 });
 
 // Button redirects
-document.querySelector(".google").addEventListener("click", function () {
-    window.location.href = "google-login.html";
-});
 
-document.querySelector(".apple").addEventListener("click", function () {
-    window.location.href = "apple-login.html";
-});
+// document.querySelector(".apple").addEventListener("click", function () {
+//     window.location.href = "apple-login.html";
+// });
 
-document.querySelector(".phone").addEventListener("click", function () {
-    window.location.href = "phone-login.html";
-});
+// document.querySelector(".phone").addEventListener("click", function () {
+//     window.location.href = "phone-login.html";
+// });
 
-document.querySelector(".email").addEventListener("click", function () {
-    window.location.href = "email.login.html";
-});
+// document.querySelector(".email").addEventListener("click", function () {
+//     window.location.href = "email.login.html";
+// });
 
 document.querySelector(".createAccount").addEventListener("click", function () {
     window.location.href = "createAccount.html";
@@ -69,4 +65,5 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = '/AI-GUARDIAN/AI GUARDIAN Project/help.html';
         });
     }
-});
+})
+
