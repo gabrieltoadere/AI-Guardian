@@ -108,8 +108,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   const user = JSON.parse(localStorage.getItem("currentUser"));
-  if (user?.username) {
-    document.getElementById("greetingName").textContent = user.username;
+  if (user?.name) {
+    document.getElementById("greetingName").textContent = user.name;
   }
 
   await displayAllergens();

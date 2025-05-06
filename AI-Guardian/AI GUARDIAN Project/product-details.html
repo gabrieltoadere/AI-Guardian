@@ -1,106 +1,185 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Details</title>
-    <link rel="stylesheet" href="/AI-Guardian/css/common.css">
-    <link rel="stylesheet" href="/AI-Guardian/css/history.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Product Details</title>
+
+  <link rel="stylesheet" href="/AI-Guardian/css/common.css">
+  <link rel="stylesheet" href="/AI-Guardian/css/history.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .main-container {
+      max-width: 800px;
+      margin: auto;
+      background: #ffffff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .back-button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .back-button:hover {
+      background-color: #388e3c;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 2rem;
+    }
+
+    .product-status {
+      margin: 20px 0;
+      padding: 20px;
+      border-radius: 10px;
+      background-color: #e8f5e9;
+      color: #2e7d32;
+      text-align: center;
+    }
+
+    .product-status.unsafe {
+      background-color: #fdecea;
+      color: #c0392b;
+    }
+
+    .product-status i {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .product-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .product-image {
+      max-width: 200px;
+      max-height: 250px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      object-fit: contain;
+    }
+
+    .info-section {
+      width: 100%;
+    }
+
+    .info-section h3 {
+      margin-bottom: 10px;
+    }
+
+    .ingredients-list {
+      background-color: #f4f4f4;
+      padding: 15px;
+      border-radius: 8px;
+      font-size: 1rem;
+      white-space: pre-line;
+      line-height: 1.5;
+      border: 1px solid #ddd;
+    }
+  </style>
 </head>
 <body>
-    <div class="main-container">
-        <button class="back-button" onclick="window.history.back()">
-            <i class="fas fa-arrow-left"></i> Back
-        </button>
-        
-        <h1 id="productTitle">Product Details</h1>
-        
-        <!-- Product Status -->
-        <div id="productStatus" class="product-status">
-            <i class="fas fa-check-circle"></i>
-            <h2>SAFE TO EAT</h2>
-            <p>No allergens detected based on your preferences</p>
-        </div>
-        
-        <!-- Product Info -->
-        <div class="product-info">
-            <img id="productImage" alt="Product Image" class="product-image">
-            
-            <div class="info-section">
-                <h3>Ingredients:</h3>
-                <ul id="ingredientsList" class="ingredients-list">
-                    <!-- Will be filled by JavaScript -->
-                </ul>
-            </div>
-        </div>
-        
-        <!-- Alternatives Section   <div id="alternativesSection" class="alternatives-section">
-            <h3>Safe Alternatives:</h3>
-            <div id="alternativeProducts" class="alternatives-grid">
-                 Will be filled by JavaScript 
-            </div>
-        </div>    -->
-        
+  <div class="main-container">
+    <button class="back-button" onclick="window.history.back()">
+      <i class="fas fa-arrow-left"></i> Back
+    </button>
+
+    <h1 id="productTitle">Product Details</h1>
+
+    <!-- Product Status -->
+    <div id="productStatus" class="product-status">
+      <i class="fas fa-check-circle"></i>
+      <h2>SAFE TO EAT</h2>
+      <p>No allergens detected based on your preferences</p>
     </div>
 
-    <script>
-        // This would be populated from your database based on the product ID
-        // Here's just example data
-        document.addEventListener('DOMContentLoaded', async () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const productId = urlParams.get('id');
-            
+    <!-- Product Info -->
+    <div class="product-info">
+      <img id="productImage" alt="Product Image" class="product-image" />
 
-            console.log("Product ID:", productId); // Debug line
-            const response = await fetch('http://localhost:5501/getScan', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ productId }),
-            });
+      <div class="info-section">
+        <h3>Ingredients:</h3>
+        <div id="ingredientsList" class="ingredients-list">
+          <!-- Filled dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const productId = urlParams.get('id');
 
-            const data = await response.json();
+      const response = await fetch('http://localhost:5501/getScan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId }),
+      });
 
+      const data = await response.json();
 
-           if (data.length > 0) {
-                const productData = data[0]; // Extract the first row from results
+      if (data.length > 0) {
+        const productData = data[0];
 
-                const product = {
-                    id: productId,
-                    name: productData.name,
-                    status: productData.status,
-                    image: productData.image,         // Make sure your table has this
-                    ingredients: productData.ingredients.split(',') // Assuming it's a comma-separated string
-                };
+        const product = {
+          id: productId,
+          name: productData.name,
+          status: productData.status,
+          image: productData.image_url,
+          ingredients: productData.ingredients
+        };
+        console.log(product);
 
-                // Update the page with product data
-                document.getElementById('productTitle').textContent = product.name;
+        // Update title and ingredients
+        document.getElementById('productTitle').textContent = product.name;
+        document.getElementById('ingredientsList').textContent = product.ingredients || "No ingredients available";
 
-                // Fill ingredients
-                const ingredientsList = document.getElementById('ingredientsList');
-                ingredientsList.innerHTML = '';
-                product.ingredients.forEach(item => {
-                    const li = document.createElement('li');
-                    li.textContent = item.trim();
-                    ingredientsList.appendChild(li);
-                });
+        // Update image
+        const imageEl = document.getElementById('productImage');
+        imageEl.src = product.image || "https://cdn-icons-png.flaticon.com/512/1178/1178479.png";
 
-                // Set status
-                const statusElement = document.getElementById('productStatus');
-                if (product.status === "unsafe") {
-                    statusElement.innerHTML = `
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <h2>BE AWARE!</h2>
-                        <p>Contains allergens based on your preferences</p>
-                    `;
-                    statusElement.className = "product-status unsafe";
-                }
+        // Update status
+        const statusElement = document.getElementById('productStatus');
+        if (product.status === "unsafe") {
+          statusElement.innerHTML = `
+            <i class="fas fa-exclamation-triangle"></i>
+            <h2>BE AWARE!</h2>
+            <p>Contains allergens based on your preferences</p>
+          `;
+          statusElement.className = "product-status unsafe";
+        }
 
-                } else {
-                    console.error("No product found with that ID.");
-                }
-        });
-    </script>
+      } else {
+        console.error("No product found with that ID.");
+      }
+    });
+  </script>
 </body>
 </html>

@@ -43,15 +43,15 @@ async function loadHistory() {
                 <div class="item-status ${scan.status}" id="status-${scan.scan_id}">
 
                     <i class="fas ${scan.status === 'safe' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i> 
-        <span class="status-text">${scan.status}</span>
+                <span class="status-text">${scan.status}</span>
                 </div>
 
                 <button class="toggle-status" data-id="${scan.scan_id}" onclick="event.stopPropagation(); toggleStatus(${scan.scan_id});">
-        <i class="fas fa-pen"></i>
-    </button>
-    <button class="delete-scan" data-id="${scan.scan_id}" onclick="event.stopPropagation(); deleteScan(${scan.scan_id});">
-        <i class="fas fa-trash"></i>
-    </button>
+                    <i class="fas fa-pen"></i>
+                </button>
+                <button class="delete-scan" data-id="${scan.scan_id}" onclick="event.stopPropagation(); deleteScan(${scan.scan_id});">
+                    <i class="fas fa-trash"></i>
+                </button>
             </div>`
         });
 

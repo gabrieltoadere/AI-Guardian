@@ -234,7 +234,11 @@ app.post('/update-allergens', async (req, res) => {
     const { userId, name } = req.body;
     db.query('UPDATE users SET name = ? WHERE id = ?', [name, userId], (err) => {
       if (err) return res.status(500).send(err);
-      res.send({ message: "User name updated" });
+      db.query('SELECT * FROM users WHERE id=?',[userId],(er,results) => {
+        if (er) return res.status(500).send(err);
+        const user = results[0];
+        return res.json({ success:true,user});
+      })
     });
   });
   
@@ -293,10 +297,10 @@ app.post('/barcodeScan',(req,res) => {
   const { scannedProduct } = req.body;
 
   const query = `INSERT INTO scan_history
-   (user_id, product_name, ingredients,potential_allergens,sugar_level,status,scan_date,quantity,price)
-   VALUES (?,?,?,?,?,?,NOW(),?,?)`;
+   (user_id, product_name, ingredients,potential_allergens,sugar_level,status,scan_date,quantity,price,image_url)
+   VALUES (?,?,?,?,?,?,NOW(),?,?,?)`;
 
-   db.query(query, [ scannedProduct.userId,scannedProduct.name , scannedProduct.ingredients,scannedProduct.potential_allergens,scannedProduct.sugar_level,scannedProduct.status,scannedProduct.quantity,scannedProduct.price] ,(err,results) => {
+   db.query(query, [ scannedProduct.userId,scannedProduct.name , scannedProduct.ingredients,scannedProduct.potential_allergens,scannedProduct.sugar_level,scannedProduct.status,scannedProduct.quantity,scannedProduct.price,scannedProduct.image] ,(err,results) => {
       if(err) {
         console.error('error storing scan', err);
       }
@@ -585,174 +589,29 @@ app.post('/login/phone', (req, res) => {
     });
   });
   
-
+  
+  
   
 app.post('/delete-scan', (req, res) => {
   const { scan_id } = req.body;
   const query = 'DELETE FROM scan_history WHERE scan_id = ?';
   db.query(query, [scan_id], (err, result) => {
-    if (err) {
+      if (err) {
           console.error('Error deleting scan:', err);
           return res.status(500).json({ error: 'Failed to delete scan' });
       }
       res.json({ success: true, message: 'Scan deleted successfully' });
-    });
-});
-
-
-
-
-//saving receipt data to the database
-app.post('/saveReceipt', (req, res) => {
-  const { userId, vendor, date, items, total } = req.body;
-
-  const query = `
-    INSERT INTO receipt_history (user_id, vendor, date, items, total)
-    VALUES (?, ?, ?, ?, ?)
-  `;
-
-  db.query(query, [userId, vendor, date, JSON.stringify(items), total], (err, results) => {
-    if (err) {
-      console.error("Error saving receipt:", err);
-      return res.status(500).json({ error: "Failed to save receipt" });
-    }
-    res.json({ message: "Receipt saved successfully" });
   });
 });
 
 
-
-app.post('/updateReceipt', (req, res) => {
-  const { receiptId, vendor, date } = req.body;
-
-  const query = 'UPDATE receipts SET vendor = ?, date = ? WHERE receipt_id = ?';
-
-  db.query(query, [vendor, date, receiptId], (err, result) => {
-      if (err) {
-          console.error('Failed to update receipt:', err);
-          return res.status(500).json({ success: false });
-      }
-      res.json({ success: true });
-  });
-});
-
-
-
-
-
-
-
-
-
-// API: Get monthly scan breakdown (safe/unsafe count)
-// New route to get monthly scan data
-app.get('/api/monthly-scan-data/:userId', (req, res) => {
-  const { userId } = req.params;
-
-  const query = `
-    SELECT 
-      DATE_FORMAT(scan_date, '%Y-%m') as month, 
-      status, 
-      COUNT(*) as count
-    FROM scan_history 
-    WHERE user_id = ?
-    GROUP BY month, status
-    ORDER BY month ASC
-  `;
-
-  db.query(query, [userId], (err, results) => {
-    if (err) {
-      console.error("Monthly scan data error:", err);
-      return res.status(500).json({ error: "Failed to fetch scan data" });
-    }
-
-    const monthlyData = {};
-
-    results.forEach(row => {
-      if (!monthlyData[row.month]) {
-        monthlyData[row.month] = { safe: 0, unsafe: 0 };
-      }
-      if (row.status === 'safe') monthlyData[row.month].safe = row.count;
-      if (row.status === 'unsafe') monthlyData[row.month].unsafe = row.count;
-    });
-
-    res.json(monthlyData);
-  });
-});
-
-
-// API: Get monthly sugar consumption
-app.get('/api/sugar-summary/:userId', (req, res) => {
-  const { userId } = req.params;
-  const query = `
-  SELECT 
-    DATE_FORMAT(scan_date, '%Y-%m') AS month,
-    SUM(CASE WHEN sugar_level REGEXP '^[0-9]+(\\.[0-9]+)?$' THEN CAST(sugar_level AS DECIMAL(10,2)) ELSE 0 END) AS total_sugar
-  FROM scan_history
-  WHERE user_id = ?
-  GROUP BY month
-`;
-
-
-  db.query(query, [userId], (err, results) => {
-    if (err) {
-      console.error('Error fetching sugar summary:', err);
-      return res.status(500).json({ error: 'Failed to fetch sugar data' });
-    }
-
-    const sugarData = {};
-    results.forEach(row => {
-      sugarData[row.month] = parseFloat(row.total_sugar) || 0;
-    });
-
-    res.json(sugarData);
-  });
-});
-
-
-
-// Get receipts by user ID
-app.get('/getReceipts/:userId', (req, res) => {
-  const { userId } = req.params;
-
-  const query = 'SELECT * FROM receipt_history WHERE user_id = ? ORDER BY date DESC';
-
-  db.query(query, [userId], (err, results) => {
-      if (err) {
-          console.error('Failed to fetch receipts:', err);
-          return res.status(500).json({ error: 'Database error fetching receipts' });
-      }
-      res.json(results);
-  });
-});
-
-
-app.get('/api/full-scan-history/:userId', (req, res) => {
-  const { userId } = req.params;
-
-  const query = `
-    SELECT product_name, sugar_level, status, scan_date as date
-    FROM scan_history
-    WHERE user_id = ?
-  `;
-
-  db.query(query, [userId], (err, results) => {
-    if (err) {
-      console.error('Error fetching full scan history:', err);
-      return res.status(500).json({ error: 'Failed to fetch full scan history' });
-    }
-    res.json(results);
-  });
-});
-
-
-
-
-
-
-
-
+  
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 })
+
+
+
+
+

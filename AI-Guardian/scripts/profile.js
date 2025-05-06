@@ -36,11 +36,19 @@ async function fetchUserNameFromDB(userId) {
 
 async function saveUserNameToDB(userId, name) {
     try {
-        await fetch("http://localhost:5501/api/user", {
+        const response = await fetch("http://localhost:5501/api/user", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ userId, name })
         });
+
+        const data = await response.json();
+
+        console.log('Received:', data);
+        if(data.success) {
+            localStorage.setItem('currentUser',JSON.stringify(data.user));
+        }
+
     } catch (err) {
         console.error("Error saving user name:", err);
     }
