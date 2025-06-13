@@ -10,6 +10,7 @@ const client = new OAuth2Client("229386078489-ovi0bke1m73e26lm1397baqplj5rabgg.a
 const ndoemailer = require('nodemailer');
 const crypto = require('crypto');
 const fetch = require('node-fetch');
+require('dotenv').config();
 
 
 
@@ -22,17 +23,17 @@ app.use(express.static(path.join(__dirname,'scripts')));
 const transporter = ndoemailer.createTransport({
   service: 'gmail',
   auth: {
-    user:'groceryguardian@gmail.com',
-    pass:'zspv wnsn pqlo nbbl'
+    user:process.env.EMAIL,
+    pass:process.env.EMAIL_PASS
   }
 });
 
 
 const db = mysql.createConnection({
     host: 'ai-guardian.mysql.database.azure.com',
-    user:'aiGuard',
-    password:'28-fourth-25',
-    database:'aiguardian',
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME,
     port: 3306,
   ssl: { rejectUnauthorized: false }
 });
