@@ -44,5 +44,9 @@ Shopping with allergies can be stressful and risky. Grocery Guardian combines AI
 
 ---
 
-## Demo / Screenshots
+## Demo 
+
+https://youtube.com/shorts/cQiBTsUjWuo?feature=share
+
+
 
